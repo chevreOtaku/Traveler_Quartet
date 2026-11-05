@@ -4,6 +4,7 @@ from typing import Dict, Sequence, Tuple
 
 from traveler_quartet.match.runner import TimedEvent, play_game_rounds
 from traveler_quartet.players.bots import BOTS
+from traveler_quartet.players.hard import hard
 from traveler_quartet.rules.economy import owns_whole_town
 from traveler_quartet.rules.endgame import ranking
 from traveler_quartet.rules.engine import GameState, new_game
@@ -13,6 +14,7 @@ COUNTED = {
     "trades": ("trade_done",), "auctions": ("auction_won", "auction_unsold"), "curses": ("cursed",),
     "disasters": ("disaster",), "dungeon_stays": ("stayed_in_dungeon",), "shared_stalls": ("stall_shared",),
 }
+COMPUTERS = {**BOTS, "hard": hard}
 
 
 def seating(seats: Sequence[str], game_number: int) -> Tuple[int, ...]:
@@ -41,7 +43,7 @@ def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool
     state = new_game(seed=seed, player_count=len(seats))
     if not disasters:
         state = _without_disasters(state)
-    final, timed = play_game_rounds(state, [BOTS[seats[entrant]] for entrant in order])
+    final, timed = play_game_rounds(state, [COMPUTERS[seats[entrant]] for entrant in order])
     winner_seat = ranking(final)[0][0]
     result = {
         "first_house": _first_house_round(timed),

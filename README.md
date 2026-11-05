@@ -119,8 +119,15 @@ The rules engine offers every player, human or AI, the same list of **legal acti
 program or language model can play through the same interface as a person. We also plan to record what AI players
 **say** against what they **do**, and what they claim against the real state of the game.
 
-Before any AI joins, three levels of computer players (Easy, Normal, Hard) will play thousands of games against each
-other to test the balance: game length, how often houses get built, and whether luck or skill wins.
+Before any AI joins, three levels of computer players (Easy, Normal, Hard) play thousands of games against each
+other to test the balance: game length, how often houses get built, and whether luck or skill wins:
+
+```
+traveler-quartet tournament --games 1000 --seats hard,normal,normal,normal [--no-disasters]
+```
+
+The seats rotate from one game to the next. The amounts are not balanced yet: these tournaments are how we will
+balance them.
 
 ## Inspirations
 

@@ -15,7 +15,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--games", type=int, default=1000, help="tournament: number of games")
     parser.add_argument("--seed", type=int, default=1, help="tournament: seed of the first game")
     parser.add_argument("--seats", default="normal,normal,normal,normal",
-                        help="tournament: the computers at the table, comma-separated (easy, normal)")
+                        help="tournament: the computers at the table, comma-separated (easy, normal, hard)")
     parser.add_argument("--no-disasters", action="store_true", help="tournament: remove the disaster cards")
     return parser
 
