@@ -22,7 +22,7 @@ def test_a_new_game_starts_everyone_at_start_with_the_starting_cash():
     state = new_game(seed=1, player_count=4)
     assert [p.position for p in state.players] == [0, 0, 0, 0]
     assert [p.cash for p in state.players] == [750] * 4
-    assert legal_actions(state) == ("roll",)
+    assert [a for a in legal_actions(state) if not a.startswith("offer:")] == ["roll"]
 
 
 def test_an_action_that_is_not_legal_is_refused():
@@ -40,8 +40,8 @@ def test_a_player_who_cannot_afford_the_district_is_not_offered_it():
     broke = replace(state.players[0], cash=1)
     state = replace(state, players=(broke,) + state.players[1:])
     state, _ = apply(state, "roll")
-    assert state.current == 1
-    assert legal_actions(state) == ("roll",)
+    assert "buy" not in legal_actions(state)
+    assert state.pending == "auction"
 
 
 def test_buying_takes_the_price_and_hands_the_turn_on():
@@ -51,7 +51,7 @@ def test_buying_takes_the_price_and_hands_the_turn_on():
     assert state.owners[square] == 0
     assert state.players[0].cash == 750 - BOARD.squares[square].price
     assert state.current == 1
-    assert legal_actions(state) == ("roll",)
+    assert [a for a in legal_actions(state) if not a.startswith("offer:")] == ["roll"]
     assert events[0].kind == "bought"
 
 

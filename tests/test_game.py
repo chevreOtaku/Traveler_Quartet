@@ -4,10 +4,14 @@ from traveler_quartet.rules.engine import new_game
 
 
 def buy_everything(state, legal):
+    if "drop" in legal:
+        return "drop"
     return "buy" if "buy" in legal else legal[0]
 
 
 def never_buy(state, legal):
+    if "drop" in legal:
+        return "drop"
     return "pass" if "pass" in legal else legal[0]
 
 

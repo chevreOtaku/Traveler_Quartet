@@ -53,6 +53,12 @@ class GameState:
     catalog: Mapping[str, Mapping[str, object]] = field(default_factory=lambda: MappingProxyType({}))
     decks: Tuple[Tuple[str, Tuple[str, ...]], ...] = ()
     discovered: Tuple[str, ...] = ()
+    auction: Optional[object] = None
+    trade: Optional[object] = None
+    offers: int = 0
+    partners: Tuple[Optional[int], ...] = ()
+    stall_request: Optional[Tuple[int, int]] = None
+    sealed: Optional[object] = None
 
     @property
     def over(self) -> bool:

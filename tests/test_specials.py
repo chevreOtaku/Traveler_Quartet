@@ -138,8 +138,9 @@ def test_a_double_frees_the_player_and_moves_him():
 
 
 def _answer_the_landing(state):
-    while state.current == 0 and state.pending in ("buy", "jump"):
-        state, _ = apply(state, "pass" if state.pending == "buy" else "stay")
+    answers = {"buy": "pass", "jump": "stay", "auction": "drop"}
+    while state.current == 0 and state.pending in answers:
+        state, _ = apply(state, answers[state.pending])
     return state
 
 

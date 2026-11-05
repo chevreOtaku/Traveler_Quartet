@@ -1,7 +1,7 @@
 from dataclasses import replace
 from typing import Callable, Dict, Optional, Tuple
 
-from traveler_quartet.rules import buildings, dungeon, finance, portals
+from traveler_quartet.rules import auctions, buildings, dungeon, finance, partners, portals, trades
 from traveler_quartet.rules.card_effects import crisis_on, resolve
 from traveler_quartet.rules.cards import load_cards, shuffled_decks
 from traveler_quartet.rules.board import Board, load_board
@@ -13,7 +13,7 @@ from traveler_quartet.rules.movement import advance
 from traveler_quartet.rules.state import Event, GameState, Player, Step, change_cash, set_at, update_player
 from traveler_quartet.rules.turns import end_turn
 
-__all__ = ["Event", "GameState", "IllegalAction", "Player", "apply", "legal_actions", "new_game"]
+__all__ = ["Event", "GameState", "IllegalAction", "Player", "actor", "apply", "legal_actions", "negotiations", "new_game"]
 
 
 class IllegalAction(ValueError):
@@ -30,7 +30,7 @@ def new_game(seed: int, player_count: int,
     return GameState(board=board, economy=economy, seed=seed, players=players,
                      owners=(None,) * size, buildings=(0,) * size, mortgaged=(False,) * size,
                      houses_left=economy.houses_stock, stalls_left=economy.stalls_stock,
-                     catalog=catalog, decks=shuffled_decks(catalog, seed))
+                     catalog=catalog, decks=shuffled_decks(catalog, seed), partners=(None,) * size)
 
 
 def _square_actions(state: GameState, name: str, allowed: Callable[[GameState, int, int], bool]) -> Tuple[str, ...]:
@@ -40,6 +40,51 @@ def _square_actions(state: GameState, name: str, allowed: Callable[[GameState, i
 
 def _raising_actions(state: GameState) -> Tuple[str, ...]:
     return _square_actions(state, "sell", buildings.can_sell) + _square_actions(state, "mortgage", finance.can_mortgage)
+
+
+def actor(state: GameState) -> int:
+    """Who must answer the pending question -- not always the player whose turn it is (architecture §3)."""
+    if state.pending == "auction":
+        return auctions.bidder(state)
+    if state.pending == "trade":
+        return state.trade.responder
+    if state.pending == "stall_request":
+        return state.owners[state.stall_request[1]]
+    if state.pending == "sealed":
+        return auctions.sealed_bidder(state)
+    return state.current
+
+
+def negotiations(state: GameState) -> Tuple[str, ...]:
+    """The PARAMETERIZED actions open right now -- templates, not actions to play as they are: `offer:<player>` (then
+    the six fields of the contract) and `counter` (the six fields). Kept apart from `legal_actions` on purpose: a
+    template played bare is refused (E13)."""
+    if state.pending == "roll":
+        return _offer_actions(state)
+    if state.pending == "trade" and state.trade.counters < trades.MAX_COUNTERS:
+        return ("counter",)
+    return ()
+
+
+def _offer_actions(state: GameState) -> Tuple[str, ...]:
+    if state.offers >= trades.MAX_OFFERS_PER_TURN:
+        return ()
+    return tuple(f"offer:{p}" for p in range(len(state.players)) if p != state.current and not state.players[p].out)
+
+
+def _trade_terms(state: GameState, action: str):
+    """A full offer or counter-offer, parsed and checked; None if it is not a legal contract right now."""
+    name, _, rest = action.partition(":")
+    fields = rest.split(":")
+    if name == "offer" and len(fields) == 7 and f"offer:{fields[0]}" in negotiations(state):
+        receiver, terms = int(fields[0]), trades.parse_terms(fields[1:])
+        ok = terms is not None and trades.valid(state, state.current, receiver, terms)
+        return (receiver, terms) if ok else None
+    if name == "counter" and len(fields) == 6 and "counter" in negotiations(state):
+        terms, t = trades.parse_terms(fields), state.trade
+        ok = terms is not None and trades.valid(state, t.responder, t.proposer, terms)
+        return (t.proposer, terms) if ok else None
+    return None
 
 
 def _dungeon_actions(state: GameState) -> Tuple[str, ...]:
@@ -57,10 +102,19 @@ def _curse_actions(state: GameState, held: bool) -> Tuple[str, ...]:
 def legal_actions(state: GameState) -> Tuple[str, ...]:
     if state.pending == "roll":
         return (("roll",) + _dungeon_actions(state) + _curse_actions(state, held=True)
-                + _square_actions(state, "build", buildings.can_build) + _raising_actions(state)
+                + _square_actions(state, "build", buildings.can_build) + _square_actions(state, "share_stall", partners.can_share)
+                + _raising_actions(state)
                 + _square_actions(state, "unmortgage", finance.can_unmortgage))
     if state.pending == "target":
         return _curse_actions(state, held=False)
+    if state.pending == "auction":
+        return auctions.legal(state)
+    if state.pending == "trade":
+        return ("accept", "refuse")
+    if state.pending == "stall_request":
+        return (("accept",) if partners.owner_can_pay(state) else ()) + ("refuse",)
+    if state.pending == "sealed":
+        return auctions.sealed_legal(state)
     if state.pending == "buy":
         return ("buy", "pass")
     if state.pending == "jump":
@@ -71,9 +125,15 @@ def legal_actions(state: GameState) -> Tuple[str, ...]:
 
 
 def apply(state: GameState, action: str) -> Step:
+    name, _, argument = action.partition(":")
+    if name in ("offer", "counter"):
+        contract = _trade_terms(state, action)
+        if contract is None:
+            raise IllegalAction(f"{action!r} is not a legal contract now")
+        receiver, terms = contract
+        return trades.offer(state, receiver, terms) if name == "offer" else trades.counter(state, terms)
     if action not in legal_actions(state):
         raise IllegalAction(f"{action!r} is not legal now; legal: {legal_actions(state)}")
-    name, _, argument = action.partition(":")
     if argument:
         state, events = SQUARE_ACTIONS[name](state, int(argument))
         return _after_raising(state, events)
@@ -133,12 +193,27 @@ def _buy(state: GameState) -> Step:
 
 
 def _pass(state: GameState) -> Step:
-    return after_landing(state), (Event("declined", state.current, (("square", state.players[state.current].position),)),)
+    square = state.players[state.current].position
+    return auctions.start(state, square), (Event("declined", state.current, (("square", square),)),)
+
+
+def _auction_step(state: GameState, step) -> Step:
+    state, events, done = step
+    return (after_landing(state) if done else state), events
+
+
+def _drop(state: GameState) -> Step:
+    return _auction_step(state, auctions.drop(state))
+
+
+def _raise(state: GameState, amount: int) -> Step:
+    return _auction_step(state, auctions.raise_bid(state, amount))
 
 
 def _bankrupt(state: GameState) -> Step:
+    freed = tuple(i for i, owner in enumerate(state.owners) if owner == state.current)
     state, events = finance.bankrupt(state)
-    return end_turn(state), events
+    return auctions.start_sealed(end_turn(state), freed), events
 
 
 def _curse(state: GameState, target: int) -> Step:
@@ -164,9 +239,11 @@ def _without(cards: Tuple[str, ...], card: str) -> Tuple[str, ...]:
 
 SIMPLE_ACTIONS: Dict[str, Callable[[GameState], Step]] = {
     "roll": _roll, "buy": _buy, "pass": _pass, "bankrupt": _bankrupt,
-    "jump": portals.jump, "stay": portals.stay, "pay_exit": dungeon.pay_exit, "use_rope": dungeon.use_rope,
+    "jump": portals.jump, "stay": portals.stay, "pay_exit": dungeon.pay_exit, "use_rope": dungeon.use_rope, "drop": _drop,
+    "accept": lambda s: (partners.accept if s.pending == "stall_request" else trades.accept)(s),
+    "refuse": lambda s: (partners.refuse if s.pending == "stall_request" else trades.refuse)(s),
 }
 SQUARE_ACTIONS: Dict[str, Callable[[GameState, int], Step]] = {
     "build": buildings.build, "sell": buildings.sell,
-    "mortgage": finance.mortgage, "unmortgage": finance.unmortgage, "curse": _curse,
+    "mortgage": finance.mortgage, "unmortgage": finance.unmortgage, "curse": _curse, "raise": _raise, "share_stall": partners.request, "bid": auctions.bid,
 }

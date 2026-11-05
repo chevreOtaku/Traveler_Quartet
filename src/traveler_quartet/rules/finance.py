@@ -69,7 +69,8 @@ def bankrupt(state: GameState) -> Step:
     owners, buildings, mortgaged = state.owners, state.buildings, state.mortgaged
     for i in owned:
         owners, buildings, mortgaged = set_at(owners, i, None), set_at(buildings, i, 0), set_at(mortgaged, i, False)
+    partners = tuple(None if (i in owned or p == me) else p for i, p in enumerate(state.partners))
     state = replace(state, owners=owners, buildings=buildings, mortgaged=mortgaged, debt=None,
-                    stalls_left=state.stalls_left + stalls_back)
+                    stalls_left=state.stalls_left + stalls_back, partners=partners)
     state = with_player(state, me, replace(state.players[me], cash=0, out=True))
     return state, (Event("bankrupt", me, (("to", debt.creditor), ("amount", left))),)

@@ -18,7 +18,7 @@ def end_turn(state: GameState) -> GameState:
             break
     if next_round > state.economy.rounds:
         return replace(state, pending="over", doubles=0)
-    return replace(state, current=following, round=next_round, pending="roll", doubles=0)
+    return replace(state, current=following, round=next_round, pending="roll", doubles=0, offers=0)
 
 
 def finish(state: GameState) -> GameState:

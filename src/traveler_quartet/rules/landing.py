@@ -1,6 +1,6 @@
 from dataclasses import replace
 
-from traveler_quartet.rules import finance
+from traveler_quartet.rules import auctions, finance
 from traveler_quartet.rules.card_effects import resolve
 from traveler_quartet.rules.dungeon import send_to_dungeon
 from traveler_quartet.rules.portals import can_jump
@@ -18,7 +18,7 @@ def _property(state: GameState, index: int) -> Step:
     me, owner = state.current, state.owners[index]
     if owner is None:
         affordable = state.players[me].cash >= state.board.squares[index].price
-        return (replace(state, pending="buy"), ()) if affordable else (after_landing(state), ())
+        return (replace(state, pending="buy"), ()) if affordable else (auctions.start(state, index), ())
     if owner == me:
         return after_landing(state), ()
     due = property_rent(state, index, state.last_dice)

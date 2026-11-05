@@ -35,6 +35,8 @@ class Economy:
     dungeon_exit_cost: int
     dungeon_turns: int
     doubles_to_dungeon: int
+    card_values: Mapping[str, int]
+    stall_income_shared: int
 
 
 def load_economy(path: Path = DATA_DIR / "economy.json") -> Economy:

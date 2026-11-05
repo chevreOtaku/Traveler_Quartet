@@ -56,6 +56,13 @@ def build(state: GameState, index: int) -> Step:
 
 
 def sell(state: GameState, index: int) -> Step:
+    from traveler_quartet.rules.partners import refund_partner
+    state, refunded = refund_partner(state, index) if state.buildings[index] == STALL else (state, ())
+    state, events = _sell(state, index)
+    return state, refunded + events
+
+
+def _sell(state: GameState, index: int) -> Step:
     me = state.current
     refund = house_cost(state, index) * state.economy.sell_back_percent // 100
     level = state.buildings[index]

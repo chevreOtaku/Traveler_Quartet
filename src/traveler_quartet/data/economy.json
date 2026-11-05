@@ -54,5 +54,11 @@
   "utility_multiplier_both": 5,
   "dungeon_exit_cost": 25,
   "dungeon_turns": 2,
-  "doubles_to_dungeon": 3
+  "doubles_to_dungeon": 3,
+  "card_values": {
+    "rope": 50,
+    "curse": 100,
+    "mirror": 100
+  },
+  "stall_income_shared": 10
 }

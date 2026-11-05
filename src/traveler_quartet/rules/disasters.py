@@ -16,6 +16,8 @@ def damage(face: int) -> int:
 def _lower_one(state: GameState, index: int) -> GameState:
     level = state.buildings[index]
     if level == STALL:
+        if state.partners:
+            state = replace(state, partners=set_at(state.partners, index, None))
         back = state.economy.houses_before_stall if state.houses_left >= state.economy.houses_before_stall else 0
         state = replace(state, stalls_left=state.stalls_left + 1, houses_left=state.houses_left - back)
         return replace(state, buildings=set_at(state.buildings, index, back))

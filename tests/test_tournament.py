@@ -28,3 +28,24 @@ def test_the_command_runs_a_small_tournament():
                             capture_output=True, text=True)
     assert result.returncode == 0
     assert "first_house_round_median" in result.stdout
+
+
+def test_a_player_may_say_something_with_any_action_and_it_is_recorded_beside_it():
+    def talkative(state, legal):
+        action = normal(state, legal)
+        return action, f"I choose {action.split(':')[0]}"
+    final, events = play_game(new_game(seed=2, player_count=2), [talkative, normal])
+    said = [e for e in events if e.kind == "said"]
+    assert said and all(dict(e.data)["text"].startswith("I choose") for e in said)
+    assert all(e.player == 0 for e in said)
+
+
+def test_saying_nothing_records_nothing():
+    _, events = play_game(new_game(seed=2, player_count=2), [normal, normal])
+    assert not any(e.kind == "said" for e in events)
+
+
+def test_a_game_that_never_ends_stops_with_a_clear_error():
+    import pytest
+    with pytest.raises(RuntimeError, match="steps"):
+        play_game_rounds(new_game(seed=2, player_count=2), [normal, normal], max_steps=10)
