@@ -3,10 +3,10 @@
 *A light-hearted property-trading board game for 2 to 4 players, humans and AI, set in a world where people keep
 getting isekai'd.*
 
-> **Status: early construction.** The rules engine plays full games of the core rules (buying, rent, houses, market
-> stalls, pairs, mortgages, debt and bankruptcy), and simple computer players can play tournaments against each other.
-> Cards, portals, the dungeon, trading and auctions are not built yet, and there is no web page yet. Every rule, name
-> and amount below may still change after the playtests.
+> **Status: construction.** The rules engine plays complete games: buying, rent, houses and market stalls, pairs,
+> portals, the dungeon, the three decks of cards, auctions, trades, shared stalls, mortgages, debt and bankruptcy.
+> Simple computer players play tournaments against each other. There is no web page and no AI player yet. Every rule,
+> name and amount may still change after the playtests.
 
 ```
 python -m pip install -e ".[dev]"
