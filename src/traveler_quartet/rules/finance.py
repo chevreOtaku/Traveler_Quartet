@@ -12,8 +12,10 @@ def unmortgage_cost(state: GameState, index: int) -> int:
 
 
 def can_mortgage(state: GameState, player: int, index: int) -> bool:
-    return (state.owners[index] == player and not state.mortgaged[index]
-            and state.board.squares[index].kind == "district" and not town_has_buildings(state, index))
+    if state.owners[index] != player or state.mortgaged[index]:
+        return False
+    kind = state.board.squares[index].kind
+    return kind in ("portal", "utility") or (kind == "district" and not town_has_buildings(state, index))
 
 
 def can_unmortgage(state: GameState, player: int, index: int) -> bool:
@@ -33,12 +35,14 @@ def unmortgage(state: GameState, index: int) -> Step:
     return state, (Event("unmortgaged", me, (("square", index), ("bank", -cost))),)
 
 
-def charge(state: GameState, amount: int, creditor: Optional[int]) -> GameState:
-    """Make the current player pay; if he cannot, open a debt he must settle before anything else."""
+def charge(state: GameState, amount: int, creditor: Optional[int], to_jackpot: bool = False) -> GameState:
+    """Make the current player pay a player, the bank, or the jackpot; if he cannot, open a debt he must settle first."""
     me = state.current
     if state.players[me].cash < amount:
-        return replace(state, pending="debt", debt=Debt(amount=amount, creditor=creditor))
+        return replace(state, pending="debt", debt=Debt(amount=amount, creditor=creditor, to_jackpot=to_jackpot))
     state = change_cash(state, me, -amount)
+    if to_jackpot:
+        return replace(state, jackpot=state.jackpot + amount)
     return change_cash(state, creditor, amount) if creditor is not None else state
 
 
@@ -49,14 +53,16 @@ def can_settle(state: GameState) -> bool:
 def settle(state: GameState) -> Step:
     """Pay the open debt in full; the caller has checked `can_settle`."""
     debt = state.debt
-    state = charge(replace(state, debt=None), debt.amount, debt.creditor)
+    state = charge(replace(state, debt=None), debt.amount, debt.creditor, debt.to_jackpot)
     return state, (Event("debt_paid", state.current, (("to", debt.creditor), ("amount", debt.amount))),)
 
 
 def bankrupt(state: GameState) -> Step:
     me, debt = state.current, state.debt
     left = state.players[me].cash
-    if debt.creditor is not None:
+    if debt.to_jackpot:
+        state = replace(state, jackpot=state.jackpot + left)
+    elif debt.creditor is not None:
         state = change_cash(state, debt.creditor, left)
     owned = [i for i, owner in enumerate(state.owners) if owner == me]
     stalls_back = sum(1 for i in owned if state.buildings[i] == STALL)

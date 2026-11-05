@@ -13,6 +13,7 @@ class Square:
     name: str
     town: Optional[str] = None
     price: int = 0
+    amount: int = 0
 
 
 @dataclass(frozen=True)

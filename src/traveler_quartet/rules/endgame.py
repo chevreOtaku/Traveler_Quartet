@@ -6,6 +6,8 @@ from traveler_quartet.rules.state import GameState
 
 def _buildings_value(state: GameState, index: int) -> int:
     level = state.buildings[index]
+    if level == 0:
+        return 0
     cost = state.economy.house_costs[state.board.squares[index].town]
     if level == STALL:
         return cost * (state.economy.houses_before_stall + 1)

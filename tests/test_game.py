@@ -32,7 +32,7 @@ def test_another_seed_plays_another_game():
 def test_no_gold_appears_or_vanishes():
     final, events = _play(seed=11)
     with_the_bank = sum(dict(e.data).get("bank", 0) for e in events)
-    assert sum(p.cash for p in final.players) == 4 * 750 + with_the_bank
+    assert sum(p.cash for p in final.players) + final.jackpot == 4 * 750 + with_the_bank
 
 
 def test_the_bank_column_matches_the_purchases():

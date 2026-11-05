@@ -10,6 +10,8 @@ class Player:
     position: int
     cash: int
     out: bool = False
+    jump_ready: bool = True
+    dungeon_turns: int = 0
 
 
 @dataclass(frozen=True)
@@ -23,6 +25,7 @@ class Event:
 class Debt:
     amount: int
     creditor: Optional[int]
+    to_jackpot: bool = False
 
 
 @dataclass(frozen=True)
@@ -41,6 +44,9 @@ class GameState:
     rolls: int = 0
     pending: str = "roll"
     debt: Optional[Debt] = None
+    jackpot: int = 0
+    doubles: int = 0
+    last_dice: Tuple[int, int] = (0, 0)
 
     @property
     def over(self) -> bool:
@@ -61,3 +67,7 @@ def change_cash(state: GameState, index: int, amount: int) -> GameState:
 
 def set_at(table: tuple, index: int, value) -> tuple:
     return table[:index] + (value,) + table[index + 1:]
+
+
+def update_player(state: GameState, index: int, **changes) -> GameState:
+    return with_player(state, index, replace(state.players[index], **changes))

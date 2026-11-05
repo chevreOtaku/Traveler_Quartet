@@ -28,6 +28,13 @@ class Economy:
     pairs: Tuple[Tuple[str, str], ...]
     pair_bonus: int
     stall_income_own: int
+    portal_rent: int
+    portal_rent_all: int
+    utility_multiplier: int
+    utility_multiplier_both: int
+    dungeon_exit_cost: int
+    dungeon_turns: int
+    doubles_to_dungeon: int
 
 
 def load_economy(path: Path = DATA_DIR / "economy.json") -> Economy:
