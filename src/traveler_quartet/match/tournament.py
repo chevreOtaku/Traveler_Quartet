@@ -1,6 +1,6 @@
 from dataclasses import replace
 from statistics import mean, median
-from typing import Dict, Sequence, Tuple
+from typing import Dict, Optional, Sequence, Tuple
 
 from traveler_quartet.match.runner import TimedEvent, play_game_rounds
 from traveler_quartet.players.bots import BOTS
@@ -38,11 +38,14 @@ def _has_whole_pair(state: GameState) -> bool:
                for pair in state.economy.pairs for player in range(len(state.players)))
 
 
-def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool) -> Dict[str, object]:
+def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool,
+              rounds: Optional[int]) -> Dict[str, object]:
     order = seating(seats, game_number)
     state = new_game(seed=seed, player_count=len(seats))
     if not disasters:
         state = _without_disasters(state)
+    if rounds is not None:
+        state = replace(state, economy=replace(state.economy, rounds=rounds))
     final, timed = play_game_rounds(state, [COMPUTERS[seats[entrant]] for entrant in order])
     winner_seat = ranking(final)[0][0]
     result = {
@@ -59,10 +62,11 @@ def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool
     return result
 
 
-def run_tournament(games: int, first_seed: int, seats: Sequence[str], disasters: bool = True) -> Dict[str, object]:
+def run_tournament(games: int, first_seed: int, seats: Sequence[str], disasters: bool = True,
+                   rounds: Optional[int] = None) -> Dict[str, object]:
     """`games` games between the computers named in `seats` (the entrants), seeds first_seed, first_seed + 1, ...;
-    the seats rotate from one game to the next."""
-    results = [_one_game(first_seed + n, seats, n, disasters) for n in range(games)]
+    the seats rotate from one game to the next. `rounds` simulates another game length (the rules keep theirs)."""
+    results = [_one_game(first_seed + n, seats, n, disasters, rounds) for n in range(games)]
     by_seat, by_entrant = [0] * len(seats), [0] * len(seats)
     for result in results:
         by_seat[result["winner_seat"]] += 1
@@ -71,6 +75,7 @@ def run_tournament(games: int, first_seed: int, seats: Sequence[str], disasters:
         "games": games,
         "seats": list(seats),
         "disasters": disasters,
+        "rounds": rounds if rounds is not None else new_game(seed=first_seed, player_count=len(seats)).economy.rounds,
         "first_house_round_median": median(r["first_house"] for r in results),
         "games_with_a_house": sum(r["first_house"] < NEVER for r in results) / games,
         "games_with_a_whole_pair": sum(r["whole_pair"] for r in results) / games,

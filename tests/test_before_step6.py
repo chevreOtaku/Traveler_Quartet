@@ -69,3 +69,9 @@ def test_each_win_goes_to_the_entrant_who_really_sat_at_the_winning_seat():
     for n, (seat, entrant) in enumerate(report["winners"]):
         assert entrant == seating(seats, n)[seat]
     assert report["wins_by_entrant"] == [sum(1 for _, e in report["winners"] if e == k) for k in range(4)]
+
+
+def test_a_tournament_can_simulate_another_game_length_without_changing_the_rules():
+    short = run_tournament(games=6, first_seed=1, seats=("normal",) * 4, rounds=5)
+    assert 1 <= short["rounds_mean"] <= 5 and short["rounds"] == 5
+    assert run_tournament(games=2, first_seed=1, seats=("normal",) * 4)["rounds"] == 30
