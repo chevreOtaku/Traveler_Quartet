@@ -47,6 +47,8 @@
     ]
   ],
   "pair_bonus": 10,
+  "town_bonus": 0,
+  "final_value_percent": 100,
   "stall_income_own": 20,
   "portal_rent": 15,
   "portal_rent_all": 50,

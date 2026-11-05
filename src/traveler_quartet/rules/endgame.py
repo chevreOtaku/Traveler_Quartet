@@ -17,7 +17,8 @@ def _buildings_value(state: GameState, index: int) -> int:
 def _district_value(state: GameState, index: int) -> int:
     if state.mortgaged[index]:
         return mortgage_value(state.board, state.economy, index)
-    return state.board.squares[index].price + _buildings_value(state, index)
+    full = state.board.squares[index].price + _buildings_value(state, index)
+    return full * state.economy.final_value_percent // 100
 
 
 def net_worth(state: GameState, player: int) -> int:

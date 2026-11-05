@@ -28,3 +28,15 @@ def test_one_town_of_a_pair_adds_nothing():
 def test_each_own_stall_adds_twenty():
     state = build_levels(own(game(), 0, *BROWN), {1: 4, 3: 4})
     assert _income(state) == 140
+
+
+def test_each_whole_town_earns_its_bonus_at_start_and_the_rule_says_zero():
+    from dataclasses import replace as _replace
+    from factory import BROWN, ORANGE, own
+    from traveler_quartet.rules.income import start_income
+    state = own(game(), 0, *BROWN, *ORANGE)
+    assert state.economy.town_bonus == 0
+    rich = _replace(state, economy=_replace(state.economy, town_bonus=10, pair_bonus=30))
+    salary = state.economy.salary
+    assert start_income(rich, 0) == salary + 2 * 10 + 30
+    assert start_income(own(rich, 0, *BROWN), 1) == salary

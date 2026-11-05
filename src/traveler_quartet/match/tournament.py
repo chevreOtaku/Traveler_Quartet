@@ -38,6 +38,14 @@ def _changed(state: GameState, changes: Mapping[str, int]) -> GameState:
     return replace(state, economy=replace(state.economy, **changes))
 
 
+def _interval_percent(wins: int, games: int) -> Tuple[float, float]:
+    """95 % of the shares a repeat of this tournament would give (normal approximation) -- a difference smaller than
+    this is noise (E18)."""
+    share = wins / games
+    half = 1.96 * (share * (1 - share) / games) ** 0.5
+    return round(100 * (share - half), 1), round(100 * (share + half), 1)
+
+
 def _first_house_round(timed: Tuple[TimedEvent, ...]) -> int:
     return next((round_ for round_, event in timed if event.kind == "built"), NEVER)
 
@@ -97,6 +105,7 @@ def run_tournament(games: int, first_seed: int, seats: Sequence[str], disasters:
         "rounds_mean": round(mean(r["rounds"] for r in results), 2),
         "wins_by_seat": by_seat,
         "wins_by_entrant": by_entrant,
+        "wins_by_entrant_interval_percent": [_interval_percent(w, games) for w in by_entrant],
         "winners": [(r["winner_seat"], r["winner_entrant"]) for r in results],
     }
     for name in COUNTED:

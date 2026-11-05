@@ -27,6 +27,8 @@ class Economy:
     unmortgage_interest_percent: int
     pairs: Tuple[Tuple[str, str], ...]
     pair_bonus: int
+    town_bonus: int
+    final_value_percent: int
     stall_income_own: int
     portal_rent: int
     portal_rent_all: int
