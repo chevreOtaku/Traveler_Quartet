@@ -3,8 +3,16 @@
 *A light-hearted property-trading board game for 2 to 4 players, humans and AI, set in a world where people keep
 getting isekai'd.*
 
-> **Status: design phase.** There is no code yet. This README describes the game we are designing. Every rule, name
-> and amount below may change once the first playtests (computer players against each other) are done.
+> **Status: early construction.** The rules engine plays full games of the core rules (buying, rent, houses, market
+> stalls, pairs, mortgages, debt and bankruptcy), and simple computer players can play tournaments against each other.
+> Cards, portals, the dungeon, trading and auctions are not built yet, and there is no web page yet. Every rule, name
+> and amount below may still change after the playtests.
+
+```
+python -m pip install -e ".[dev]"
+python -m pytest
+python -m traveler_quartet tournament --games 100
+```
 
 ## The idea
 
