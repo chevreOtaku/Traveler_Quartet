@@ -31,10 +31,15 @@ def test_another_seed_plays_another_game():
 
 def test_no_gold_appears_or_vanishes():
     final, events = _play(seed=11)
+    with_the_bank = sum(dict(e.data).get("bank", 0) for e in events)
+    assert sum(p.cash for p in final.players) == 4 * 750 + with_the_bank
+
+
+def test_the_bank_column_matches_the_purchases():
+    final, events = _play(seed=11)
     board = load_board()
-    salaries = 100 * sum(1 for e in events if e.kind == "passed_start")
-    spent = sum(board.squares[i].price for i, owner in enumerate(final.owners) if owner is not None)
-    assert sum(p.cash for p in final.players) + spent == 4 * 750 + salaries
+    bought = sum(board.squares[i].price for i, owner in enumerate(final.owners) if owner is not None)
+    assert -sum(dict(e.data)["bank"] for e in events if e.kind == "bought") == bought
 
 
 def test_nobody_buys_when_nobody_wants_to():

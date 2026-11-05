@@ -4,5 +4,19 @@
   "rounds": 30,
   "rent_percent": 10,
   "rent_multiplier_bare": 1,
-  "rent_multiplier_whole_town": 2
+  "rent_multiplier_whole_town": 2,
+  "rent_multipliers_by_level": [1, 4, 10, 25, 40],
+  "house_costs": {
+    "brown": 25, "light_blue": 25, "purple": 50, "orange": 50,
+    "red": 75, "yellow": 75, "green": 100, "dark_blue": 100
+  },
+  "houses_stock": 32,
+  "stalls_stock": 12,
+  "houses_before_stall": 3,
+  "sell_back_percent": 50,
+  "mortgage_percent": 50,
+  "unmortgage_interest_percent": 10,
+  "pairs": [["brown", "orange"], ["green", "red"], ["light_blue", "dark_blue"], ["purple", "yellow"]],
+  "pair_bonus": 10,
+  "stall_income_own": 20
 }
