@@ -75,3 +75,17 @@ def test_a_tournament_can_simulate_another_game_length_without_changing_the_rule
     short = run_tournament(games=6, first_seed=1, seats=("normal",) * 4, rounds=5)
     assert 1 <= short["rounds_mean"] <= 5 and short["rounds"] == 5
     assert run_tournament(games=2, first_seed=1, seats=("normal",) * 4)["rounds"] == 30
+
+
+def test_a_tournament_can_simulate_other_amounts_and_says_which():
+    rich = run_tournament(games=6, first_seed=1, seats=("normal",) * 4, changes={"salary": 400, "pair_bonus": 50})
+    base = run_tournament(games=6, first_seed=1, seats=("normal",) * 4)
+    assert rich["changes"] == {"salary": 400, "pair_bonus": 50} and base["changes"] == {}
+    assert rich["bankruptcies_per_game_mean"] <= base["bankruptcies_per_game_mean"]
+    assert rich["buildings_per_game_mean"] > base["buildings_per_game_mean"]
+
+
+def test_an_unknown_amount_is_refused_rather_than_ignored():
+    import pytest
+    with pytest.raises(ValueError):
+        run_tournament(games=1, first_seed=1, seats=("normal",) * 4, changes={"salry": 125})

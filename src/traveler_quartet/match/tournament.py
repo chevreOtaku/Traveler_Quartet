@@ -1,6 +1,6 @@
-from dataclasses import replace
+from dataclasses import fields, replace
 from statistics import mean, median
-from typing import Dict, Optional, Sequence, Tuple
+from typing import Dict, Mapping, Optional, Sequence, Tuple
 
 from traveler_quartet.match.runner import TimedEvent, play_game_rounds
 from traveler_quartet.players.bots import BOTS
@@ -29,6 +29,15 @@ def _without_disasters(state: GameState) -> GameState:
     return replace(state, decks=tuple((deck, tuple(c for c in cards if c in keep)) for deck, cards in state.decks))
 
 
+def _changed(state: GameState, changes: Mapping[str, int]) -> GameState:
+    """Other amounts for a SIMULATION (the rules in economy.json keep theirs); an unknown name is refused, not ignored."""
+    known = {f.name for f in fields(state.economy)}
+    unknown = sorted(set(changes) - known)
+    if unknown:
+        raise ValueError(f"unknown amounts {unknown}; known: {sorted(known)}")
+    return replace(state, economy=replace(state.economy, **changes))
+
+
 def _first_house_round(timed: Tuple[TimedEvent, ...]) -> int:
     return next((round_ for round_, event in timed if event.kind == "built"), NEVER)
 
@@ -39,13 +48,14 @@ def _has_whole_pair(state: GameState) -> bool:
 
 
 def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool,
-              rounds: Optional[int]) -> Dict[str, object]:
+              rounds: Optional[int], changes: Mapping[str, int]) -> Dict[str, object]:
     order = seating(seats, game_number)
     state = new_game(seed=seed, player_count=len(seats))
     if not disasters:
         state = _without_disasters(state)
     if rounds is not None:
         state = replace(state, economy=replace(state.economy, rounds=rounds))
+    state = _changed(state, changes)
     final, timed = play_game_rounds(state, [COMPUTERS[seats[entrant]] for entrant in order])
     winner_seat = ranking(final)[0][0]
     result = {
@@ -63,10 +73,12 @@ def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool
 
 
 def run_tournament(games: int, first_seed: int, seats: Sequence[str], disasters: bool = True,
-                   rounds: Optional[int] = None) -> Dict[str, object]:
+                   rounds: Optional[int] = None, changes: Optional[Mapping[str, int]] = None) -> Dict[str, object]:
     """`games` games between the computers named in `seats` (the entrants), seeds first_seed, first_seed + 1, ...;
-    the seats rotate from one game to the next. `rounds` simulates another game length (the rules keep theirs)."""
-    results = [_one_game(first_seed + n, seats, n, disasters, rounds) for n in range(games)]
+    the seats rotate from one game to the next. `rounds` simulates another game length (the rules keep theirs);
+    `changes` other amounts, by their name in economy.json."""
+    changes = dict(changes or {})
+    results = [_one_game(first_seed + n, seats, n, disasters, rounds, changes) for n in range(games)]
     by_seat, by_entrant = [0] * len(seats), [0] * len(seats)
     for result in results:
         by_seat[result["winner_seat"]] += 1
@@ -75,6 +87,7 @@ def run_tournament(games: int, first_seed: int, seats: Sequence[str], disasters:
         "games": games,
         "seats": list(seats),
         "disasters": disasters,
+        "changes": changes,
         "rounds": rounds if rounds is not None else new_game(seed=first_seed, player_count=len(seats)).economy.rounds,
         "first_house_round_median": median(r["first_house"] for r in results),
         "games_with_a_house": sum(r["first_house"] < NEVER for r in results) / games,

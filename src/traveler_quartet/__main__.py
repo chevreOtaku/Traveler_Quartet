@@ -18,13 +18,20 @@ def build_parser() -> argparse.ArgumentParser:
                         help="tournament: the computers at the table, comma-separated (easy, normal, hard)")
     parser.add_argument("--no-disasters", action="store_true", help="tournament: remove the disaster cards")
     parser.add_argument("--rounds", type=int, default=None, help="tournament: simulate another game length")
+    parser.add_argument("--set", action="append", default=[], metavar="NAME=AMOUNT",
+                        help="tournament: simulate another amount, by its name in economy.json (repeatable)")
     return parser
+
+
+def _changes(pairs: List[str]) -> dict:
+    return {name: int(amount) for name, _, amount in (pair.partition("=") for pair in pairs)}
 
 
 def _tournament(args: argparse.Namespace) -> int:
     from traveler_quartet.match.tournament import run_tournament
     report = run_tournament(games=args.games, first_seed=args.seed, seats=args.seats.split(","),
-                            disasters=not args.no_disasters, rounds=args.rounds)
+                            disasters=not args.no_disasters, rounds=args.rounds,
+                            changes=_changes(args.set))
     print(json.dumps({k: v for k, v in report.items() if k != "winners"}, indent=2))
     return 0
 
