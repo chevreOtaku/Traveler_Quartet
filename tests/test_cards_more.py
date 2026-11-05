@@ -73,3 +73,32 @@ def test_the_normal_computer_curses_the_richest_rival():
     state, _ = apply(_drawing("curse", EVENT, 0, players=3, die_even=False), "roll")
     state = cash(cash(state, 1, 300), 2, 900)
     assert normal(state, legal_actions(state)) == "curse:2"
+
+
+def _holding(state, player, card):
+    players = list(state.players)
+    players[player] = replace(players[player], cards=players[player].cards + (card,))
+    return replace(state, players=tuple(players))
+
+
+def test_the_karma_mirror_is_kept():
+    state, _ = apply(_drawing("mirror", CHANCE, 0), "roll")
+    assert "mirror" in state.players[0].cards
+
+
+def test_a_curse_on_a_mirror_holder_goes_back_to_its_caster():
+    state = build_levels(own(_drawing("curse", EVENT, 0, players=3, die_even=False), 0, *BROWN), {1: 1, 3: 1})
+    state = _holding(state, 2, "mirror")
+    state, events = apply(state, "roll")
+    state, events = apply(state, "curse:2")
+    assert state.players[2].cash == 750 and "mirror" not in state.players[2].cards
+    assert state.players[0].cash == 750 - 30 * 2
+    assert any(e.kind == "mirrored" for e in events)
+
+
+def test_the_mirror_does_not_bounce_twice():
+    state = build_levels(own(_drawing("curse", EVENT, 0, players=3, die_even=False), 0, *BROWN), {1: 1, 3: 1})
+    state = _holding(_holding(state, 2, "mirror"), 0, "mirror")
+    state, _ = apply(state, "roll")
+    state, _ = apply(state, "curse:2")
+    assert state.players[0].cash == 750 - 30 * 2 and "mirror" in state.players[0].cards

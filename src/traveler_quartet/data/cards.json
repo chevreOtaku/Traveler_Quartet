@@ -11,6 +11,7 @@
     {"id": "to_dungeon", "deck": "chance", "effect": "go_to_dungeon", "text": "Go straight to the dungeon."},
     {"id": "goddess_blessing", "deck": "chance", "effect": "you_pay_others_gain", "you": 10, "each": 10, "text": "The water goddess blessed you, with too much power: a tidal wave hits the ramparts of every town."},
     {"id": "rope", "deck": "chance", "effect": "keep", "text": "Adventurer's rope. Keep this card: it gets you out of the dungeon for free."},
+    {"id": "mirror", "deck": "chance", "effect": "keep", "text": "Karma mirror. Keep this card secret: the next curse aimed at you goes back to whoever cast it."},
     {"id": "bonus", "deck": "chance", "effect": "pay", "amount": 50, "text": "Your boss 'forgot' your bonus. It's a black company, after all."},
     {"id": "mage", "deck": "chance", "effect": "die", "even": 100, "odd": -30, "carousel": true, "text": "A mage is practising: a giant explosion echoes over a distant town. Even: a giant chest appears. Odd: a meteor lands on your goods."},
 

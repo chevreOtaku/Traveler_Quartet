@@ -144,13 +144,22 @@ def _bankrupt(state: GameState) -> Step:
 def _curse(state: GameState, target: int) -> Step:
     me, per_building = state.current, state.catalog["curse"]["amount"]
     towns = tuple(state.board.towns)
+    events = (Event("cursed", me, (("target", target),)),)
+    if "mirror" in state.players[target].cards:
+        state = update_player(state, target, cards=_without(state.players[target].cards, "mirror"))
+        events += (Event("mirrored", target, (("back_to", me),)),)
+        target = me
     state, event = crisis_on(state, target, towns, per_building)
-    events = (Event("cursed", me, (("target", target),)), event)
+    events += (event,)
     if state.pending == "target":
         return after_landing(state), events
-    cards = list(state.players[me].cards)
-    cards.remove("curse")
-    return update_player(state, me, cards=tuple(cards)), events
+    return update_player(state, me, cards=_without(state.players[me].cards, "curse")), events
+
+
+def _without(cards: Tuple[str, ...], card: str) -> Tuple[str, ...]:
+    out = list(cards)
+    out.remove(card)
+    return tuple(out)
 
 
 SIMPLE_ACTIONS: Dict[str, Callable[[GameState], Step]] = {
