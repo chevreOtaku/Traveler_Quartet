@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+
+# Never publish keys or local settings
+.env
+.env.*
+*.key
+
+# Game journals and experiment results stay on your machine
+journal/
+runs/

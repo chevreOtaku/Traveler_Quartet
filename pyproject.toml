@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traveler-quartet"
+version = "0.0.1"
+description = "A light-hearted property-trading board game for humans and AI, set in a world where people keep getting isekai'd."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9"]
+
+[project.scripts]
+traveler-quartet = "traveler_quartet.__main__:main"
+
+[project.urls]
+Repository = "https://github.com/chevreOtaku/Traveler_Quartet"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
