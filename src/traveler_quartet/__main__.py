@@ -16,13 +16,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=1, help="tournament: seed of the first game")
     parser.add_argument("--seats", default="normal,normal,normal,normal",
                         help="tournament: the computers at the table, comma-separated (easy, normal)")
+    parser.add_argument("--no-disasters", action="store_true", help="tournament: remove the disaster cards")
     return parser
 
 
 def _tournament(args: argparse.Namespace) -> int:
     from traveler_quartet.match.tournament import run_tournament
-    report = run_tournament(games=args.games, first_seed=args.seed, seats=args.seats.split(","))
-    print(json.dumps(report, indent=2))
+    report = run_tournament(games=args.games, first_seed=args.seed, seats=args.seats.split(","),
+                            disasters=not args.no_disasters)
+    print(json.dumps({k: v for k, v in report.items() if k != "winners"}, indent=2))
     return 0
 
 

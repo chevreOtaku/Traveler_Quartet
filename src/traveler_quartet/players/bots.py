@@ -21,18 +21,29 @@ def _square(action: str) -> int:
 
 
 def easy(state: GameState, legal: Tuple[str, ...]) -> str:
-    """Plays at random: buys half the time, sometimes builds, bids a little, answers offers by a coin."""
+    """A credible beginner (avant-etape-6 §2): buys whenever it can pay, builds now and then, bids up to half the price,
+    never trades nor shares a stall, never pays to leave the dungeon."""
     rng = _rng(state, "easy")
+    me = actor(state)
     if state.pending == "buy":
-        return rng.choice(("buy", "pass"))
+        return "buy"
     if state.pending == "roll":
         builds = [a for a in legal if a.startswith("build:")]
-        return rng.choice(builds) if builds and rng.random() < 0.2 else "roll"
+        return rng.choice(builds) if builds and rng.random() < 0.3 else "roll"
     if state.pending == "auction":
-        return "raise:5" if "raise:5" in legal and rng.random() < 0.3 else "drop"
+        cap = state.board.squares[state.auction.square].price // 2
+        return "raise:5" if "raise:5" in legal and state.auction.price + 5 <= cap else "drop"
     if state.pending == "sealed":
-        return rng.choice(legal[:3])
-    return rng.choice(legal)
+        cap = state.board.squares[state.sealed.square].price // 2
+        return max((a for a in legal if int(a.split(":")[1]) <= cap), key=lambda a: int(a.split(":")[1]))
+    if state.pending in ("trade", "stall_request"):
+        return "refuse"
+    if state.pending == "jump":
+        return rng.choice(legal)
+    if state.pending == "target":
+        return rng.choice(legal)
+    sells = [a for a in legal if a.startswith("sell:")]
+    return (sells or [a for a in legal if a.startswith("mortgage:")] or list(legal))[0]
 
 
 def _completing_offer(state: GameState, legal: Tuple[str, ...]) -> Optional[str]:
