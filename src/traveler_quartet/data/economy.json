@@ -1,0 +1,8 @@
+{
+  "start_cash": 750,
+  "salary": 100,
+  "rounds": 30,
+  "rent_percent": 10,
+  "rent_multiplier_bare": 1,
+  "rent_multiplier_whole_town": 2
+}

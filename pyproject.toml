@@ -24,3 +24,6 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+traveler_quartet = ["data/*.json"]
