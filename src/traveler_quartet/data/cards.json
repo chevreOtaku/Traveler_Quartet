@@ -1,0 +1,41 @@
+{
+  "cards": [
+    {"id": "birthday", "deck": "chance", "effect": "everyone_gains", "amount": 100, "text": "It's everyone's birthday! The Adventurers' Guild gives every player 100."},
+    {"id": "slime", "deck": "chance", "effect": "die", "even": 100, "odd": -20, "text": "A friendly slime ate your purse. Even: it gives you a golden dropping. Odd: it's a friendly slime, it doesn't pay back."},
+    {"id": "sword", "deck": "chance", "effect": "gain", "amount": 50, "text": "You sold a 'legendary sword'. It was a stick."},
+    {"id": "radish", "deck": "chance", "effect": "nothing", "text": "You help a villager. To thank you, he gives you a giant white radish wearing tights. It is of no use to you."},
+    {"id": "tax_collector", "deck": "chance", "effect": "pay_per_building", "amount": 20, "text": "The Demon Lord's tax collector comes by: 20 per building you own."},
+    {"id": "lost_hero", "deck": "chance", "effect": "collect_from_others", "amount": 10, "text": "A lost hero asks for directions. Every other player pays you 10 for your map."},
+    {"id": "cart", "deck": "chance", "effect": "move_back", "steps": 3, "text": "Your cart loses a wheel. Go back 3 squares."},
+    {"id": "to_start", "deck": "chance", "effect": "move_to_start", "text": "Advance to Start and collect your income."},
+    {"id": "to_dungeon", "deck": "chance", "effect": "go_to_dungeon", "text": "Go straight to the dungeon."},
+    {"id": "goddess_blessing", "deck": "chance", "effect": "you_pay_others_gain", "you": 10, "each": 10, "text": "The water goddess blessed you, with too much power: a tidal wave hits the ramparts of every town."},
+    {"id": "rope", "deck": "chance", "effect": "keep", "text": "Adventurer's rope. Keep this card: it gets you out of the dungeon for free."},
+    {"id": "bonus", "deck": "chance", "effect": "pay", "amount": 50, "text": "Your boss 'forgot' your bonus. It's a black company, after all."},
+    {"id": "mage", "deck": "chance", "effect": "die", "even": 100, "odd": -30, "carousel": true, "text": "A mage is practising: a giant explosion echoes over a distant town. Even: a giant chest appears. Odd: a meteor lands on your goods."},
+
+    {"id": "mayonnaise", "deck": "event", "effect": "invention", "pair": ["brown", "orange"], "one": 25, "both": 50, "text": "A member of a certain police squad invents mayonnaise.", "again": "A great festive season sweeps the realm."},
+    {"id": "credit_card", "deck": "event", "effect": "invention", "pair": ["green", "red"], "one": 25, "both": 50, "text": "Someone invents the credit card.", "again": "A wave of demand for credit cards."},
+    {"id": "soap", "deck": "event", "effect": "invention", "pair": ["light_blue", "dark_blue"], "one": 25, "both": 50, "text": "Someone invents scented soap.", "again": "A wave of demand for scented soap."},
+    {"id": "printing", "deck": "event", "effect": "invention", "pair": ["purple", "yellow"], "one": 25, "both": 50, "text": "Someone invents the printing press.", "again": "A wave of demand for printed books."},
+    {"id": "earthquake", "deck": "event", "effect": "disaster", "target": "random", "text": "An earthquake shakes a town."},
+    {"id": "liquid", "deck": "event", "effect": "disaster", "target": "random", "text": "The Hollow Company spilled a strange liquid over a town."},
+    {"id": "dragon", "deck": "event", "effect": "disaster", "target": "random", "text": "A dragon was playing 'who can shoot the farthest' and hit a town by accident."},
+    {"id": "demon_invasion", "deck": "event", "effect": "disaster", "target": "expensive", "text": "Demons invade a town."},
+    {"id": "revolt", "deck": "event", "effect": "disaster", "target": "expensive", "text": "A self-proclaimed water goddess starts a riot in the streets."},
+    {"id": "cabbages", "deck": "event", "effect": "repair", "percent": 50, "text": "A stampede of flying cabbages crosses a town."},
+    {"id": "epidemic", "deck": "event", "effect": "crisis", "town": "dark_blue", "amount": 30, "text": "An epidemic hits the capital: a cure must be found."},
+    {"id": "strike", "deck": "event", "effect": "crisis", "town": "light_blue", "amount": 30, "text": "The miners of Overtime Hollow go on strike."},
+    {"id": "festival", "deck": "event", "effect": "festival", "town": "brown", "amount": 20, "text": "Harvest festival in Greenhorn Fields."},
+    {"id": "curse", "deck": "event", "effect": "curse", "amount": 30, "text": "The curse. Roll a die: even, you may keep it; odd, play it now on another player."},
+
+    {"id": "mimic", "deck": "adventurer", "effect": "pay", "amount": 10, "text": "A mimic eats your clothes. An elf mage dressed all in white saves you."},
+    {"id": "chest", "deck": "adventurer", "effect": "die", "even": 150, "odd": 0, "text": "A treasure chest. Even: it's full. Odd: it's empty."},
+    {"id": "saint", "deck": "adventurer", "effect": "lose_turn_then_free", "text": "You escort a saint. You pray with her... and fall asleep. You lose this turn, then you are out."},
+    {"id": "goblins", "deck": "adventurer", "effect": "pay", "amount": 20, "text": "Goblins steal your purse, but they leave behind a magazine of virtual idols from an unknown world."},
+    {"id": "healer", "deck": "adventurer", "effect": "pay", "amount": 30, "text": "The healer, a macho in sunglasses, hands you his bill and asks you to pray to Mitama."},
+    {"id": "exit", "deck": "adventurer", "effect": "free_exit", "text": "You find the way out."},
+    {"id": "lost", "deck": "adventurer", "effect": "lock", "text": "You got lost. You stay until the end of your time inside."},
+    {"id": "adventurers", "deck": "adventurer", "effect": "draw_event", "text": "You hung out with adventurers. Draw an Event card."}
+  ]
+}

@@ -2,6 +2,8 @@ from dataclasses import replace
 from typing import Callable, Dict, Optional, Tuple
 
 from traveler_quartet.rules import buildings, dungeon, finance, portals
+from traveler_quartet.rules.card_effects import crisis_on, resolve
+from traveler_quartet.rules.cards import load_cards, shuffled_decks
 from traveler_quartet.rules.board import Board, load_board
 from traveler_quartet.rules.dice import roll
 from traveler_quartet.rules.economy import Economy, load_economy
@@ -24,9 +26,11 @@ def new_game(seed: int, player_count: int,
     economy = economy or load_economy()
     size = len(board.squares)
     players = tuple(Player(position=0, cash=economy.start_cash) for _ in range(player_count))
+    catalog = load_cards()
     return GameState(board=board, economy=economy, seed=seed, players=players,
                      owners=(None,) * size, buildings=(0,) * size, mortgaged=(False,) * size,
-                     houses_left=economy.houses_stock, stalls_left=economy.stalls_stock)
+                     houses_left=economy.houses_stock, stalls_left=economy.stalls_stock,
+                     catalog=catalog, decks=shuffled_decks(catalog, seed))
 
 
 def _square_actions(state: GameState, name: str, allowed: Callable[[GameState, int, int], bool]) -> Tuple[str, ...]:
@@ -38,11 +42,25 @@ def _raising_actions(state: GameState) -> Tuple[str, ...]:
     return _square_actions(state, "sell", buildings.can_sell) + _square_actions(state, "mortgage", finance.can_mortgage)
 
 
+def _dungeon_actions(state: GameState) -> Tuple[str, ...]:
+    out = ("pay_exit",) if dungeon.can_pay_exit(state) else ()
+    rope = dungeon.in_dungeon(state) and "rope" in state.players[state.current].cards
+    return out + (("use_rope",) if rope else ())
+
+
+def _curse_actions(state: GameState, held: bool) -> Tuple[str, ...]:
+    if held and "curse" not in state.players[state.current].cards:
+        return ()
+    return tuple(f"curse:{p}" for p in range(len(state.players)) if p != state.current and not state.players[p].out)
+
+
 def legal_actions(state: GameState) -> Tuple[str, ...]:
     if state.pending == "roll":
-        exit_ = ("pay_exit",) if dungeon.can_pay_exit(state) else ()
-        return (("roll",) + exit_ + _square_actions(state, "build", buildings.can_build) + _raising_actions(state)
+        return (("roll",) + _dungeon_actions(state) + _curse_actions(state, held=True)
+                + _square_actions(state, "build", buildings.can_build) + _raising_actions(state)
                 + _square_actions(state, "unmortgage", finance.can_unmortgage))
+    if state.pending == "target":
+        return _curse_actions(state, held=False)
     if state.pending == "buy":
         return ("buy", "pass")
     if state.pending == "jump":
@@ -70,13 +88,17 @@ def _after_raising(state: GameState, events: Tuple[Event, ...]) -> Step:
 
 
 def _roll(state: GameState) -> Step:
-    me = state.current
+    me, events = state.current, ()
+    if dungeon.in_dungeon(state):
+        state, events, nxt = resolve(state, "adventurer")
+        if nxt == "done":
+            return state, events
     dice = roll(state.seed, state.rolls)
     double = dice[0] == dice[1]
     state = replace(state, rolls=state.rolls + 1, last_dice=dice)
-    events = (Event("rolled", me, (("dice", dice),)),)
+    events += (Event("rolled", me, (("dice", dice),)),)
     if dungeon.in_dungeon(state):
-        if not double:
+        if not double or state.players[me].dungeon_locked:
             state, inside = dungeon.stay_inside(state)
             return state, events + inside
         state = update_player(state, me, dungeon_turns=0)
@@ -119,11 +141,23 @@ def _bankrupt(state: GameState) -> Step:
     return end_turn(state), events
 
 
+def _curse(state: GameState, target: int) -> Step:
+    me, per_building = state.current, state.catalog["curse"]["amount"]
+    towns = tuple(state.board.towns)
+    state, event = crisis_on(state, target, towns, per_building)
+    events = (Event("cursed", me, (("target", target),)), event)
+    if state.pending == "target":
+        return after_landing(state), events
+    cards = list(state.players[me].cards)
+    cards.remove("curse")
+    return update_player(state, me, cards=tuple(cards)), events
+
+
 SIMPLE_ACTIONS: Dict[str, Callable[[GameState], Step]] = {
     "roll": _roll, "buy": _buy, "pass": _pass, "bankrupt": _bankrupt,
-    "jump": portals.jump, "stay": portals.stay, "pay_exit": dungeon.pay_exit,
+    "jump": portals.jump, "stay": portals.stay, "pay_exit": dungeon.pay_exit, "use_rope": dungeon.use_rope,
 }
 SQUARE_ACTIONS: Dict[str, Callable[[GameState, int], Step]] = {
     "build": buildings.build, "sell": buildings.sell,
-    "mortgage": finance.mortgage, "unmortgage": finance.unmortgage,
+    "mortgage": finance.mortgage, "unmortgage": finance.unmortgage, "curse": _curse,
 }

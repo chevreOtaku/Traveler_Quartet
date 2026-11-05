@@ -13,7 +13,8 @@ def in_dungeon(state: GameState) -> bool:
 
 
 def can_pay_exit(state: GameState) -> bool:
-    return in_dungeon(state) and state.players[state.current].cash >= state.economy.dungeon_exit_cost
+    me = state.players[state.current]
+    return in_dungeon(state) and not me.dungeon_locked and me.cash >= state.economy.dungeon_exit_cost
 
 
 def send_to_dungeon(state: GameState) -> Step:
@@ -25,7 +26,7 @@ def send_to_dungeon(state: GameState) -> Step:
 
 def pay_exit(state: GameState) -> Step:
     me, cost = state.current, state.economy.dungeon_exit_cost
-    state = update_player(change_cash(state, me, -cost), me, dungeon_turns=0)
+    state = update_player(change_cash(state, me, -cost), me, dungeon_turns=0, dungeon_locked=False)
     return state, (Event("left_dungeon", me, (("paid", cost), ("bank", -cost))),)
 
 
@@ -33,4 +34,13 @@ def stay_inside(state: GameState) -> Step:
     """A roll without a double: one round less inside, and the turn is over."""
     me = state.current
     left = state.players[me].dungeon_turns - 1
-    return end_turn(update_player(state, me, dungeon_turns=left)), (Event("stayed_in_dungeon", me, (("left", left),)),)
+    state = update_player(state, me, dungeon_turns=left, dungeon_locked=state.players[me].dungeon_locked and left > 0)
+    return end_turn(state), (Event("stayed_in_dungeon", me, (("left", left),)),)
+
+
+def use_rope(state: GameState) -> Step:
+    me = state.current
+    cards = list(state.players[me].cards)
+    cards.remove("rope")
+    state = update_player(state, me, dungeon_turns=0, dungeon_locked=False, cards=tuple(cards))
+    return state, (Event("used_rope", me),)

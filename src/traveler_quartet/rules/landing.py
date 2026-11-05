@@ -1,6 +1,7 @@
 from dataclasses import replace
 
 from traveler_quartet.rules import finance
+from traveler_quartet.rules.card_effects import resolve
 from traveler_quartet.rules.dungeon import send_to_dungeon
 from traveler_quartet.rules.portals import can_jump
 from traveler_quartet.rules.properties import is_property, property_rent
@@ -51,4 +52,14 @@ def land(state: GameState, index: int) -> Step:
         return _park(state, index)
     if kind == "go_to_dungeon":
         return send_to_dungeon(state)
+    if kind in ("chance", "event"):
+        return _card(state, kind)
     return after_landing(state), ()
+
+
+def _card(state: GameState, deck: str) -> Step:
+    state, events, nxt = resolve(state, deck)
+    if nxt == "land":
+        state, more = land(state, state.players[state.current].position)
+        return state, events + more
+    return (after_landing(state) if nxt == "continue" else state), events

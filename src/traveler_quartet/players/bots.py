@@ -30,6 +30,11 @@ def easy(state: GameState, legal: Tuple[str, ...]) -> str:
 def normal(state: GameState, legal: Tuple[str, ...]) -> str:
     """Simple rules: keep a reserve of 100, buy and build while it holds, sell houses before mortgaging."""
     cash = state.players[state.current].cash
+    curses = [a for a in legal if a.startswith("curse:")]
+    if curses:
+        return max(curses, key=lambda a: (state.players[_square(a)].cash, -_square(a)))
+    if "use_rope" in legal:
+        return "use_rope"
     if state.pending == "buy":
         price = state.board.squares[state.players[state.current].position].price
         return "buy" if cash - price >= RESERVE else "pass"

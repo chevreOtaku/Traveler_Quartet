@@ -1,5 +1,6 @@
-from dataclasses import dataclass, replace
-from typing import Optional, Tuple
+from dataclasses import dataclass, field, replace
+from types import MappingProxyType
+from typing import Mapping, Optional, Tuple
 
 from traveler_quartet.rules.board import Board
 from traveler_quartet.rules.economy import Economy, Owners
@@ -12,6 +13,8 @@ class Player:
     out: bool = False
     jump_ready: bool = True
     dungeon_turns: int = 0
+    dungeon_locked: bool = False
+    cards: Tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -47,6 +50,9 @@ class GameState:
     jackpot: int = 0
     doubles: int = 0
     last_dice: Tuple[int, int] = (0, 0)
+    catalog: Mapping[str, Mapping[str, object]] = field(default_factory=lambda: MappingProxyType({}))
+    decks: Tuple[Tuple[str, Tuple[str, ...]], ...] = ()
+    discovered: Tuple[str, ...] = ()
 
     @property
     def over(self) -> bool:
