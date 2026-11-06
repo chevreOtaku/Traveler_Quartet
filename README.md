@@ -138,6 +138,13 @@ To play over the network of your own machine (the base of the coming web page an
 traveler-quartet serve            # http://127.0.0.1:8765 -- POST /games, then GET /view and POST /act with your token
 ```
 
+To play ONE seat of that server from a terminal, one command per move (to see exactly what a player sees):
+
+```
+python -m traveler_quartet.match.seat new remote,normal,normal,normal 7
+python -m traveler_quartet.match.seat act roll good luck     # then: view, events [since]
+```
+
 The seats rotate from one game to the next. The amounts are not balanced yet: these tournaments are how we will
 balance them.
 
