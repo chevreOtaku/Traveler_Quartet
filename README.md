@@ -5,7 +5,7 @@ getting isekai'd.*
 
 > **Status: construction.** The rules engine plays complete games: buying, rent, houses and market stalls, pairs,
 > portals, the dungeon, the three decks of cards, auctions, trades, shared stalls, mortgages, debt and bankruptcy.
-> Computer players play tournaments, and command-line AI agents can join a mixed table. There is no web page yet. Every rule,
+> Computer players play tournaments, command-line AI agents can join a mixed table, and a local text page lets a human play. Every rule,
 > name and amount may still change after the playtests.
 
 ```
@@ -132,11 +132,18 @@ To play yourself in the console, against computer players:
 traveler-quartet cli --opponents normal,normal,normal [--seed 7] [--rounds 10]
 ```
 
-To play over the network of your own machine (the base of the coming web page and of AI players at a distance):
+To play in your browser against one to three computer players:
 
 ```
-traveler-quartet serve            # http://127.0.0.1:8765 -- POST /games, then GET /view and POST /act with your token
+traveler-quartet serve            # open http://127.0.0.1:8765/
 ```
+
+Choose the opponents and a seed, then use the action buttons. The trade form builds offers and counter-offers;
+messages accompany your next action. The journal appends new events as the page refreshes every 1.5 seconds.
+The page is self-contained and works offline. Keep the tab open: reloading loses your seat. The server stays local;
+the page reads only your player view, with your token in the authorization header. No drawings yet.
+
+The browser logic also has dependency-free checks with Node's built-in test runner: `node --test tests/web_page.test.cjs`.
 
 To play ONE seat of that server from a terminal, one command per move (to see exactly what a player sees):
 

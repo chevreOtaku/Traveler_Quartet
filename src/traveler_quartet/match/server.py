@@ -16,6 +16,7 @@ import secrets
 import threading
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from importlib.resources import files
 from typing import Dict, Mapping, Tuple
 from urllib.parse import parse_qs, urlparse
 
@@ -100,6 +101,14 @@ def _handler(reg: Registry):
             self.wfile.write(raw)
 
         def do_GET(self) -> None:
+            if self.path == "/":
+                raw = files("traveler_quartet").joinpath("web/index.html").read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+                return
             self._answer("GET")
 
         def do_POST(self) -> None:

@@ -62,5 +62,7 @@
     "curse": 100,
     "mirror": 100
   },
-  "stall_income_shared": 10
+  "stall_income_shared": 10,
+  "seat_bonus_cash": 0,
+  "rotate_first_player": 1
 }

@@ -39,6 +39,8 @@ class Economy:
     doubles_to_dungeon: int
     card_values: Mapping[str, int]
     stall_income_shared: int
+    seat_bonus_cash: int
+    rotate_first_player: int
 
 
 def load_economy(path: Path = DATA_DIR / "economy.json") -> Economy:
