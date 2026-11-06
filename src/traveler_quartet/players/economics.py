@@ -12,6 +12,8 @@ from traveler_quartet.rules.economy import rent
 from traveler_quartet.rules.state import GameState, set_at
 
 ROLLS_PER_TURN = 1 + 1 / 6 + 1 / 36     # a double rolls again, three in a row stop
+BUILT_LEVEL = 3                         # the potential of a town: whole, three houses on each district
+REALISED_SHARE = 0.5                    # completing and building take time: half the rounds left earn it
 
 
 def rounds_left(state: GameState) -> int:
@@ -46,11 +48,52 @@ def _town_lift(state: GameState, square: int, me: int) -> float:
                                                - _rent(state, state.owners, state.buildings, i)) for i in others)
 
 
+def town_potential(state: GameState, town: str, owner: int) -> float:
+    """E19 : what a town would bring `owner` if he held it WHOLE with three houses on each district -- the extra rent
+    over the bare one (on the share of the rounds left it would take to get there), minus the houses, plus their final
+    value. The real value of a district lives HERE, not in its bare rent."""
+    squares = state.board.towns[town]
+    owners = tuple(owner if i in squares else o for i, o in enumerate(state.owners))
+    built = tuple(BUILT_LEVEL if i in squares else b for i, b in enumerate(state.buildings))
+    houses = sum(BUILT_LEVEL * house_cost(state, i) for i in squares)
+    extra = sum(expected_hits(state, i, owner) * (_rent(state, owners, built, i) - _rent(state, state.owners, state.buildings, i))
+                for i in squares)
+    return REALISED_SHARE * extra - houses + end_value(state, houses)
+
+
+def _closer(k: int, n: int) -> float:
+    """How much one more district of a town (from k to k + 1 of n) brings it closer to whole: quadratic -- the last one
+    matters most."""
+    return ((k + 1) / n) ** 2 - (k / n) ** 2
+
+
+def option_value(state: GameState, square: int, me: int) -> float:
+    """My share of the town's potential -- none if a rival already holds part of it (no completion without a trade)."""
+    town = state.board.squares[square].town
+    others = [state.owners[i] for i in state.board.towns.get(town, ()) if i != square]
+    if not town or any(o not in (None, me) for o in others):
+        return 0.0
+    return max(town_potential(state, town, me), 0.0) * _closer(others.count(me), len(others) + 1)
+
+
+def block_value(state: GameState, square: int, me: int) -> float:
+    """What I deny the ONE rival who holds the rest of the town, if he is the only other owner there."""
+    town = state.board.squares[square].town
+    others = {state.owners[i] for i in state.board.towns.get(town, ()) if i != square} - {None}
+    if not town or len(others) != 1 or me in others:
+        return 0.0
+    rival = others.pop()
+    held = sum(1 for i in state.board.towns[town] if state.owners[i] == rival)
+    return max(town_potential(state, town, rival), 0.0) * _closer(held, len(state.board.towns[town]))
+
+
 def worth(state: GameState, square: int, me: int) -> float:
-    """What owning `square` brings `me` from now to the end: its rents, the lift of a completed town, its final value."""
+    """What owning `square` brings `me` from now to the end: its rents, the lift of a completed town, its OPTION on the
+    town and what it BLOCKS (E19), its final value."""
     owned = set_at(state.owners, square, me)
     rents = expected_hits(state, square, me) * _rent(state, owned, state.buildings, square)
-    return rents + _town_lift(state, square, me) + end_value(state, state.board.squares[square].price)
+    return (rents + _town_lift(state, square, me) + option_value(state, square, me) + block_value(state, square, me)
+            + end_value(state, state.board.squares[square].price))
 
 
 def buy_gain(state: GameState, square: int, me: int) -> float:

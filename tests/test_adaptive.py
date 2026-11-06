@@ -101,3 +101,46 @@ def test_completing_a_town_also_lifts_the_rent_of_its_other_districts():
     alone, completing = game(players=4), own(game(players=4), 0, 1)
     own_square_only = expected_hits(alone, 3, 0) * 3          # its own rent goes from 3 (bare) to 6 (whole town)
     assert worth(completing, 3, 0) - worth(alone, 3, 0) > own_square_only + 1e-9
+
+
+# E19 -- la valeur d'une rue est dans sa VILLE (la completer, y batir) et dans le BLOCAGE d'un rival, pas dans son loyer nu
+
+def test_a_lone_district_has_an_option_on_its_whole_town():
+    from traveler_quartet.players.economics import option_value
+    assert option_value(game(players=4), 16, 0) > 0
+
+
+def test_the_second_district_of_a_town_is_worth_more_than_the_first():
+    from traveler_quartet.players.economics import option_value
+    assert option_value(own(game(players=4), 0, 16), 18, 0) > option_value(game(players=4), 18, 0)
+
+
+def test_no_option_where_a_rival_already_holds_part_of_the_town_but_buying_blocks_him():
+    from traveler_quartet.players.economics import block_value, option_value
+    state = own(game(players=4), 1, 16, 18)
+    assert option_value(state, 19, 0) == 0 and block_value(state, 19, 0) > 0
+    assert block_value(game(players=4), 19, 0) == 0
+
+
+def test_over_whole_games_it_still_buys_early_when_a_district_counts_for_half():
+    """The guard E19 asked for: the changed rule PLAYED over whole games, not only isolated late decisions."""
+    from collections import Counter
+    from traveler_quartet.players.bots import normal
+    counts = Counter()
+
+    def spy(state, legal):
+        choice = adaptive(state, legal)
+        if state.pending == "buy" and state.round <= 10:
+            counts[choice] += 1
+        return choice
+
+    for seed in range(1, 6):
+        play_game(_rules(new_game(seed=seed, player_count=4), final_value_percent=50), [spy, normal, normal, normal])
+    assert counts["buy"] >= counts["pass"]
+
+
+def test_blocking_one_rival_from_his_town_adds_to_what_the_district_is_worth():
+    from traveler_quartet.players.economics import worth
+    blocking = own(game(players=4), 1, 16, 18)
+    nobody_to_block = own(own(game(players=4), 1, 16), 2, 18)
+    assert worth(blocking, 19, 0) > worth(nobody_to_block, 19, 0)
