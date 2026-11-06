@@ -61,7 +61,7 @@ def test_landing_on_a_rival_district_pays_the_rent_to_its_owner():
     owners = tuple(1 if i == square else None for i in range(40))
     state = replace(new_game(seed=seed, player_count=2), owners=owners)
     state, events = apply(state, "roll")
-    due = BOARD.squares[square].price * 10 // 100
+    due = BOARD.squares[square].price * ECONOMY.rent_percent // 100
     assert state.players[0].cash == 750 - due
     assert state.players[1].cash == 750 + due
     assert any(e.kind == "rent_paid" for e in events)

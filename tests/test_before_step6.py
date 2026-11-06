@@ -94,5 +94,6 @@ def test_an_unknown_amount_is_refused_rather_than_ignored():
 def test_the_report_gives_the_uncertainty_of_each_share_of_wins_e18():
     report = run_tournament(games=100, first_seed=1, seats=("normal",) * 4)
     for wins, (low, high) in zip(report["wins_by_entrant"], report["wins_by_entrant_interval_percent"]):
-        share = 100 * wins / 100
-        assert low < share < high and 15 < high - low < 25
+        share = wins / 100
+        half = 100 * 1.96 * (share * (1 - share) / 100) ** 0.5
+        assert low < 100 * share < high and abs((high - low) - 2 * half) < 0.2

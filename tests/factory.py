@@ -7,8 +7,14 @@ BROWN = (1, 3)
 ORANGE = (16, 18, 19)
 
 
+MECHANICS_RENT_PERCENT = 10
+
+
 def game(players: int = 2, seed: int = 1) -> GameState:
-    return new_game(seed=seed, player_count=players)
+    """A game for testing MECHANICS: the rent stays at 10 % of the price, whatever the rules' amount (D43) -- the tests
+    check how the rules work, with simple numbers; `test_the_rules_amounts` pins the amounts themselves."""
+    state = new_game(seed=seed, player_count=players)
+    return replace(state, economy=replace(state.economy, rent_percent=MECHANICS_RENT_PERCENT))
 
 
 def own(state: GameState, player: Optional[int], *squares: int) -> GameState:

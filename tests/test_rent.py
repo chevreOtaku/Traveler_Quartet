@@ -1,8 +1,11 @@
+from dataclasses import replace
+
+from factory import MECHANICS_RENT_PERCENT
 from traveler_quartet.rules.board import load_board
 from traveler_quartet.rules.economy import load_economy, rent
 
 BOARD = load_board()
-ECONOMY = load_economy()
+ECONOMY = replace(load_economy(), rent_percent=MECHANICS_RENT_PERCENT)
 NOBODY = (None,) * 40
 
 
