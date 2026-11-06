@@ -17,7 +17,7 @@ records what players DO, next to what they SAY (a free message attached to an ac
 | `src/traveler_quartet/rules/` | the engine: `apply(state, action) -> (state, events)`, `legal_actions`, `actor`, `negotiations` | PURE functions, frozen state, no I/O, no randomness except the seeded dice |
 | `src/traveler_quartet/data/` | the board, the economy (`economy.json`) and the cards, as DATA | an amount is changed here, never in code -- and a change of amount is a DECISION (see below) |
 | `src/traveler_quartet/players/` | the computer players (`bots.py`, `hard.py`, `adaptive.py`), what one player may SEE (`view.py`), the state as text (`text.py`), the AI player by command (`command_player.py`) | a player is a function `(state, legal) -> action` or `(action, message)` |
-| `src/traveler_quartet/match/` | the game loop (`runner.py`) and the tournaments (`tournament.py`) | |
+| `src/traveler_quartet/match/` | the game loop (`runner.py`), the tournaments (`tournament.py`), a game SESSION for remote players (`session.py`) and the local HTTP server (`server.py`, standard library, 127.0.0.1) | a front end talks ONLY to the server: create a game, read `/view` with its token, post to `/act` -- see the docstring of `server.py` |
 | `tests/` | pytest; `factory.py` builds test states | mechanics tests use a rent of 10 % (simple numbers); `test_rules_amounts.py` pins the real amounts |
 
 ## The contract a front end must respect
