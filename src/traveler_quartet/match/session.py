@@ -7,7 +7,7 @@ another player draws a card he may KEEP (the rope, the mirror, the curse), the l
 """
 
 import secrets
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from traveler_quartet.match.tournament import COMPUTERS
@@ -50,13 +50,17 @@ def _advance(session: Session) -> None:
     raise RuntimeError(f"the computers did not hand over in {MAX_COMPUTER_STEPS} steps")
 
 
-def new_session(seats: Sequence[str], seed: int, make_token: Callable[[], str] = lambda: secrets.token_urlsafe(16)
-                ) -> Session:
+def new_session(seats: Sequence[str], seed: int, make_token: Callable[[], str] = lambda: secrets.token_urlsafe(16),
+                rounds: Optional[int] = None) -> Session:
+    """`rounds`: another game length (a short game to try things; the rules keep theirs)."""
     unknown = [s for s in seats if s != REMOTE and s not in COMPUTERS]
     if unknown:
         raise ValueError(f"unknown seats {unknown}; use {REMOTE!r} or one of {sorted(COMPUTERS)}")
     tokens = {make_token(): seat for seat, kind in enumerate(seats) if kind == REMOTE}
-    session = Session(new_game(seed=seed, player_count=len(seats)), tuple(seats), tokens)
+    state = new_game(seed=seed, player_count=len(seats))
+    if rounds is not None:
+        state = replace(state, economy=replace(state.economy, rounds=rounds))
+    session = Session(state, tuple(seats), tokens)
     _advance(session)
     return session
 
