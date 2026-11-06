@@ -64,6 +64,12 @@ def test_events_since_n_skips_the_first_n(base, tmp_path):
     assert "hello" in all_events and "hello" not in later
 
 
+def test_a_table_without_a_remote_seat_is_refused_before_it_is_created(base, tmp_path):
+    store = tmp_path / "seat.json"
+    code, out = _seat(base, store, "new", "normal,normal", "1")
+    assert code == 2 and "remote" in out and not store.exists()
+
+
 def test_a_command_before_new_says_so_instead_of_crashing(tmp_path):
     code, out = run(["--store", str(tmp_path / "none.json"), "view"])
     assert code == 2 and "new" in out

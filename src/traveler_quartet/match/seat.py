@@ -62,6 +62,8 @@ def _shown(status: int, data: Dict[str, object]) -> Tuple[int, str]:
 
 
 def _new(base: str, store: Path, seats: str, seed: int) -> Tuple[int, str]:
+    if "remote" not in seats.split(","):
+        return 2, f"no `remote` seat in {seats!r}: this client plays ONE remote seat (e.g. remote,normal,normal)"
     status, data = request(base, "POST", "/games", {"seats": seats.split(","), "seed": seed})
     if status != 201:
         return _shown(status, data)
@@ -82,7 +84,8 @@ def _played(args: argparse.Namespace, saved: Dict[str, str], base: str) -> Tuple
 
 
 def run(argv: List[str]) -> Tuple[int, str]:
-    """The whole command: its exit code (0 done, 1 refused by the server, 2 no game yet) and what it prints."""
+    """The whole command: its exit code (0 done, 1 refused by the server, 2 no game yet or no remote seat) and what it
+    prints."""
     args = _parser().parse_args(argv)
     if args.command == "new":
         return _new(args.base or DEFAULT_BASE, args.store, args.seats, args.seed)
