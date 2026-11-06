@@ -79,3 +79,24 @@ def test_the_agents_are_run_with_their_safeguards_never_with_them_off():
     assert "--restricted" in CLAUDE and "--strict-mcp-config" in CLAUDE
     assert CODEX[CODEX.index("--sandbox") + 1] == "read-only"
     assert not any("dangerously" in flag or flag in ("--yolo", "danger-full-access") for flag in CLAUDE + CODEX)
+
+
+def test_a_failed_agent_command_cannot_be_mistaken_for_a_valid_decision(tmp_path):
+    import subprocess
+    import sys
+    import pytest
+    from traveler_quartet.players.command_player import run_command
+    script = tmp_path / "failed_agent.py"
+    script.write_text('print(\'{"action":"roll"}\')\nraise SystemExit(7)\n', encoding="utf-8")
+    with pytest.raises(subprocess.CalledProcessError):
+        run_command([sys.executable, str(script)])("Choose an action")
+
+
+def test_a_successful_but_empty_agent_command_is_an_explicit_error(tmp_path):
+    import sys
+    import pytest
+    from traveler_quartet.players.command_player import run_command
+    script = tmp_path / "empty_agent.py"
+    script.write_text('print("   ")\n', encoding="utf-8")
+    with pytest.raises(RuntimeError, match="empty"):
+        run_command([sys.executable, str(script)])("Choose an action")
