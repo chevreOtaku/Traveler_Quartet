@@ -1,12 +1,11 @@
-"""The first player who ROTATES (D38, a lever to measure; 0 in the rules): with `rotate_first_player`, round r starts at
-seat (r - 1) mod n -- everyone still plays once per round, and nobody starts with less than the others."""
+"""The first player who ROTATES (D38 -> the rule, D46): with `rotate_first_player`, round r starts at seat
+(r - 1) mod n -- everyone still plays once per round, and nobody starts with less than the others. The amount itself
+is pinned in `test_rules_amounts.py`; here both settings are tested, so the mechanics hold whatever the rule says."""
 
-import json
 from dataclasses import replace
 
 from traveler_quartet.match.runner import play_game_rounds
 from traveler_quartet.players.bots import BOTS
-from traveler_quartet.rules.board import DATA_DIR
 from traveler_quartet.rules.engine import new_game
 from traveler_quartet.rules.turns import end_turn
 
@@ -22,11 +21,6 @@ def _turns(state, count):
         state = end_turn(state)
         seen.append((state.round, state.current))
     return seen
-
-
-def test_the_rules_keep_the_first_player_fixed():
-    raw = json.loads((DATA_DIR / "economy.json").read_text(encoding="utf-8"))
-    assert raw["rotate_first_player"] == 0
 
 
 def test_without_rotation_every_round_starts_at_seat_0():

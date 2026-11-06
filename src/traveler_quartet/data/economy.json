@@ -64,6 +64,5 @@
   },
   "stall_income_shared": 10,
   "seat_bonus_cash": 0,
-  "seat_start_offset": 0,
-  "rotate_first_player": 0
+  "rotate_first_player": 1
 }

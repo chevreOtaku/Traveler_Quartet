@@ -10,3 +10,8 @@ def test_the_rent_is_fifteen_percent_of_the_price_d43():
 
 def test_a_game_lasts_thirty_rounds_d40():
     assert load_economy().rounds == 30
+
+
+def test_the_first_player_rotates_and_nobody_starts_richer_d46():
+    economy = load_economy()
+    assert economy.rotate_first_player == 1 and economy.seat_bonus_cash == 0

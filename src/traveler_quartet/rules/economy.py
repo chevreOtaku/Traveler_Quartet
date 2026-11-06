@@ -40,7 +40,6 @@ class Economy:
     card_values: Mapping[str, int]
     stall_income_shared: int
     seat_bonus_cash: int
-    seat_start_offset: int
     rotate_first_player: int
 
 

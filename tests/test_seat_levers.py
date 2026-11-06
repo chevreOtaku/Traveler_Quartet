@@ -1,7 +1,7 @@
-"""The advance of the first seat (D38): two levers to measure, both 0 in the rules -- gold for the later seats
-(`seat_bonus_cash`: seat k gets k x X more at the start) and a start further on (`seat_start_offset`: seat k starts
-k x N squares on). And a simulation must apply its amounts BEFORE the players are seated, or a starting amount is
-silently ignored."""
+"""The advance of the first seat (D38). Gold for the later seats (`seat_bonus_cash`: seat k gets k x X more at the
+start) is kept at 0 -- it corrects the advance but would FEEL unfair; it stays for a handicap mode. (A start further on
+was measured and REMOVED: not monotonic, no effect on new seeds.) And a simulation must apply its amounts BEFORE the
+players are seated, or a starting amount is silently ignored."""
 
 import json
 
@@ -12,9 +12,9 @@ from traveler_quartet.rules.board import DATA_DIR
 from traveler_quartet.rules.engine import new_game
 
 
-def test_the_rules_keep_both_levers_at_zero():
+def test_the_rules_keep_the_gold_lever_at_zero():
     raw = json.loads((DATA_DIR / "economy.json").read_text(encoding="utf-8"))
-    assert raw["seat_bonus_cash"] == 0 and raw["seat_start_offset"] == 0
+    assert raw["seat_bonus_cash"] == 0 and "seat_start_offset" not in raw
 
 
 def test_at_zero_every_seat_starts_alike():
@@ -31,12 +31,6 @@ def test_gold_for_the_later_seats_grows_with_the_seat():
     state = starting_state(seed=1, player_count=4, changes={"seat_bonus_cash": 50})
     start = state.economy.start_cash
     assert [p.cash for p in state.players] == [start, start + 50, start + 100, start + 150]
-
-
-def test_a_start_further_on_grows_with_the_seat_and_lands_nowhere():
-    state = starting_state(seed=1, player_count=4, changes={"seat_start_offset": 2})
-    assert [p.position for p in state.players] == [0, 2, 4, 6]
-    assert all(owner is None for owner in state.owners) and state.round == 1
 
 
 def test_a_simulation_still_refuses_an_unknown_amount():

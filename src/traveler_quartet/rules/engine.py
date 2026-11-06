@@ -25,8 +25,8 @@ def new_game(seed: int, player_count: int,
     board = board or load_board()
     economy = economy or load_economy()
     size = len(board.squares)
-    players = tuple(Player(position=(seat * economy.seat_start_offset) % size,
-                           cash=economy.start_cash + seat * economy.seat_bonus_cash) for seat in range(player_count))
+    players = tuple(Player(position=0, cash=economy.start_cash + seat * economy.seat_bonus_cash)
+                    for seat in range(player_count))
     catalog = load_cards()
     return GameState(board=board, economy=economy, seed=seed, players=players,
                      owners=(None,) * size, buildings=(0,) * size, mortgaged=(False,) * size,
