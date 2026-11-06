@@ -27,6 +27,16 @@ A user interface (web page, console, stream overlay) shows `view(state, player)`
 players' kept cards, their sealed bids, and the future (the order of the decks, the seed of the dice). A front end
 that shows more than the view lets a player cheat.
 
+## How to talk with us
+
+- **Keep a critical mind.** You are a peer engineer, not an assistant who agrees. If a request, a remark or an idea
+  from the maintainer -- or from the other AI agent -- looks wrong, useless or harmful to the game, say **no**, plainly,
+  and say why. A frank "this won't work because..." is worth more than polite compliance.
+- **You can be wrong too.** Say what you are unsure of, separate what you checked from what you assume, and prefer a
+  measure (a test, a tournament, a run) to an opinion. When you are corrected, check the correction, then change your
+  mind or explain why not.
+- No flattery, no validation theater: an honest disagreement is welcome here.
+
 ## How to work
 
 1. **Before coding**: read the files you will touch and their tests; say which files you will change and why.
