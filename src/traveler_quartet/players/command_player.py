@@ -26,6 +26,9 @@ INTRO = ("You are playing Traveler Quartet, a board game for 2-4 merchants. The 
 SAFE = ("pass", "drop", "refuse", "stay", "roll", "bid:0", "bankrupt")
 JSON_OBJECT = re.compile(r"\{.*?\}", re.DOTALL)
 CLAUDE = ["claude", "-p", "--restricted", "--strict-mcp-config", "--output-format", "text"]
+# Codex (its developer reference, read 06/11): read-only sandbox, run outside a git repository, nothing persisted,
+# the prompt on stdin ("-"). To be tried once Codex is installed and logged in.
+CODEX = ["codex", "exec", "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral", "-"]
 
 
 def parse_answer(text: str) -> Optional[Tuple[str, str]]:

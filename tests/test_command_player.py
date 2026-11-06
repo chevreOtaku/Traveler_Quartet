@@ -72,3 +72,10 @@ def test_the_prompt_is_the_players_view_and_the_answer_format_never_the_future()
     ai = Scripted('{"action": "buy", "message": ""}')
     CommandPlayer(ai, seat=state.current)(state, legal_actions(state))
     assert ANSWER_FORMAT in ai.prompts[0] and "Your choices" in ai.prompts[0] and "seed" not in ai.prompts[0]
+
+
+def test_the_agents_are_run_with_their_safeguards_never_with_them_off():
+    from traveler_quartet.players.command_player import CLAUDE, CODEX
+    assert "--restricted" in CLAUDE and "--strict-mcp-config" in CLAUDE
+    assert CODEX[CODEX.index("--sandbox") + 1] == "read-only"
+    assert not any("dangerously" in flag or flag in ("--yolo", "danger-full-access") for flag in CLAUDE + CODEX)
