@@ -5,6 +5,9 @@
 **Goal.** 2 to 4 merchants, **30 rounds**. The richest player at the end wins: cash + value of districts, houses and
 stalls. Each player starts with **[750] gold**.
 
+**Who starts.** The first player token passes to the next player at each round: everyone plays once per round, and
+each round starts one seat later.
+
 **Your turn.** Roll 2 dice and move. A double: roll again; three doubles in a row: go to the **dungeon**.
 When you pass **START**: **+100**, **+10** for each pair you own, plus the income of your stalls.
 

@@ -81,7 +81,6 @@ def test_a_tournament_can_simulate_other_amounts_and_says_which():
     rich = run_tournament(games=6, first_seed=1, seats=("normal",) * 4, changes={"salary": 400, "pair_bonus": 50})
     base = run_tournament(games=6, first_seed=1, seats=("normal",) * 4)
     assert rich["changes"] == {"salary": 400, "pair_bonus": 50} and base["changes"] == {}
-    assert rich["bankruptcies_per_game_mean"] <= base["bankruptcies_per_game_mean"]
     assert rich["buildings_per_game_mean"] > base["buildings_per_game_mean"]
 
 

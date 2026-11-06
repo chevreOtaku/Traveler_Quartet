@@ -6,7 +6,7 @@ from traveler_quartet.match.runner import TimedEvent, play_game_rounds
 from traveler_quartet.players.bots import BOTS
 from traveler_quartet.players.adaptive import adaptive
 from traveler_quartet.players.hard import hard
-from traveler_quartet.rules.economy import owns_whole_town
+from traveler_quartet.rules.economy import Economy, load_economy, owns_whole_town
 from traveler_quartet.rules.endgame import ranking
 from traveler_quartet.rules.engine import GameState, new_game
 
@@ -30,13 +30,24 @@ def _without_disasters(state: GameState) -> GameState:
     return replace(state, decks=tuple((deck, tuple(c for c in cards if c in keep)) for deck, cards in state.decks))
 
 
-def _changed(state: GameState, changes: Mapping[str, int]) -> GameState:
+def _changed(economy: Economy, changes: Mapping[str, int]) -> Economy:
     """Other amounts for a SIMULATION (the rules in economy.json keep theirs); an unknown name is refused, not ignored."""
-    known = {f.name for f in fields(state.economy)}
+    known = {f.name for f in fields(economy)}
     unknown = sorted(set(changes) - known)
     if unknown:
         raise ValueError(f"unknown amounts {unknown}; known: {sorted(known)}")
-    return replace(state, economy=replace(state.economy, **changes))
+    return replace(economy, **changes)
+
+
+def starting_state(seed: int, player_count: int, disasters: bool = True, rounds: Optional[int] = None,
+                   changes: Optional[Mapping[str, int]] = None) -> GameState:
+    """The first state of a simulated game. The amounts are changed BEFORE the players are seated: changed after, a
+    starting amount (the start cash, a seat lever) would be silently ignored."""
+    economy = load_economy()
+    if rounds is not None:
+        economy = replace(economy, rounds=rounds)
+    state = new_game(seed=seed, player_count=player_count, economy=_changed(economy, changes or {}))
+    return state if disasters else _without_disasters(state)
 
 
 def _interval_percent(wins: int, games: int) -> Tuple[float, float]:
@@ -59,12 +70,7 @@ def _has_whole_pair(state: GameState) -> bool:
 def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool,
               rounds: Optional[int], changes: Mapping[str, int]) -> Dict[str, object]:
     order = seating(seats, game_number)
-    state = new_game(seed=seed, player_count=len(seats))
-    if not disasters:
-        state = _without_disasters(state)
-    if rounds is not None:
-        state = replace(state, economy=replace(state.economy, rounds=rounds))
-    state = _changed(state, changes)
+    state = starting_state(seed, len(seats), disasters, rounds, changes)
     final, timed = play_game_rounds(state, [COMPUTERS[seats[entrant]] for entrant in order])
     winner_seat = ranking(final)[0][0]
     result = {
