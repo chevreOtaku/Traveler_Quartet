@@ -100,3 +100,12 @@ def test_a_successful_but_empty_agent_command_is_an_explicit_error(tmp_path):
     script.write_text('print("   ")\n', encoding="utf-8")
     with pytest.raises(RuntimeError, match="empty"):
         run_command([sys.executable, str(script)])("Choose an action")
+
+
+def test_claude_plays_as_a_lean_player_a_short_system_prompt_and_no_tools():
+    """Measured 06/11: the full Claude Code agent sent ~25 000 input tokens for a ~160-token game question; with a
+    short system prompt and no tools, ~900 -- the same decision, a quarter of the cost, half the time."""
+    from traveler_quartet.players.command_player import CLAUDE, PLAYER_SYSTEM_PROMPT
+    assert CLAUDE[CLAUDE.index("--system-prompt") + 1] == PLAYER_SYSTEM_PROMPT
+    assert CLAUDE[CLAUDE.index("--tools") + 1] == ""
+    assert len(PLAYER_SYSTEM_PROMPT) < 300
