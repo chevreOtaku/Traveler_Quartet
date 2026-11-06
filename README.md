@@ -126,6 +126,12 @@ other to test the balance: game length, how often houses get built, and whether 
 traveler-quartet tournament --games 1000 --seats hard,normal,normal,normal [--no-disasters]
 ```
 
+To play yourself in the console, against computer players:
+
+```
+traveler-quartet cli --opponents normal,normal,normal [--seed 7] [--rounds 10]
+```
+
 To play over the network of your own machine (the base of the coming web page and of AI players at a distance):
 
 ```

@@ -23,7 +23,7 @@ def test_the_command_prints_the_version():
 
 
 def test_a_mode_that_is_not_built_yet_says_so_and_fails():
-    for mode in ("play", "cli"):
+    for mode in ("play",):
         result = _run(mode)
         assert result.returncode == 1
         assert "not built yet" in result.stderr

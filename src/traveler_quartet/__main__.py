@@ -23,6 +23,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="tournament: simulate another amount, by its name in economy.json (repeatable)")
     parser.add_argument("--port", type=int, default=8765, help="serve: the local port (127.0.0.1 only)")
     parser.add_argument("--log", help="ai-game: JSON log path, outside every repository")
+    parser.add_argument("--opponents", default="normal,normal,normal",
+                        help="cli: the computers you play against, comma-separated (easy, normal, hard, adaptive)")
     return parser
 
 
@@ -57,6 +59,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
     if args.mode is None:
         parser.print_help()
+        return 0
+    if args.mode == "cli":
+        from traveler_quartet.match.console import play_console
+        try:
+            play_console(tuple(o.strip() for o in args.opponents.split(",") if o.strip()), seed=args.seed, rounds=args.rounds)
+        except (ValueError, KeyboardInterrupt, EOFError) as error:
+            print(f"traveler-quartet: {error or 'left'}", file=sys.stderr)
+            return 2
         return 0
     if args.mode == "serve":
         return _serve(args)
