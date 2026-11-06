@@ -4,6 +4,7 @@ from typing import Dict, Mapping, Optional, Sequence, Tuple
 
 from traveler_quartet.match.runner import TimedEvent, play_game_rounds
 from traveler_quartet.players.bots import BOTS
+from traveler_quartet.players.adaptive import adaptive
 from traveler_quartet.players.hard import hard
 from traveler_quartet.rules.economy import owns_whole_town
 from traveler_quartet.rules.endgame import ranking
@@ -14,7 +15,7 @@ COUNTED = {
     "trades": ("trade_done",), "auctions": ("auction_won", "auction_unsold"), "curses": ("cursed",),
     "disasters": ("disaster",), "dungeon_stays": ("stayed_in_dungeon",), "shared_stalls": ("stall_shared",),
 }
-COMPUTERS = {**BOTS, "hard": hard}
+COMPUTERS = {**BOTS, "hard": hard, "adaptive": adaptive}
 
 
 def seating(seats: Sequence[str], game_number: int) -> Tuple[int, ...]:

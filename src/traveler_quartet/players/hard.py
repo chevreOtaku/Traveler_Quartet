@@ -116,7 +116,13 @@ def _completing_offer(state: GameState) -> Optional[str]:
     return None
 
 
-def _turn_start(state: GameState, legal: Tuple[str, ...]) -> str:
+def _best_house(state: GameState, legal: Tuple[str, ...], cash: int, danger: int) -> Optional[str]:
+    """The Hard choice: the house that earns the most rent per gold, if the danger on the board allows it."""
+    builds = [a for a in legal if a.startswith("build:") and cash - house_cost(state, _arg(a)) >= danger]
+    return max(builds, key=lambda a: (_house_return(state, _arg(a)), -_arg(a))) if builds else None
+
+
+def _turn_start(state: GameState, legal: Tuple[str, ...], choose_house=_best_house) -> str:
     me = state.current
     cash, danger = state.players[me].cash, _danger(state, me)
     leave = _dungeon_move(state, legal)
@@ -125,9 +131,9 @@ def _turn_start(state: GameState, legal: Tuple[str, ...]) -> str:
     curses = [a for a in legal if a.startswith("curse:")]
     if curses:
         return _leader(state, curses)
-    builds = [a for a in legal if a.startswith("build:") and cash - house_cost(state, _arg(a)) >= danger]
-    if builds:
-        return max(builds, key=lambda a: (_house_return(state, _arg(a)), -_arg(a)))
+    house = choose_house(state, legal, cash, danger)
+    if house:
+        return house
     lifts = [a for a in legal if a.startswith("unmortgage:") and cash - unmortgage_cost(state, _arg(a)) >= 2 * danger]
     if lifts:
         return lifts[0]
