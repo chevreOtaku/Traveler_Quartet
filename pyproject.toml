@@ -26,4 +26,4 @@ where = ["src"]
 testpaths = ["tests"]
 
 [tool.setuptools.package-data]
-traveler_quartet = ["data/*.json"]
+traveler_quartet = ["data/*.json", "web/*.html"]

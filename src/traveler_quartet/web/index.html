@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:,">
+<title>Traveler Quartet</title>
+<style>
+  :root { font-family: system-ui, sans-serif; color: #24283c; background: #f5f3ee; }
+  * { box-sizing: border-box; }
+  body { max-width: 1100px; margin: auto; padding: 32px 20px 64px; }
+  header { border-bottom: 2px solid #323d67; padding-bottom: 20px; margin-bottom: 24px; }
+  h1 { font: 2.3rem Georgia, serif; margin: 8px 0; }
+  h2 { font: 1.4rem Georgia, serif; margin: 0 0 16px; }
+  p { line-height: 1.6; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .16em; font-size: .75rem; font-weight: 700; color: #585265; }
+  .muted { color: #5d6070; }
+  section { background: #fffefa; border: 1px solid #d6d5cd; padding: 24px; border-radius: 10px; margin: 20px 0; }
+  label { display: flex; flex-direction: column; gap: 6px; font-size: .9rem; font-weight: 600; }
+  input, select, textarea, button { font: inherit; border: 1px solid #9295a4; border-radius: 5px; padding: 10px 12px; }
+  input, select, textarea { background: white; color: #24283c; width: 100%; min-width: 0; }
+  button { background: #323d67; color: white; cursor: pointer; }
+  button:hover { background: #202a4e; }
+  button:disabled { opacity: .55; cursor: wait; }
+  :focus-visible { outline: 3px solid #b16a16; outline-offset: 3px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 16px 0; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { font-weight: 600; margin: 12px 0; }
+  pre { font: .9rem/1.65 ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  #state { max-height: 65vh; overflow: auto; }
+  #log { max-height: 320px; overflow: auto; font-size: .8rem; }
+  #error { color: #9c2727; white-space: pre-wrap; }
+  summary { cursor: pointer; font-weight: 600; padding: 8px 0; }
+  [hidden] { display: none !important; }
+  @media (max-width: 550px) { body { padding: 18px 12px 40px; } section { padding: 18px; } h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">A seat at the table</div>
+  <h1>Traveler Quartet</h1>
+  <p class="muted">Buy districts, make deals, and find your fortune in another world.</p>
+</header>
+<p id="error" role="alert"></p>
+<section id="setup">
+  <h2>Start a game</h2>
+  <p>You are player 0. Choose one to three computer opponents.</p>
+  <form id="start">
+    <fieldset id="setupFields">
+      <div class="grid">
+        <label>Computer players<select id="count"><option>1</option><option>2</option><option selected>3</option></select></label>
+        <label>Seed<input id="seed" type="number" step="1" value="1" required></label>
+      </div>
+      <div class="grid">
+        <label>Player 1<select id="bot1"><option>easy</option><option selected>normal</option><option>hard</option><option>adaptive</option></select></label>
+        <label id="opponent2">Player 2<select id="bot2"><option>easy</option><option selected>normal</option><option>hard</option><option>adaptive</option></select></label>
+        <label id="opponent3">Player 3<select id="bot3"><option>easy</option><option selected>normal</option><option>hard</option><option>adaptive</option></select></label>
+      </div>
+      <button type="submit">Take your seat</button>
+    </fieldset>
+  </form>
+  <p class="muted">Keep this tab open while playing. Reloading loses your seat.</p>
+</section>
+<main id="table" hidden>
+  <section aria-label="Your view"><pre id="state" tabindex="0"></pre></section>
+  <section>
+    <h2>Your next move</h2>
+    <p id="status" role="status"></p>
+    <label>Message to the table (optional)<textarea id="message" rows="2" placeholder="What do you say with your next action?"></textarea></label>
+    <div id="actions" class="actions"></div>
+    <details id="trade" hidden>
+      <summary>Propose a trade or counter-offer</summary>
+      <form id="tradeForm">
+        <fieldset id="tradeFields">
+          <label>Trading partner<select id="recipient"></select></label>
+          <fieldset><legend>You give</legend><div class="grid">
+            <label>Gold<input id="giveGold" type="number" min="0" step="1" value="0" required></label>
+            <label>District numbers<input id="giveSquares" placeholder="1, 3" pattern="[0-9, ]*"></label>
+            <label>Card names<input id="giveCards" placeholder="rope" pattern="[a-zA-Z0-9_, ]*"></label>
+          </div></fieldset>
+          <fieldset><legend>You ask for</legend><div class="grid">
+            <label>Gold<input id="askGold" type="number" min="0" step="1" value="0" required></label>
+            <label>District numbers<input id="askSquares" placeholder="6" pattern="[0-9, ]*"></label>
+            <label>Card names<input id="askCards" placeholder="mirror" pattern="[a-zA-Z0-9_, ]*"></label>
+          </div></fieldset>
+          <p class="muted">Separate district numbers or card names with commas. Leave empty for none. The game checks the offer.</p>
+          <button type="submit">Send proposal</button>
+        </fieldset>
+      </form>
+    </details>
+    <button id="restart" type="button" hidden>Start another game</button>
+  </section>
+  <section><details open><summary>Table journal</summary><pre id="log" tabindex="0"></pre></details></section>
+</main>
+<script>
+"use strict";
+const byId = id => document.getElementById(id);
+let game = null, token = null, cursor = 0, busy = false, latest = null, timer = null, eventsPending = false;
+
+function auth() {
+  return {"Content-Type": "application/json", "Authorization": `Bearer ${token}`};
+}
+
+async function checked(promise) {
+  const response = await promise;
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || `Request refused (${response.status})`);
+  return data;
+}
+
+function controls() {
+  byId("setupFields").disabled = busy;
+  const waiting = busy || !latest || latest.over || !latest.view.your_turn;
+  byId("message").disabled = waiting;
+  byId("tradeFields").disabled = waiting;
+  for (const button of byId("actions").children) button.disabled = waiting;
+}
+
+function show(data) {
+  latest = data;
+  byId("state").textContent = data.text;
+  byId("status").textContent = data.over ? "Game over. Final holdings are shown above." :
+    (data.view.your_turn ? "Choose an action. Your message travels with it." : "Waiting for the other players.");
+  byId("actions").replaceChildren();
+  const actions = data.over ? [] : data.view.legal_actions;
+  for (const action of actions) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = action;
+    button.addEventListener("click", () => play(action));
+    byId("actions").append(button);
+  }
+  const choices = data.over ? [] : data.view.negotiations.filter(n => n.startsWith("offer:") || n === "counter");
+  const previous = byId("recipient").value;
+  byId("recipient").replaceChildren();
+  for (const choice of choices) {
+    const option = document.createElement("option");
+    option.value = choice;
+    option.textContent = choice === "counter" ? "Counter-offer to the proposer" : `Player ${choice.split(":")[1]}`;
+    byId("recipient").append(option);
+  }
+  if (choices.includes(previous)) byId("recipient").value = previous;
+  byId("trade").hidden = choices.length === 0;
+  byId("restart").hidden = !data.over;
+  controls();
+}
+
+async function readEvents() {
+  eventsPending = true;
+  const data = await checked(fetch(`/games/${game}/events?since=${cursor}`, {headers: auth()}));
+  for (const event of data.events) {
+    if (event.index < cursor) continue;
+    byId("log").textContent += JSON.stringify(event) + "\n";
+    cursor = event.index + 1;
+  }
+  eventsPending = false;
+}
+
+async function refresh() {
+  show(await checked(fetch(`/games/${game}/view`, {headers: auth()})));
+  await readEvents();
+}
+
+function schedule() {
+  clearTimeout(timer);
+  if (game && (eventsPending || !latest || !latest.over)) timer = setTimeout(poll, 1500);
+}
+
+async function poll() {
+  if (busy) { schedule(); return; }
+  busy = true;
+  controls();
+  try {
+    await refresh();
+    byId("error").textContent = "";
+  } catch (error) {
+    byId("error").textContent = `Refresh failed: ${error.message}. Retrying shortly.`;
+  } finally {
+    busy = false;
+    controls();
+    schedule();
+  }
+}
+
+async function startGame() {
+  if (busy) return;
+  const count = Number(byId("count").value), seed = Number(byId("seed").value);
+  if (!Number.isSafeInteger(seed) || ![1, 2, 3].includes(count)) {
+    byId("error").textContent = "Choose one to three computers and an integer seed.";
+    return;
+  }
+  const seats = ["remote", ...Array.from({length: count}, (_, n) => byId(`bot${n + 1}`).value)];
+  busy = true;
+  controls();
+  try {
+    const data = await checked(fetch("/games", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({seats, seed})}));
+    const entry = Object.entries(data.tokens).find(([, seat]) => seat === 0);
+    if (!entry) throw new Error("The server did not provide your seat");
+    game = data.game;
+    token = entry[0];
+    byId("setup").hidden = true;
+    byId("table").hidden = false;
+    await refresh();
+    byId("error").textContent = "";
+  } catch (error) {
+    byId("error").textContent = `Cannot start: ${error.message}`;
+  } finally {
+    busy = false;
+    controls();
+    schedule();
+  }
+}
+
+async function play(action) {
+  if (busy || !latest || latest.over || !latest.view.your_turn) return;
+  busy = true;
+  clearTimeout(timer);
+  controls();
+  try {
+    const data = await checked(fetch(`/games/${game}/act`, {method: "POST", headers: auth(),
+      body: JSON.stringify({action, message: byId("message").value})}));
+    byId("message").value = "";
+    show(data);
+    await readEvents();
+    byId("error").textContent = "";
+  } catch (error) {
+    let detail = error.message;
+    try { await refresh(); } catch (refreshError) { detail += `; refresh failed: ${refreshError.message}`; }
+    byId("error").textContent = `Action failed: ${detail}. Check the table before trying again.`;
+  } finally {
+    busy = false;
+    controls();
+    schedule();
+  }
+}
+
+function tradeAction() {
+  const fields = ["giveGold", "giveSquares", "giveCards", "askGold", "askSquares", "askCards"];
+  return [byId("recipient").value, ...fields.map(id => byId(id).value.replace(/\s/g, ""))].join(":");
+}
+
+byId("start").addEventListener("submit", event => { event.preventDefault(); startGame(); });
+byId("tradeForm").addEventListener("submit", event => { event.preventDefault(); play(tradeAction()); });
+byId("count").addEventListener("change", () => {
+  byId("opponent2").hidden = Number(byId("count").value) < 2;
+  byId("opponent3").hidden = Number(byId("count").value) < 3;
+});
+byId("restart").addEventListener("click", () => location.reload());
+</script>
+</body>
+</html>
