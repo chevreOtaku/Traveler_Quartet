@@ -94,5 +94,8 @@ def run_command(command: List[str], timeout: float = 300.0) -> Callable[[str], s
         with tempfile.TemporaryDirectory(prefix="tq-player-") as empty:
             done = subprocess.run(full, input=prompt, capture_output=True, text=True, encoding="utf-8",
                                   cwd=empty, timeout=timeout)
+        done.check_returncode()
+        if not done.stdout.strip():
+            raise RuntimeError("agent command returned an empty answer")
         return done.stdout
     return ask

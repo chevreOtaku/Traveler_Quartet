@@ -5,7 +5,7 @@ getting isekai'd.*
 
 > **Status: construction.** The rules engine plays complete games: buying, rent, houses and market stalls, pairs,
 > portals, the dungeon, the three decks of cards, auctions, trades, shared stalls, mortgages, debt and bankruptcy.
-> Simple computer players play tournaments against each other. There is no web page and no AI player yet. Every rule,
+> Computer players play tournaments, and command-line AI agents can join a mixed table. There is no web page yet. Every rule,
 > name and amount may still change after the playtests.
 
 ```
@@ -134,6 +134,27 @@ traveler-quartet serve            # http://127.0.0.1:8765 -- POST /games, then G
 
 The seats rotate from one game to the next. The amounts are not balanced yet: these tournaments are how we will
 balance them.
+
+### Play a mixed AI table
+
+With the `claude` and `codex` commands installed and signed in:
+
+```
+python -m traveler_quartet ai-game --seats claude,codex,normal,normal --rounds 10 --seed 1
+```
+
+The agents use their existing command-line subscriptions. Each real choice starts a new agent invocation, so a game
+can take several minutes and uses those accounts' limits. Computer seats can be `easy`, `normal`, `hard` or `adaptive`.
+Two to four players are required. Without `--rounds`, the normal 30-round limit applies; the example is a short pilot.
+
+The command prints a JSON report and its log path. The default log goes to the system temporary directory. An explicit
+`--log` path must be outside every Git repository and must not already exist. The report includes AI decision journals,
+table messages, trade/auction/curse counts by seat, retries, fallbacks, duration and the final ranking. Process failures
+and empty command output stop the run with an error; they are not presented as AI decisions. Invalid decisions are
+handled by the existing retry and logged safe-action policy. Automated tests use scripted commands, never real agents.
+If an agent fails after play starts, the command saves a partial report before exiting non-zero: previous decisions
+and messages, the failing round and seat, and the error. Its ranking is marked provisional. This handles reported
+exceptions; it does not guarantee recovery from a killed process or a disk failure, and it does not resume the game.
 
 ## Inspirations
 

@@ -1,11 +1,12 @@
 import argparse
 import json
+import subprocess
 import sys
 from typing import List, Optional
 
 from traveler_quartet import __version__
 
-MODES = ("play", "cli", "tournament", "serve")
+MODES = ("play", "cli", "tournament", "serve", "ai-game")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,6 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--set", action="append", default=[], metavar="NAME=AMOUNT",
                         help="tournament: simulate another amount, by its name in economy.json (repeatable)")
     parser.add_argument("--port", type=int, default=8765, help="serve: the local port (127.0.0.1 only)")
+    parser.add_argument("--log", help="ai-game: JSON log path, outside every repository")
     return parser
 
 
@@ -60,6 +62,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         return _serve(args)
     if args.mode == "tournament":
         return _tournament(args)
+    if args.mode == "ai-game":
+        from traveler_quartet.match.ai_game import play_ai_game
+        try:
+            report = play_ai_game(tuple(seat.strip() for seat in args.seats.split(",")),
+                                  seed=args.seed, rounds=args.rounds, log_path=args.log)
+        except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as error:
+            print(f"traveler-quartet: {error}", file=sys.stderr)
+            return 2
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+        return 0
     print(f"traveler-quartet: '{args.mode}' is not built yet.", file=sys.stderr)
     return 1
 
