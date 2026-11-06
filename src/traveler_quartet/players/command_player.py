@@ -25,7 +25,13 @@ INTRO = ("You are playing Traveler Quartet, a board game for 2-4 merchants. The 
          "wins: cash plus the value of districts and buildings.")
 SAFE = ("pass", "drop", "refuse", "stay", "roll", "bid:0", "bankrupt")
 JSON_OBJECT = re.compile(r"\{.*?\}", re.DOTALL)
-CLAUDE = ["claude", "-p", "--restricted", "--strict-mcp-config", "--output-format", "text"]
+# Claude as a LEAN player (measured 06/11): the full Claude Code agent resent its whole instructions and tool list at each
+# move -- ~25 000 input tokens for a ~160-token game question. A short system prompt and NO tools: ~900 tokens, the same
+# decision, a quarter of the cost, half the time; and with no tools it can read or write nothing at all.
+PLAYER_SYSTEM_PROMPT = ("You are a player in a board game. Read the state and answer with the JSON object asked for, "
+                        "nothing else.")
+CLAUDE = ["claude", "-p", "--restricted", "--strict-mcp-config", "--output-format", "text",
+          "--system-prompt", PLAYER_SYSTEM_PROMPT, "--tools", ""]
 # Codex (its developer reference, read 06/11): read-only sandbox, run outside a git repository, nothing persisted,
 # the prompt on stdin ("-"). To be tried once Codex is installed and logged in.
 CODEX = ["codex", "exec", "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral", "-"]
