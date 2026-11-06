@@ -126,6 +126,12 @@ other to test the balance: game length, how often houses get built, and whether 
 traveler-quartet tournament --games 1000 --seats hard,normal,normal,normal [--no-disasters]
 ```
 
+To play over the network of your own machine (the base of the coming web page and of AI players at a distance):
+
+```
+traveler-quartet serve            # http://127.0.0.1:8765 -- POST /games, then GET /view and POST /act with your token
+```
+
 The seats rotate from one game to the next. The amounts are not balanced yet: these tournaments are how we will
 balance them.
 
