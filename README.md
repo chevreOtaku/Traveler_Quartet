@@ -145,6 +145,13 @@ the page reads only your player view, with your token in the authorization heade
 
 The browser logic also has dependency-free checks with Node's built-in test runner: `node --test tests/web_page.test.cjs`.
 
+To play ONE seat of that server from a terminal, one command per move (to see exactly what a player sees):
+
+```
+python -m traveler_quartet.match.seat new remote,normal,normal,normal 7
+python -m traveler_quartet.match.seat act roll good luck     # then: view, events [since]
+```
+
 The seats rotate from one game to the next. The amounts are not balanced yet: these tournaments are how we will
 balance them.
 

@@ -17,7 +17,7 @@ records what players DO, next to what they SAY (a free message attached to an ac
 | `src/traveler_quartet/rules/` | the engine: `apply(state, action) -> (state, events)`, `legal_actions`, `actor`, `negotiations` | PURE functions, frozen state, no I/O, no randomness except the seeded dice |
 | `src/traveler_quartet/data/` | the board, the economy (`economy.json`) and the cards, as DATA | an amount is changed here, never in code -- and a change of amount is a DECISION (see below) |
 | `src/traveler_quartet/players/` | the computer players (`bots.py`, `hard.py`, `adaptive.py`), what one player may SEE (`view.py`), the state as text (`text.py`), the AI player by command (`command_player.py`) | a player is a function `(state, legal) -> action` or `(action, message)` |
-| `src/traveler_quartet/match/` | the game loop (`runner.py`), the tournaments (`tournament.py`), a game SESSION for remote players (`session.py`) and the local HTTP server (`server.py`, standard library, 127.0.0.1) | a front end talks ONLY to the server: create a game, read `/view` with its token, post to `/act` -- see the docstring of `server.py` |
+| `src/traveler_quartet/match/` | the game loop (`runner.py`), the tournaments (`tournament.py`), a game SESSION for remote players (`session.py`), the local HTTP server (`server.py`, standard library, 127.0.0.1), the console game for a human (`console.py`) and a terminal client for ONE seat of the server (`seat.py`) | a front end talks ONLY to the server: create a game, read `/view` with its token, post to `/act` -- see the docstring of `server.py` |
 | `tests/` | pytest; `factory.py` builds test states | mechanics tests use a rent of 10 % (simple numbers); `test_rules_amounts.py` pins the real amounts |
 
 ## The contract a front end must respect
@@ -26,6 +26,17 @@ A user interface (web page, console, stream overlay) shows `view(state, player)`
 `legal_actions` (or a full offer from `negotiations`). It never reads the state directly: the view hides the other
 players' kept cards, their sealed bids, and the future (the order of the decks, the seed of the dice). A front end
 that shows more than the view lets a player cheat.
+
+## Testing the game as a player
+
+To see what a player sees, play one seat yourself: start `traveler-quartet serve`, then one command per move with
+`python -m traveler_quartet.match.seat new remote,normal,normal,normal <seed>`, then `view`, `act <action> [message]`,
+`events [since]` (details in the docstring of `seat.py`). Report what reads badly or is missing.
+
+- Such a game is a **UX test, never a result**: you know the code and the bots, so you are not a blind player. Say so
+  in your report, and never quote its score as a measure of the game or of a player.
+- While playing, read only what the seat shows: never the engine state, the decks, the seed or the bots' code.
+- Measured games (who wins, do players trade) are played by `ai-game` or `tournament`, not by you at the table.
 
 ## How to talk with us
 
