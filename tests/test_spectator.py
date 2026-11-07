@@ -11,8 +11,8 @@ from traveler_quartet.match.server import Registry, handle
 from traveler_quartet.players.view import spectator
 
 PERMITTED_TOP = {"round", "rounds", "current", "pending", "last_dice", "jackpot", "houses_left", "stalls_left", "players",
-                 "board", "order", "doubles", "rules", "cards"}
-PERMITTED_WHEN_OPEN = {"auction", "trade", "stall_request", "sealed"}
+                 "board", "order", "doubles", "rules", "cards", "actor"}
+PERMITTED_WHEN_OPEN = {"auction", "trade", "stall_request", "sealed", "debt_context", "ranking"}
 
 
 def _with_cards(state, player, cards):

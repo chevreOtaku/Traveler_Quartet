@@ -12,8 +12,9 @@ and the card CATALOGUE (what each card does -- never the order of the decks).
 from dataclasses import asdict
 from typing import Dict, List, Optional
 
-from traveler_quartet.rules.endgame import net_worth
+from traveler_quartet.rules.endgame import net_worth, ranking
 from traveler_quartet.rules.engine import actor, legal_actions, negotiations
+from traveler_quartet.rules.partners import partner_of
 from traveler_quartet.rules.properties import property_rent
 from traveler_quartet.rules.state import GameState
 from traveler_quartet.rules.turns import starter
@@ -32,7 +33,8 @@ def _rents(state: GameState, i: int) -> Dict[str, Optional[int]]:
 def _square(state: GameState, i: int) -> Dict[str, object]:
     s = state.board.squares[i]
     return {"index": i, "name": s.name, "kind": s.kind, "town": s.town, "price": s.price, "owner": state.owners[i],
-            "buildings": state.buildings[i], "mortgaged": state.mortgaged[i], **_rents(state, i)}
+            "buildings": state.buildings[i], "mortgaged": state.mortgaged[i], "partner": partner_of(state, i),
+            **_rents(state, i)}
 
 
 def _player(state: GameState, p: int, mine: bool) -> Dict[str, object]:
@@ -69,14 +71,28 @@ def _negotiation(state: GameState) -> Dict[str, object]:
     return out
 
 
+def _debt_context(state: GameState) -> Dict[str, object]:
+    """Who owes whom how much -- public: the payment happens on the table. A debt exists only while it is open (the
+    engine clears it when it is settled or ends in bankruptcy)."""
+    d = state.debt
+    if d is None:
+        return {}
+    to = "jackpot" if d.to_jackpot else ("bank" if d.creditor is None else d.creditor)
+    return {"debt_context": {"debtor": state.current, "to": to, "amount": d.amount}}
+
+
 def _table(state: GameState) -> Dict[str, object]:
     """What lies on the table for EVERYONE -- the part a player's view and a spectator's share."""
-    return {
+    table = {
         "round": state.round, "rounds": state.economy.rounds, "current": state.current, "pending": state.pending,
+        "actor": None if state.over else actor(state),
         "last_dice": list(state.last_dice), "jackpot": state.jackpot, "houses_left": state.houses_left,
         "stalls_left": state.stalls_left, "board": [_square(state, i) for i in range(len(state.board.squares))],
         "order": _order(state), "doubles": state.doubles, "rules": asdict(state.economy),
-        "cards": [dict(card) for card in state.catalog.values()], **_negotiation(state)}
+        "cards": [dict(card) for card in state.catalog.values()], **_negotiation(state), **_debt_context(state)}
+    if state.over:
+        table["ranking"] = [{"seat": seat, "net_worth": worth} for seat, worth in ranking(state)]
+    return table
 
 
 def view(state: GameState, me: int) -> Dict[str, object]:

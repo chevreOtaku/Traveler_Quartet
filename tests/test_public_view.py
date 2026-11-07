@@ -11,10 +11,11 @@ from traveler_quartet.rules.endgame import net_worth
 
 LIGHT_BLUE = (6, 8, 9)
 PERMITTED_TOP = {"round", "rounds", "current", "pending", "last_dice", "jackpot", "houses_left", "stalls_left", "me",
-                 "others", "board", "your_turn", "legal_actions", "negotiations", "order", "doubles", "rules", "cards"}
-PERMITTED_WHEN_OPEN = {"auction", "trade", "stall_request", "debt", "sealed"}
+                 "others", "board", "your_turn", "legal_actions", "negotiations", "order", "doubles", "rules", "cards",
+                 "actor"}
+PERMITTED_WHEN_OPEN = {"auction", "trade", "stall_request", "debt", "sealed", "debt_context", "ranking"}
 PERMITTED_SQUARE = {"index", "name", "kind", "town", "price", "owner", "buildings", "mortgaged", "rent",
-                    "rent_per_dice_point"}
+                    "rent_per_dice_point", "partner"}
 PERMITTED_PLAYER = {"seat", "cash", "position", "out", "in_dungeon", "cards_held", "net_worth"}
 
 
