@@ -3,7 +3,8 @@
 
 - Only REAL choices are asked: one legal action and nothing to negotiate -> it is played without asking.
 - An illegal answer is refused and asked again, with the reason ; after `retries`, a SAFE action is played and logged.
-- The agent sees only `render(view(state, seat))` -- never the decks order nor the seed.
+- The agent sees only `render(view(state, seat))` -- never the decks order nor the seed -- and, given a `history`, the
+  public events since ITS last decision (`players/recent.py`, plan step 7): a cursor moves at each decision it answers.
 - `run_command` runs the agent in an EMPTY temporary folder, outside every repository, its code-running tools off.
 """
 
@@ -15,6 +16,7 @@ import tempfile
 import time
 from typing import Callable, List, Optional, Sequence, Tuple
 
+from traveler_quartet.players.recent import TimedEvent, summary_lines
 from traveler_quartet.players.text import render
 from traveler_quartet.players.view import view
 from traveler_quartet.rules.engine import GameState, IllegalAction, apply, negotiations
@@ -63,30 +65,43 @@ def _safe(legal: Sequence[str]) -> str:
 class CommandPlayer:
     """A chooser for the runner: `(state, legal) -> (action, message)`. `ask(prompt) -> text` is the AI."""
 
-    def __init__(self, ask: Callable[[str], str], seat: int, retries: int = 2):
+    def __init__(self, ask: Callable[[str], str], seat: int, retries: int = 2,
+                 history: Optional[Callable[[], Sequence[TimedEvent]]] = None):
         self.ask, self.seat, self.retries, self.log = ask, seat, retries, []
+        self.history, self.cursor = history, 0
 
     def negotiable(self, state: GameState) -> bool:
         return bool(negotiations(state))
 
+    def _summary(self, state: GameState) -> str:
+        if self.history is None:
+            return ""
+        names = [square.name for square in state.board.squares]
+        lines = summary_lines(list(self.history())[self.cursor:], state.catalog, names, self.seat)
+        return "\n\n## Since your last decision\n" + ("\n".join(lines) if lines else "- nothing happened")
+
     def __call__(self, state: GameState, legal: Tuple[str, ...]) -> Tuple[str, Optional[str]]:
         if len(legal) == 1 and not self.negotiable(state):
             return legal[0], None
-        prompt, started = f"{INTRO}\n\n{render(view(state, self.seat))}\n\n{ANSWER_FORMAT}", time.time()
+        summary = self._summary(state)
+        prompt, started = f"{INTRO}\n\n{render(view(state, self.seat))}{summary}\n\n{ANSWER_FORMAT}", time.time()
+        sizes = {"prompt_chars": len(prompt), "summary_chars": len(summary)}
+        if self.history is not None:
+            self.cursor = len(self.history())
         for attempt in range(1, self.retries + 2):
             answer = parse_answer(self.ask(prompt))
             if answer and _legal(state, answer[0]):
-                self._note(state, attempt, answer[0], False, started)
+                self._note(state, attempt, answer[0], False, started, sizes)
                 return answer[0], answer[1] or None
             said = answer[0] if answer else "no JSON answer"
             prompt += f"\n\nYour answer `{said}` is not legal now. Choose again. {ANSWER_FORMAT}"
         action = _safe(legal)
-        self._note(state, attempt, action, True, started)
+        self._note(state, attempt, action, True, started, sizes)
         return action, None
 
-    def _note(self, state: GameState, attempts: int, action: str, fallback: bool, started: float) -> None:
+    def _note(self, state: GameState, attempts: int, action: str, fallback: bool, started: float, sizes: dict) -> None:
         self.log.append({"round": state.round, "question": state.pending, "attempts": attempts, "action": action,
-                         "fallback": fallback, "seconds": round(time.time() - started, 1)})
+                         "fallback": fallback, "seconds": round(time.time() - started, 1), **sizes})
 
 
 def run_command(command: List[str], timeout: float = 300.0) -> Callable[[str], str]:

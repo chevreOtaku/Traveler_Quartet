@@ -48,13 +48,13 @@ def _log_target(log_path: Optional[Path]) -> Path:
     return target
 
 
-def _players(seats: Sequence[str], commands: Mapping[str, List[str]]):
+def _players(seats: Sequence[str], commands: Mapping[str, List[str]], history=None):
     choosers, agents = [], {}
     for seat, name in enumerate(seats):
         if name in COMPUTERS:
             choosers.append(COMPUTERS[name])
         else:
-            agent = CommandPlayer(run_command(commands[name]), seat=seat)
+            agent = CommandPlayer(run_command(commands[name]), seat=seat, history=history)
             agents[str(seat)] = agent
             choosers.append(agent)
     return choosers, agents
@@ -101,9 +101,9 @@ def play_ai_game(seats: Sequence[str], seed: int = 1, rounds: Optional[int] = No
     initial = new_game(seed=seed, player_count=len(seats))
     if rounds is not None:
         initial = replace(initial, economy=replace(initial.economy, rounds=rounds))
-    choosers, agents = _players(seats, COMMANDS if commands is None else commands)
-    started = time.monotonic()
     progress = GameProgress(initial)
+    choosers, agents = _players(seats, COMMANDS if commands is None else commands, history=lambda: progress.timed)
+    started = time.monotonic()
     try:
         final, timed = play_game_rounds(initial, choosers, on_step=progress.record)
     except Exception as error:
