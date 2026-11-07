@@ -1,17 +1,28 @@
 """The local server (step 7a) -- the standard library only; the page ASKS (no WebSocket); designed as if the players were
 FAR: a game, one token per remote player, every answer checked by the engine.
 
-    POST /games                      {"seats": ["remote", "normal", ...], "seed": 1}  -> 201 {"game", "tokens"}
-    GET  /games/<id>/view            -> 200 {"view", "text", "over", "log_length"}
-    POST /games/<id>/act             {"action": "...", "message": "..."}      -> 200 {"view", ...}
-    GET  /games/<id>/events?since=n  -> 200 {"events": [...]}
-    GET  /games/<id>/public          -> 200 {"view", "over", "log_length"}  -- a SPECTATOR (the stream), no token
-    GET  /games/<id>/public/events?since=n -> 200 {"events": [...]}       -- every kept card stays "a kept card"
+    POST /games                      {"seats": ["remote", "normal", ...], "seed": 1, "rounds"?: n}
+                                     -> 201 {"game", "tokens"}
+    GET  /games/<id>/view            -> 200 {"view", "text", "over", "revision", "log_length"}
+    POST /games/<id>/act             {"action": "...", "message"?: "...", "expected_revision"?: r}
+                                     -> 200 {"view", "text", "over", "revision", "log_length"}
+    GET  /games/<id>/events?since=a&until=b          -> 200 {"events": [...]}
+    GET  /games/<id>/public          -> 200 {"view", "over", "revision", "log_length"}  -- a SPECTATOR, no token
+    GET  /games/<id>/public/events?since=a&until=b   -> 200 {"events": [...]}  -- every kept card stays "a kept card"
 
-`POST /games` may give "rounds" (a shorter game to try things; a positive integer).
+- `rounds` (optional): a shorter game, a positive integer.
+- `revision`: +1 per SUCCESSFUL action of the game (computer or remote, with or without events); a refused action
+  changes nothing. Each event row carries the `revision` of its action, its `index` (the cursor), and a `sentence`.
+- A snapshot (`view`, `revision`, `log_length`) is taken under one lock. Read the events with `since` (included) and
+  `until` (EXCLUDED, optional; both clamped to the log) and render the snapshot with exactly the events below its
+  `log_length`. If `revision` grew while `log_length` did not (an eventless action, e.g. a sealed bid), refresh the view.
+- `expected_revision` (optional, recommended for a front): checked after authentication and BEFORE the action; if it is
+  not the current revision -> 409, with no effect at all. Refresh before retrying -- a retried request is never applied
+  twice.
 
 The token goes in the `Authorization: Bearer <token>` header, never in the URL (it would end up in logs). 401: unknown
-token ; 409: not your turn ; 400: a bad request or an illegal action (with the legal ones) ; 404: no such game or path.
+token ; 409: not your turn, or a stale `expected_revision` ; 400: a bad request (a malformed `rounds` or
+`expected_revision`) or an illegal action (with the legal ones) ; 404: no such game or path.
 `handle` is the whole server without the network; `make_server` binds it to 127.0.0.1 by default.
 """
 
