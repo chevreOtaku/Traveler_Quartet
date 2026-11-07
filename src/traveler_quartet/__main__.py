@@ -23,6 +23,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="tournament: simulate another amount, by its name in economy.json (repeatable)")
     parser.add_argument("--port", type=int, default=8765, help="serve: the local port (127.0.0.1 only)")
     parser.add_argument("--log", help="ai-game: JSON log path, outside every repository")
+    parser.add_argument("--notebook-cap", type=int, default=None,
+                        help="ai-game: each AI keeps private notes on its rivals, each capped at this many characters")
     parser.add_argument("--opponents", default="normal,normal,normal",
                         help="cli: the computers you play against, comma-separated (easy, normal, hard, adaptive)")
     return parser
@@ -76,7 +78,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         from traveler_quartet.match.ai_game import play_ai_game
         try:
             report = play_ai_game(tuple(seat.strip() for seat in args.seats.split(",")),
-                                  seed=args.seed, rounds=args.rounds, log_path=args.log)
+                                  seed=args.seed, rounds=args.rounds, log_path=args.log,
+                                  notebook_cap=args.notebook_cap)
         except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as error:
             print(f"traveler-quartet: {error}", file=sys.stderr)
             return 2

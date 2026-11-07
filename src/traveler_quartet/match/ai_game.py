@@ -48,13 +48,13 @@ def _log_target(log_path: Optional[Path]) -> Path:
     return target
 
 
-def _players(seats: Sequence[str], commands: Mapping[str, List[str]], history=None):
+def _players(seats: Sequence[str], commands: Mapping[str, List[str]], history=None, notebook_cap=None):
     choosers, agents = [], {}
     for seat, name in enumerate(seats):
         if name in COMPUTERS:
             choosers.append(COMPUTERS[name])
         else:
-            agent = CommandPlayer(run_command(commands[name]), seat=seat, history=history)
+            agent = CommandPlayer(run_command(commands[name]), seat=seat, history=history, notebook_cap=notebook_cap)
             agents[str(seat)] = agent
             choosers.append(agent)
     return choosers, agents
@@ -95,14 +95,19 @@ def _write_report(target: Path, state, timed, seats, agents, started, seed, erro
 
 def play_ai_game(seats: Sequence[str], seed: int = 1, rounds: Optional[int] = None,
                  log_path: Optional[Path] = None,
-                 commands: Optional[Mapping[str, List[str]]] = None) -> Dict[str, object]:
+                 commands: Optional[Mapping[str, List[str]]] = None,
+                 notebook_cap: Optional[int] = None) -> Dict[str, object]:
+    """`notebook_cap`: each AI seat keeps a private notebook on its rivals, each note capped (None = no notebook)."""
     _validate(seats, rounds)
+    if notebook_cap is not None and notebook_cap < 1:
+        raise ValueError("the notebook cap must be positive")
     target = _log_target(log_path)
     initial = new_game(seed=seed, player_count=len(seats))
     if rounds is not None:
         initial = replace(initial, economy=replace(initial.economy, rounds=rounds))
     progress = GameProgress(initial)
-    choosers, agents = _players(seats, COMMANDS if commands is None else commands, history=lambda: progress.timed)
+    choosers, agents = _players(seats, COMMANDS if commands is None else commands, history=lambda: progress.timed,
+                                notebook_cap=notebook_cap)
     started = time.monotonic()
     try:
         final, timed = play_game_rounds(initial, choosers, on_step=progress.record)
