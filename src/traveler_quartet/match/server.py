@@ -21,11 +21,11 @@ import threading
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
-from typing import Dict, Mapping, Tuple
+from typing import Dict, Mapping, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from traveler_quartet.match.session import (NotYourTurn, Session, Unauthorized, act, events_for, new_session,
-                                            public_events, seen, watched)
+from traveler_quartet.match.session import (NotYourTurn, Session, StaleRevision, Unauthorized, act, events_for,
+                                            new_session, public_events, seen, watched)
 from traveler_quartet.rules.engine import IllegalAction, legal_actions
 
 Reply = Tuple[int, Dict[str, object]]
@@ -66,16 +66,31 @@ def _create(reg: Registry, body: bytes) -> Reply:
     return 201, {"game": game, "tokens": session.tokens}
 
 
+def _window(query: str) -> Tuple[int, Optional[int]]:
+    """`since` (included) and `until` (EXCLUDED, optional) of an events read."""
+    params = parse_qs(query)
+    until = params.get("until", [None])[0]
+    return int(params.get("since", ["0"])[0]), (None if until is None else int(until))
+
+
+def _expected_revision(data: Mapping[str, object]) -> Optional[int]:
+    value = data.get("expected_revision")
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError("expected_revision must be a non-negative integer")
+    return value
+
+
 def _on_game(reg: Registry, game: str, verb: str, headers: Mapping[str, str], body: bytes, query: str) -> Reply:
     session, token = reg.games[game], _token(headers)
     if verb == "view":
         return 200, seen(session, token)
     if verb == "events":
-        since = int(parse_qs(query).get("since", ["0"])[0])
-        return 200, {"events": events_for(session, token, since)}
+        return 200, {"events": events_for(session, token, *_window(query))}
     data = _json(body)
     try:
-        act(session, token, str(data.get("action", "")), data.get("message"))
+        act(session, token, str(data.get("action", "")), data.get("message"), _expected_revision(data))
     except IllegalAction as error:
         return 400, {"error": str(error), "legal_actions": list(legal_actions(session.state))}
     return 200, seen(session, token)
@@ -89,7 +104,7 @@ def _spectate(reg: Registry, parts, query: str) -> Reply:
         return 200, watched(session)
     if parts[3] != "events":
         return 404, {"error": "no such path"}
-    return 200, {"events": public_events(session, int(parse_qs(query).get("since", ["0"])[0]))}
+    return 200, {"events": public_events(session, *_window(query))}
 
 
 def handle(reg: Registry, method: str, path: str, headers: Mapping[str, str], body: bytes) -> Reply:
@@ -108,7 +123,7 @@ def handle(reg: Registry, method: str, path: str, headers: Mapping[str, str], bo
                 return _on_game(reg, parts[1], parts[2], headers, body, url.query)
     except Unauthorized as error:
         return 401, {"error": str(error)}
-    except NotYourTurn as error:
+    except (NotYourTurn, StaleRevision) as error:
         return 409, {"error": str(error)}
     except ValueError as error:
         return 400, {"error": str(error)}

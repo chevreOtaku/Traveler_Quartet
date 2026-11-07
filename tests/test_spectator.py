@@ -55,7 +55,7 @@ def test_the_spectator_log_hides_every_kept_card():
     reg = Registry()
     _, created = _create(reg, {"seats": ["remote", "normal"], "seed": 1})
     session = reg.games[created["game"]]
-    session.log.append((1, Event("card", 0, (("card", "mirror"),))))
+    session.log.append((1, Event("card", 0, (("card", "mirror"),)), session.revision))
     status, body = handle(reg, "GET", f"/games/{created['game']}/public/events?since=0", {}, b"")
     assert status == 200 and "mirror" not in json.dumps(body["events"]) and body["events"][-1]["data"]["card"] == "a kept card"
 
