@@ -60,6 +60,34 @@ def test_the_spectator_log_hides_every_kept_card():
     assert status == 200 and "mirror" not in json.dumps(body["events"]) and body["events"][-1]["data"]["card"] == "a kept card"
 
 
+def test_a_sealed_bid_said_with_a_message_never_leaks_its_amount():
+    """Found by Codex in review (P1): a message recorded the exact action `bid:55` -- the server published it."""
+    from traveler_quartet.rules.auctions import Sealed
+    reg = Registry()
+    _, created = _create(reg, {"seats": ["remote", "remote", "remote"], "seed": 1})
+    game, tokens = created["game"], {seat: token for token, seat in created["tokens"].items()}
+    session = reg.games[game]
+    session.state = replace(session.state, pending="sealed", current=0,
+                            sealed=Sealed(queue=(6,), bidders=(0, 1, 2), turn=0, bids=()))
+    acted = handle(reg, "POST", f"/games/{game}/act", {"Authorization": f"Bearer {tokens[0]}"},
+                   json.dumps({"action": "bid:55", "message": "hello"}).encode())
+    assert acted[0] == 200 and reg.games[game].state.pending == "sealed"
+    public = handle(reg, "GET", f"/games/{game}/public/events?since=0", {}, b"")[1]["events"]
+    rival = handle(reg, "GET", f"/games/{game}/events?since=0", {"Authorization": f"Bearer {tokens[1]}"}, b"")[1]["events"]
+    mine = handle(reg, "GET", f"/games/{game}/events?since=0", {"Authorization": f"Bearer {tokens[0]}"}, b"")[1]["events"]
+    said = lambda events: next(e for e in events if e["kind"] == "said")
+    assert "55" not in json.dumps(public) and "55" not in json.dumps(rival)
+    assert said(public)["data"] == {"action": "bid", "text": "hello"} and said(rival)["data"]["text"] == "hello"
+    assert said(mine)["data"]["action"] == "bid:55"
+
+
+def test_an_open_auction_raise_stays_public():
+    from traveler_quartet.players.recent import public_event
+    from traveler_quartet.rules.state import Event
+    raised = Event("said", 0, (("action", "raise:10"), ("text", "more")))
+    assert public_event(game().catalog, raised, None)["data"]["action"] == "raise:10"
+
+
 def test_a_game_can_be_created_shorter():
     reg = Registry()
     status, created = _create(reg, {"seats": ["remote", "normal"], "seed": 1, "rounds": 5})

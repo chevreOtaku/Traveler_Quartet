@@ -10,6 +10,7 @@ from typing import Callable, Dict, List, Mapping, Sequence, Tuple
 from traveler_quartet.rules.state import Event
 
 KEPT_EFFECTS = ("keep", "curse")
+SEALED_BID = "bid:"
 SUMMARY_CAP = 30
 TimedEvent = Tuple[int, Event]
 
@@ -18,10 +19,17 @@ def kept_cards(catalog: Mapping[str, Mapping[str, object]]) -> frozenset:
     return frozenset(cid for cid, card in catalog.items() if card.get("effect") in KEPT_EFFECTS)
 
 
-def public_event(catalog: Mapping[str, Mapping[str, object]], event: Event, viewer: int) -> Dict[str, object]:
+def public_event(catalog: Mapping[str, Mapping[str, object]], event: Event, viewer) -> Dict[str, object]:
+    """The event as `viewer` may see it (a seat, or None for a spectator). Two secrets are redacted for everyone but
+    their author: which card a rival KEEPS, and the amount of a SEALED bid -- a message is recorded with the exact action
+    it came with (`bid:55`), so the amount is cut from it (found by Codex in review); what the player SAID stays."""
     data = dict(event.data)
-    if event.kind == "card" and event.player != viewer and data.get("card") in kept_cards(catalog):
+    if event.player == viewer:
+        return {"kind": event.kind, "player": event.player, "data": data}
+    if event.kind == "card" and data.get("card") in kept_cards(catalog):
         data = {"card": "a kept card"}
+    if event.kind == "said" and str(data.get("action", "")).startswith(SEALED_BID):
+        data["action"] = SEALED_BID.rstrip(":")
     return {"kind": event.kind, "player": event.player, "data": data}
 
 
