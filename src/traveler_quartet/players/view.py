@@ -69,20 +69,34 @@ def _negotiation(state: GameState) -> Dict[str, object]:
     return out
 
 
+def _table(state: GameState) -> Dict[str, object]:
+    """What lies on the table for EVERYONE -- the part a player's view and a spectator's share."""
+    return {
+        "round": state.round, "rounds": state.economy.rounds, "current": state.current, "pending": state.pending,
+        "last_dice": list(state.last_dice), "jackpot": state.jackpot, "houses_left": state.houses_left,
+        "stalls_left": state.stalls_left, "board": [_square(state, i) for i in range(len(state.board.squares))],
+        "order": _order(state), "doubles": state.doubles, "rules": asdict(state.economy),
+        "cards": [dict(card) for card in state.catalog.values()], **_negotiation(state)}
+
+
 def view(state: GameState, me: int) -> Dict[str, object]:
     turn = actor(state) == me and not state.over
     seen: Dict[str, object] = {
-        "round": state.round, "rounds": state.economy.rounds, "current": state.current, "pending": state.pending,
-        "last_dice": list(state.last_dice), "jackpot": state.jackpot, "houses_left": state.houses_left,
-        "stalls_left": state.stalls_left, "me": _player(state, me, True),
+        **_table(state), "me": _player(state, me, True),
         "others": [_player(state, p, False) for p in range(len(state.players)) if p != me],
-        "board": [_square(state, i) for i in range(len(state.board.squares))],
         "your_turn": turn, "legal_actions": list(legal_actions(state)) if turn else [],
-        "negotiations": list(negotiations(state)) if turn else [], "order": _order(state), "doubles": state.doubles,
-        "rules": asdict(state.economy), "cards": [dict(card) for card in state.catalog.values()],
-        **_negotiation(state)}
+        "negotiations": list(negotiations(state)) if turn else []}
     if state.debt is not None and state.current == me:
         seen["debt"] = state.debt.amount
     if state.sealed is not None:
         seen["sealed"] = _sealed(state, me)
+    return seen
+
+
+def spectator(state: GameState) -> Dict[str, object]:
+    """What a SPECTATOR sees (the stream's scene): the table and every player's PUBLIC line -- no kept card, no sealed
+    bid, no legal action. It holds no seat, so it can play nothing."""
+    seen: Dict[str, object] = {**_table(state), "players": [_player(state, p, False) for p in range(len(state.players))]}
+    if state.sealed is not None:
+        seen["sealed"] = _sealed(state, None)
     return seen
