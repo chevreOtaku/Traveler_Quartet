@@ -5,6 +5,10 @@ FAR: a game, one token per remote player, every answer checked by the engine.
     GET  /games/<id>/view            -> 200 {"view", "text", "over", "log_length"}
     POST /games/<id>/act             {"action": "...", "message": "..."}      -> 200 {"view", ...}
     GET  /games/<id>/events?since=n  -> 200 {"events": [...]}
+    GET  /games/<id>/public          -> 200 {"view", "over", "log_length"}  -- a SPECTATOR (the stream), no token
+    GET  /games/<id>/public/events?since=n -> 200 {"events": [...]}       -- every kept card stays "a kept card"
+
+`POST /games` may give "rounds" (a shorter game to try things; a positive integer).
 
 The token goes in the `Authorization: Bearer <token>` header, never in the URL (it would end up in logs). 401: unknown
 token ; 409: not your turn ; 400: a bad request or an illegal action (with the legal ones) ; 404: no such game or path.
@@ -20,7 +24,8 @@ from importlib.resources import files
 from typing import Dict, Mapping, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from traveler_quartet.match.session import NotYourTurn, Session, Unauthorized, act, events_for, new_session, seen
+from traveler_quartet.match.session import (NotYourTurn, Session, Unauthorized, act, events_for, new_session,
+                                            public_events, seen, watched)
 from traveler_quartet.rules.engine import IllegalAction, legal_actions
 
 Reply = Tuple[int, Dict[str, object]]
@@ -44,9 +49,18 @@ def _json(body: bytes) -> Dict[str, object]:
     return data
 
 
+def _rounds(data: Mapping[str, object]):
+    rounds = data.get("rounds")
+    if rounds is None:
+        return None
+    if isinstance(rounds, bool) or not isinstance(rounds, int) or rounds < 1:
+        raise ValueError("rounds must be a positive integer")
+    return rounds
+
+
 def _create(reg: Registry, body: bytes) -> Reply:
     data = _json(body)
-    session = new_session(tuple(data.get("seats", ())), seed=int(data.get("seed", 1)))
+    session = new_session(tuple(data.get("seats", ())), seed=int(data.get("seed", 1)), rounds=_rounds(data))
     game = secrets.token_hex(4)
     reg.games[game] = session
     return 201, {"game": game, "tokens": session.tokens}
@@ -67,6 +81,17 @@ def _on_game(reg: Registry, game: str, verb: str, headers: Mapping[str, str], bo
     return 200, seen(session, token)
 
 
+def _spectate(reg: Registry, parts, query: str) -> Reply:
+    if parts[1] not in reg.games:
+        return 404, {"error": "no such game"}
+    session = reg.games[parts[1]]
+    if len(parts) == 3:
+        return 200, watched(session)
+    if parts[3] != "events":
+        return 404, {"error": "no such path"}
+    return 200, {"events": public_events(session, int(parse_qs(query).get("since", ["0"])[0]))}
+
+
 def handle(reg: Registry, method: str, path: str, headers: Mapping[str, str], body: bytes) -> Reply:
     url = urlparse(path)
     parts = [p for p in url.path.split("/") if p]
@@ -74,6 +99,8 @@ def handle(reg: Registry, method: str, path: str, headers: Mapping[str, str], bo
         with reg.lock:
             if method == "POST" and parts == ["games"]:
                 return _create(reg, body)
+            if method == "GET" and len(parts) in (3, 4) and parts[0] == "games" and parts[2] == "public":
+                return _spectate(reg, parts, url.query)
             if len(parts) == 3 and parts[0] == "games" and (method, parts[2]) in (("GET", "view"), ("GET", "events"),
                                                                                   ("POST", "act")):
                 if parts[1] not in reg.games:

@@ -13,7 +13,7 @@ from typing import Callable, Dict, List, Optional, Sequence, Tuple
 from traveler_quartet.match.tournament import COMPUTERS
 from traveler_quartet.players.recent import public_event
 from traveler_quartet.players.text import render
-from traveler_quartet.players.view import view
+from traveler_quartet.players.view import spectator, view
 from traveler_quartet.rules.engine import GameState, actor, apply, legal_actions, new_game
 from traveler_quartet.rules.state import Event
 
@@ -86,6 +86,17 @@ def events_for(session: Session, token: str, since: int = 0) -> List[Dict[str, o
     viewer = _seat_of(session, token)
     return [{"index": i, "round": r, **public_event(session.state.catalog, e, viewer)}
             for i, (r, e) in enumerate(session.log) if i >= since]
+
+
+def public_events(session: Session, since: int = 0) -> List[Dict[str, object]]:
+    """The log for a SPECTATOR: everyone's kept cards stay "a kept card" (no seat to be the exception)."""
+    return [{"index": i, "round": r, **public_event(session.state.catalog, e, None)}
+            for i, (r, e) in enumerate(session.log) if i >= since]
+
+
+def watched(session: Session) -> Dict[str, object]:
+    """What a spectator receives: the public view, no text to act on, no token."""
+    return {"view": spectator(session.state), "over": session.state.over, "log_length": len(session.log)}
 
 
 def seen(session: Session, token: str) -> Dict[str, object]:
