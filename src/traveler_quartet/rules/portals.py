@@ -1,4 +1,5 @@
 from traveler_quartet.rules.income import start_income
+from traveler_quartet.rules.moves import moved
 from traveler_quartet.rules.state import Event, GameState, Step, change_cash, update_player
 from traveler_quartet.rules.turns import finish
 
@@ -20,7 +21,7 @@ def jump(state: GameState) -> Step:
     origin = state.players[me].position
     target = next_portal(state, origin)
     state = update_player(state, me, position=target, jump_ready=False)
-    events = [Event("jumped", me, (("from", origin), ("to", target)))]
+    events = [Event("jumped", me, (("from", origin), ("to", target))), *moved(me, origin, target, "portal", None)]
     if target < origin:
         income = start_income(state, me)
         state = change_cash(state, me, income)

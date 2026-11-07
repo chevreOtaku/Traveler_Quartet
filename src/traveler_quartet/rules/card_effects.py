@@ -10,6 +10,7 @@ from traveler_quartet.rules.disasters import (buildings_of, damage, destroy, own
 from traveler_quartet.rules.dungeon import send_to_dungeon
 from traveler_quartet.rules.economy import STALL, owns_whole_town
 from traveler_quartet.rules.income import start_income
+from traveler_quartet.rules.moves import moved
 from traveler_quartet.rules.state import Event, GameState, change_cash, update_player
 from traveler_quartet.rules.turns import end_turn
 
@@ -90,20 +91,23 @@ def collect_from_others(state, card):
 
 
 def move_back(state, card):
-    me = state.current
-    position = (state.players[me].position - card["steps"]) % len(state.board.squares)
-    return update_player(state, me, position=position), (_card_event(state, card),), "land"
+    me, origin = state.current, state.players[state.current].position
+    position = (origin - card["steps"]) % len(state.board.squares)
+    walk = moved(me, origin, position, "card", -card["steps"])
+    return update_player(state, me, position=position), (_card_event(state, card),) + walk, "land"
 
 
 def move_to_start(state, card):
-    me = state.current
+    me, origin = state.current, state.players[state.current].position
     income = start_income(state, me)
+    walk = moved(me, origin, 0, "card", (len(state.board.squares) - origin) % len(state.board.squares))
     state = update_player(change_cash(state, me, income), me, position=0, jump_ready=True)
-    return state, (_card_event(state, card), Event("passed_start", me, (("amount", income), ("bank", income)))), "land"
+    payment = (Event("passed_start", me, (("amount", income), ("bank", income))),)
+    return state, (_card_event(state, card),) + walk + payment, "land"
 
 
 def go_to_dungeon(state, card):
-    state, events = send_to_dungeon(state)
+    state, events = send_to_dungeon(state, kind="card")
     return state, (_card_event(state, card),) + events, "done"
 
 

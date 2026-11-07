@@ -84,16 +84,26 @@ def valid(state: GameState, giver: int, receiver: int, terms: Terms) -> bool:
             and _can_hand_over(state, receiver, terms.ask_gold, terms.ask_squares, terms.ask_cards))
 
 
+def contract(trade: Trade) -> Tuple[Tuple[str, object], ...]:
+    """The public payload of a trade event (contract v2): who proposes, who answers, and the terms from the PROPOSER's
+    side (give = what the proposer gives). The same terms the view already shows while the offer is open."""
+    t = trade.terms
+    terms = {"give_gold": t.give_gold, "give_squares": list(t.give_squares), "give_cards": list(t.give_cards),
+             "ask_gold": t.ask_gold, "ask_squares": list(t.ask_squares), "ask_cards": list(t.ask_cards)}
+    return (("proposer", trade.proposer), ("responder", trade.responder), ("terms", terms))
+
+
 def offer(state: GameState, receiver: int, terms: Terms) -> Tuple[GameState, Tuple[Event, ...]]:
     trade = Trade(proposer=state.current, responder=receiver, terms=terms)
     state = replace(state, pending="trade", trade=trade, offers=state.offers + 1)
-    return state, (Event("offered", state.current, (("to", receiver),)),)
+    return state, (Event("offered", state.current, (("to", receiver),) + contract(trade)),)
 
 
 def counter(state: GameState, terms: Terms) -> Tuple[GameState, Tuple[Event, ...]]:
+    """A counter IS the new offer: the counterer becomes the proposer."""
     t = state.trade
     trade = Trade(proposer=t.responder, responder=t.proposer, terms=terms, counters=t.counters + 1)
-    return replace(state, trade=trade), (Event("countered", t.responder, (("to", t.proposer),)),)
+    return replace(state, trade=trade), (Event("countered", t.responder, (("to", t.proposer),) + contract(trade)),)
 
 
 def _hand_over(state: GameState, giver: int, receiver: int, gold: int, squares, cards) -> GameState:
@@ -113,7 +123,8 @@ def accept(state: GameState) -> Tuple[GameState, Tuple[Event, ...]]:
     s = t.terms
     state = _hand_over(state, t.proposer, t.responder, s.give_gold, s.give_squares, s.give_cards)
     state = _hand_over(state, t.responder, t.proposer, s.ask_gold, s.ask_squares, s.ask_cards)
-    return replace(state, pending="roll", trade=None), (Event("trade_done", t.responder, (("with", t.proposer),)),)
+    accepted = Event("trade_done", t.responder, (("with", t.proposer),) + contract(t))
+    return replace(state, pending="roll", trade=None), (accepted,)
 
 
 def refuse(state: GameState) -> Tuple[GameState, Tuple[Event, ...]]:
