@@ -11,13 +11,13 @@ from dataclasses import dataclass, field, replace
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from traveler_quartet.match.tournament import COMPUTERS
+from traveler_quartet.players.recent import public_event
 from traveler_quartet.players.text import render
 from traveler_quartet.players.view import view
 from traveler_quartet.rules.engine import GameState, actor, apply, legal_actions, new_game
 from traveler_quartet.rules.state import Event
 
 REMOTE = "remote"
-KEPT_EFFECTS = ("keep", "curse")
 MAX_COMPUTER_STEPS = 20000
 
 
@@ -82,20 +82,10 @@ def act(session: Session, token: str, action: str, message: Optional[str] = None
     _advance(session)
 
 
-def _kept_cards(session: Session) -> frozenset:
-    return frozenset(cid for cid, card in session.state.catalog.items() if card.get("effect") in KEPT_EFFECTS)
-
-
-def _public(session: Session, event: Event, viewer: int) -> Dict[str, object]:
-    data = dict(event.data)
-    if event.kind == "card" and event.player != viewer and data.get("card") in _kept_cards(session):
-        data = {"card": "a kept card"}
-    return {"kind": event.kind, "player": event.player, "data": data}
-
-
 def events_for(session: Session, token: str, since: int = 0) -> List[Dict[str, object]]:
     viewer = _seat_of(session, token)
-    return [{"index": i, "round": r, **_public(session, e, viewer)} for i, (r, e) in enumerate(session.log) if i >= since]
+    return [{"index": i, "round": r, **public_event(session.state.catalog, e, viewer)}
+            for i, (r, e) in enumerate(session.log) if i >= since]
 
 
 def seen(session: Session, token: str) -> Dict[str, object]:

@@ -57,11 +57,12 @@ def test_a_player_sees_his_own_view_through_his_token():
 
 
 def test_the_others_kept_cards_stay_hidden_in_the_log_too():
-    from traveler_quartet.match.session import _public
+    from traveler_quartet.players.recent import public_event
     from traveler_quartet.rules.state import Event
     s = new_session(("remote", "remote"), seed=1, make_token=_tokens())
+    catalog = s.state.catalog
     drawn = Event("card", 1, (("card", "mirror"), ("deck", "chance")))
-    assert _public(s, drawn, viewer=1)["data"]["card"] == "mirror"
-    assert _public(s, drawn, viewer=0)["data"] == {"card": "a kept card"}
+    assert public_event(catalog, drawn, viewer=1)["data"]["card"] == "mirror"
+    assert public_event(catalog, drawn, viewer=0)["data"] == {"card": "a kept card"}
     plain = Event("card", 1, (("card", "gain_50"),))
-    assert _public(s, plain, viewer=0)["data"]["card"] == "gain_50"
+    assert public_event(catalog, plain, viewer=0)["data"]["card"] == "gain_50"

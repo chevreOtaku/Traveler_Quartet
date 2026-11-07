@@ -38,6 +38,13 @@ def test_a_real_command_plays_a_short_game_and_writes_its_report(tmp_path, fake_
     assert len(report["actions_by_seat"]) == 2 and report["minutes"] >= 0
 
 
+def test_an_ai_seat_reads_what_happened_since_its_last_decision(tmp_path, fake_command):
+    report = play_ai_game(("claude", "normal"), seed=1, rounds=3, log_path=tmp_path / "match.json",
+                          commands={"claude": fake_command})
+    sizes = [d["summary_chars"] for d in report["ai_decisions"]["0"]]
+    assert sizes and all(size > 0 for size in sizes)
+
+
 @pytest.mark.parametrize("seats", [("unknown", "normal"), ("normal",), ("easy",) * 5])
 def test_invalid_seats_are_refused_before_a_command_runs(seats, tmp_path):
     with pytest.raises(ValueError, match="seat|players"):
