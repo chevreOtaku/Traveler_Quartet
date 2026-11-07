@@ -9,13 +9,13 @@
 """
 
 import json
-import re
 import shutil
 import subprocess
 import tempfile
 import time
 from typing import Callable, List, Optional, Sequence, Tuple
 
+from traveler_quartet.players.notebook import NOTES_FORMAT, notes_section, update_notes
 from traveler_quartet.players.recent import TimedEvent, summary_lines
 from traveler_quartet.players.text import render
 from traveler_quartet.players.view import view
@@ -26,7 +26,6 @@ ANSWER_FORMAT = ('Answer with ONE JSON object and nothing else: {"action": "<one
 INTRO = ("You are playing Traveler Quartet, a board game for 2-4 merchants. The richest player after the last round "
          "wins: cash plus the value of districts and buildings.")
 SAFE = ("pass", "drop", "refuse", "stay", "roll", "bid:0", "bankrupt")
-JSON_OBJECT = re.compile(r"\{.*?\}", re.DOTALL)
 # Claude as a LEAN player (measured 06/11): the full Claude Code agent resent its whole instructions and tool list at each
 # move -- ~25 000 input tokens for a ~160-token game question. A short system prompt and NO tools: ~900 tokens, the same
 # decision, a quarter of the cost, half the time; and with no tools it can read or write nothing at all.
@@ -39,15 +38,22 @@ CLAUDE = ["claude", "-p", "--restricted", "--strict-mcp-config", "--output-forma
 CODEX = ["codex", "exec", "--sandbox", "read-only", "--skip-git-repo-check", "--ephemeral", "-"]
 
 
-def parse_answer(text: str) -> Optional[Tuple[str, str]]:
-    for match in JSON_OBJECT.finditer(text):
+def parse_reply(text: str) -> Optional[dict]:
+    """The first COMPLETE JSON object with an "action" -- nested objects included (the notebook's "notes")."""
+    decoder = json.JSONDecoder()
+    for start in (i for i, char in enumerate(text) if char == "{"):
         try:
-            data = json.loads(match.group(0))
+            data, _ = decoder.raw_decode(text, start)
         except ValueError:
             continue
         if isinstance(data, dict) and isinstance(data.get("action"), str):
-            return data["action"].strip(), str(data.get("message") or "")
+            return data
     return None
+
+
+def parse_answer(text: str) -> Optional[Tuple[str, str]]:
+    data = parse_reply(text)
+    return (data["action"].strip(), str(data.get("message") or "")) if data else None
 
 
 def _legal(state: GameState, action: str) -> bool:
@@ -66,9 +72,10 @@ class CommandPlayer:
     """A chooser for the runner: `(state, legal) -> (action, message)`. `ask(prompt) -> text` is the AI."""
 
     def __init__(self, ask: Callable[[str], str], seat: int, retries: int = 2,
-                 history: Optional[Callable[[], Sequence[TimedEvent]]] = None):
+                 history: Optional[Callable[[], Sequence[TimedEvent]]] = None, notebook_cap: Optional[int] = None):
         self.ask, self.seat, self.retries, self.log = ask, seat, retries, []
         self.history, self.cursor = history, 0
+        self.notebook_cap, self.notes = notebook_cap, {}
 
     def negotiable(self, state: GameState) -> bool:
         return bool(negotiations(state))
@@ -84,20 +91,30 @@ class CommandPlayer:
         if len(legal) == 1 and not self.negotiable(state):
             return legal[0], None
         summary = self._summary(state)
-        prompt, started = f"{INTRO}\n\n{render(view(state, self.seat))}{summary}\n\n{ANSWER_FORMAT}", time.time()
-        sizes = {"prompt_chars": len(prompt), "summary_chars": len(summary)}
+        notebook = notes_section(self.notes, self.notebook_cap) if self.notebook_cap else ""
+        answer_format = ANSWER_FORMAT + (NOTES_FORMAT if self.notebook_cap else "")
+        prompt = f"{INTRO}\n\n{render(view(state, self.seat))}{summary}{notebook}\n\n{answer_format}"
+        started, sizes = time.time(), {"prompt_chars": len(prompt), "summary_chars": len(summary)}
         if self.history is not None:
             self.cursor = len(self.history())
         for attempt in range(1, self.retries + 2):
-            answer = parse_answer(self.ask(prompt))
-            if answer and _legal(state, answer[0]):
-                self._note(state, attempt, answer[0], False, started, sizes)
-                return answer[0], answer[1] or None
-            said = answer[0] if answer else "no JSON answer"
-            prompt += f"\n\nYour answer `{said}` is not legal now. Choose again. {ANSWER_FORMAT}"
+            reply = parse_reply(self.ask(prompt))
+            action = reply["action"].strip() if reply else None
+            if action and _legal(state, action):
+                self._keep_notes(state, reply.get("notes"), sizes)
+                self._note(state, attempt, action, False, started, sizes)
+                return action, str(reply.get("message") or "") or None
+            prompt += f"\n\nYour answer `{action or 'no JSON answer'}` is not legal now. Choose again. {answer_format}"
         action = _safe(legal)
+        self._keep_notes(state, None, sizes)
         self._note(state, attempt, action, True, started, sizes)
         return action, None
+
+    def _keep_notes(self, state: GameState, proposed, sizes: dict) -> None:
+        if not self.notebook_cap:
+            return
+        self.notes, cut = update_notes(self.notes, proposed, self.seat, len(state.players), self.notebook_cap)
+        sizes.update({"notes": dict(self.notes), "notes_cut": cut})
 
     def _note(self, state: GameState, attempts: int, action: str, fallback: bool, started: float, sizes: dict) -> None:
         self.log.append({"round": state.round, "question": state.pending, "attempts": attempts, "action": action,
