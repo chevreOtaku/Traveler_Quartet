@@ -10,6 +10,7 @@ from traveler_quartet.rules.economy import Economy, load_economy
 from traveler_quartet.rules.income import start_income
 from traveler_quartet.rules.landing import after_landing, land
 from traveler_quartet.rules.movement import advance
+from traveler_quartet.rules.moves import moved
 from traveler_quartet.rules.state import Event, GameState, Player, Step, change_cash, set_at, update_player
 from traveler_quartet.rules.turns import end_turn
 
@@ -175,8 +176,10 @@ def _roll(state: GameState) -> Step:
 
 def _move(state: GameState, steps: int, events: Tuple[Event, ...]) -> Step:
     me = state.current
-    position, passed = advance(state.players[me].position, steps, len(state.board.squares))
+    origin = state.players[me].position
+    position, passed = advance(origin, steps, len(state.board.squares))
     state = update_player(state, me, position=position)
+    events += moved(me, origin, position, "dice", steps)
     if passed:
         income = start_income(state, me)
         state = update_player(change_cash(state, me, income), me, jump_ready=True)

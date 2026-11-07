@@ -1,5 +1,6 @@
 from dataclasses import replace
 
+from traveler_quartet.rules.moves import moved
 from traveler_quartet.rules.state import Event, GameState, Step, change_cash, update_player
 from traveler_quartet.rules.turns import end_turn
 
@@ -17,11 +18,11 @@ def can_pay_exit(state: GameState) -> bool:
     return in_dungeon(state) and not me.dungeon_locked and me.cash >= state.economy.dungeon_exit_cost
 
 
-def send_to_dungeon(state: GameState) -> Step:
-    """Straight to the dungeon, no salary on the way (D8)."""
-    me = state.current
-    state = update_player(state, me, position=dungeon_square(state), dungeon_turns=state.economy.dungeon_turns)
-    return end_turn(replace(state, doubles=0)), (Event("sent_to_dungeon", me),)
+def send_to_dungeon(state: GameState, kind: str = "dungeon") -> Step:
+    """Straight to the dungeon, no salary on the way (D8) -- a teleport; `kind` says why (three doubles, or a card)."""
+    me, origin, target = state.current, state.players[state.current].position, dungeon_square(state)
+    state = update_player(state, me, position=target, dungeon_turns=state.economy.dungeon_turns)
+    return end_turn(replace(state, doubles=0)), (Event("sent_to_dungeon", me),) + moved(me, origin, target, kind, None)
 
 
 def pay_exit(state: GameState) -> Step:
