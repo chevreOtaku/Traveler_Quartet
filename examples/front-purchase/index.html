@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="scene.css">
+<title>Traveler Quartet - A little plot of another world</title>
+<script src="fixtures.js" defer></script>
+<script src="model.js" defer></script>
+<script src="scene.js" defer></script>
+</head>
+<body>
+<div class="preview-bar" aria-label="Presentation controls">
+  <span><span class="demo-dot"></span> DESIGN DEMO <span class="preview-note">/ Purchase scene</span></span>
+  <div class="preview-tools">
+    <div class="mode-switch" role="group" aria-label="Scene mode">
+      <button id="playerMode" aria-pressed="true">Player</button>
+      <button id="streamMode" aria-pressed="false">Stream</button>
+    </div>
+    <button id="reset" class="quiet">Reset scene</button>
+  </div>
+</div>
+<main class="game-shell" id="scene">
+  <header class="masthead">
+    <a class="brand" href="./" aria-label="Traveler Quartet purchase demo">
+      <span class="brand-mark" aria-hidden="true">T<span>Q</span></span>
+      <span>TRAVELER <b>QUARTET</b></span>
+    </a>
+    <div class="chapter"><span class="tiny">THE MERCHANT'S ROAD</span><span>Small beginnings. Questionable investments.</span></div>
+    <div class="round"><span class="tiny">ROUND</span><strong id="round">03 <span>/ 30</span></strong></div>
+  </header>
+  <section class="players" aria-label="Public player standings">
+    <article class="player is-current"><span class="seal">I</span><div><span class="player-name">Player 0 <small>YOU</small></span><strong><span id="cash0"></span> <span class="gold-label">G</span></strong></div><span class="turn-label">AT THE COUNTER</span></article>
+    <article class="player"><span class="seal">II</span><div><span class="player-name">Player 1</span><strong><span id="cash1"></span> <span class="gold-label">G</span></strong></div><span class="player-place">Overtime Hollow</span></article>
+    <article class="player"><span class="seal">III</span><div><span class="player-name">Player 2</span><strong><span id="cash2"></span> <span class="gold-label">G</span></strong></div><span class="player-place">Wildmark</span></article>
+    <article class="player"><span class="seal">IV</span><div><span class="player-name">Player 3</span><strong><span id="cash3"></span> <span class="gold-label">G</span></strong></div><span class="player-place">Wolfcoin</span></article>
+  </section>
+  <div class="scene-grid">
+    <section class="town-scene" aria-labelledby="townTitle">
+      <div class="town-heading"><span class="tiny">THE BEGINNER'S TOWN</span><h1 id="townTitle">Greenhorn Fields<span>.</span></h1><p>Every great fortune starts somewhere.<br>Yours might start with a cabbage.</p></div>
+      <span class="town-number" aria-hidden="true">01</span>
+      <img class="village" src="village.svg" alt="A sunny fantasy market village with a windmill, cabbage gardens and a small timber shop.">
+      <div class="art-caption"><span class="map-cross" aria-hidden="true">+</span> THE FIELDS <span class="caption-line"></span> A FRESH START</div>
+      <div class="arrival"><span class="tiny" id="arrivalLabel">YOU HAVE ARRIVED</span><strong id="arrivalName">Cabbage Row</strong><span id="arrivalNote">An unowned district. A modest opportunity.</span></div>
+      <div class="merchant-wrap">
+        <div class="merchant-tag">PLAYER 0 <span>/ HUMAN MERCHANT</span></div>
+        <img id="merchant" class="merchant" src="merchant.svg" alt="An ordinary chibi merchant with a green cap, a linen apron and a satchel.">
+        <div class="character-shadow"></div>
+      </div>
+      <div class="board-strip" aria-label="A small section of the board, not the complete board">
+        <div class="mini-square"><span>00</span><strong>Start</strong><small>The road begins</small></div>
+        <div class="mini-square selected"><span>01</span><strong>Cabbage Row</strong><small id="squareOwner">Unowned</small><b class="you-pin">I</b></div>
+        <div class="mini-square"><span>02</span><strong>Tax</strong><small>The inevitable</small></div>
+        <div class="mini-square"><span>03</span><strong>Newcomer's Gate</strong><small>Player 2</small></div>
+      </div>
+    </section>
+    <aside class="deed" aria-labelledby="propertyName">
+      <div class="deed-top"><span class="tiny">DISTRICT DEED</span><span class="deed-index">No. 01</span></div>
+      <div class="deed-title"><span class="town-swatch"></span><span>GREENHORN FIELDS</span><span class="owner-badge" id="ownerBadge">FOR SALE</span></div>
+      <h2 id="propertyName">Cabbage Row</h2>
+      <p class="flavor">Good soil. Honest work.<br>A suspicious number of cabbages.</p>
+      <div class="price-row"><div><span class="tiny">PURCHASE PRICE</span><strong><span id="price"></span><small>G</small></strong></div><div class="rent"><span class="tiny">CURRENT RENT</span><strong><span id="rent"></span><small>G</small></strong></div></div>
+      <section class="town-ledger" aria-labelledby="collectionTitle">
+        <div class="ledger-title"><h3 id="collectionTitle">A little piece of town</h3><span>2 DISTRICTS</span></div>
+        <div class="ledger-row"><span class="district-dot"></span><span>Cabbage Row</span><b id="ledgerOwner">Unowned</b></div>
+        <div class="ledger-row"><span class="district-dot"></span><span>Newcomer's Gate</span><b>Player 2</b></div>
+        <p>Town ownership is shown here so you can see who holds the other district.</p>
+      </section>
+      <div class="decision" id="decision">
+        <span class="tiny">YOUR DECISION</span>
+        <h3>A small investment?</h3>
+        <button class="buy-button" id="buy"><span>Buy this district</span><span id="buyPrice"></span></button>
+        <button class="pass-button" id="pass">Pass &amp; send to auction <span aria-hidden="true">&rarr;</span></button>
+        <p>Demo choices load outcomes generated by the rules engine.</p>
+      </div>
+      <div class="spectator-note" id="spectatorNote" hidden><span class="tiny">SPECTATOR VIEW</span><h3 id="spectatorTitle">At the counter.</h3><p id="spectatorText">Player 0 is considering Cabbage Row. The stream has no controls for playing.</p></div>
+      <div class="result" id="result" role="status" aria-live="polite" hidden><span class="tiny" id="resultLabel"></span><h3 id="resultTitle"></h3><p id="resultText"></p><button id="again" class="text-button">Try the other choice &rarr;</button></div>
+      <div class="deed-bottom"><span aria-hidden="true">TQ</span> A very official piece of paper.</div>
+    </aside>
+  </div>
+  <footer class="table-footer"><span><b class="footer-dot"></b> <span id="modeLabel">PLAYER VIEW</span> <span class="footer-divider">/</span> PUBLIC DEMO DATA ONLY</span><span id="footerState">A purchase scene, not a live game.</span><span class="footer-end">FORTUNE FAVOURS THE MERCHANT.</span></footer>
+</main>
+<p class="preview-disclaimer">Lot 1 · Visual study with a fixed public scenario. No live match, account or connection required.</p>
+</body>
+</html>

@@ -1,0 +1,67 @@
+:root {font-family:"Segoe UI",Arial,sans-serif;color:#273e42;background:#f4f0e7;font-synthesis:none;}
+* {box-sizing:border-box;}
+[hidden] {display:none !important;}
+body {margin:0;}
+main {max-width:1920px;margin:auto;padding:16px 28px;}
+header {display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:12px;}
+.eyebrow {font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 8px;}
+.eyebrow span {color:#a78562;margin:0 8px;}
+h1 {font:400 clamp(26px,2.2vw,38px)/1.1 Georgia,serif;letter-spacing:-.03em;margin:0;}
+.intro {font-size:13px;line-height:1.6;margin:0;}
+#setup,#setup form,.controls,.inspect {display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+#setup {justify-content:space-between;margin:10px 0;}
+label {font-size:12px;display:inline-flex;align-items:center;gap:7px;}
+input,select {font:inherit;color:inherit;background:#fffaf0;border:1px solid #b6c0b1;border-radius:6px;padding:7px;}
+#seed {width:75px;} #game {width:120px;}
+a {color:#285b60;font-size:12px;}
+button {font:600 12px "Segoe UI",Arial,sans-serif;border:1px solid #91a99d;background:#fffaf0;color:#294e55;
+  padding:10px 14px;border-radius:20px;cursor:pointer;}
+#start,#replay {background:#285b60;border-color:#285b60;color:#fff7e9;}
+button:hover {filter:brightness(1.07);}
+button:disabled {opacity:.5;cursor:default;}
+button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible,.board-scroll:focus-visible {
+  outline:3px solid #bf763b;outline-offset:3px;}
+button[aria-pressed="true"] {background:#ffe0a8;}
+#error {padding:10px;border:1px solid #bd6845;background:#fff1dc;font-size:14px;}
+.board-scroll {overflow-x:auto;border-radius:20px;border:1px solid #b9c5af;}
+.stage {position:relative;height:clamp(760px,75vh,850px);min-width:1420px;overflow:hidden;background:#e5e9dc;}
+#viewport,#labels {position:absolute;inset:0;}
+canvas {display:block;width:100%;height:100%;}
+#labels {pointer-events:none;overflow:hidden;}
+.leaders {position:absolute;width:100%;height:100%;inset:0;}
+.leaders line {stroke:#647e6b;stroke-width:1;opacity:.45;}
+.tile-label {position:absolute;width:164px;text-align:center;font-size:18px;font-weight:500;line-height:1.12;
+  border-top:3px solid var(--town);padding:3px 4px;background:#e5e9dcf5;border-radius:3px;}
+.tile-label b {font-size:12px;white-space:nowrap;color:#4d5e50;}
+.side-label {width:220px;text-align:left;border-top:0;border-left:4px solid var(--town);padding:2px 6px;}
+.centre {position:absolute;top:30%;left:50%;width:490px;transform:translateX(-50%);text-align:center;
+  background:#e8eddfeb;border:1px solid #bfcbb4;border-radius:22px;padding:14px 24px;}
+.centre .eyebrow {color:#487266;}
+.dice-label {font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 2px;}
+#dice {font:400 34px Georgia,serif;letter-spacing:.12em;margin:0 0 10px;}
+#status {font-size:16px;line-height:1.4;min-height:44px;margin:0;}
+#route {font-size:12px;max-height:30px;overflow:auto;line-height:1.4;color:#617366;margin:5px 0 10px;}
+.controls,.inspect {justify-content:center;gap:8px;}
+.inspect {margin-top:8px;}
+.detail-controls {display:none;position:absolute;bottom:22px;left:50%;transform:translateX(-50%);}
+.detail .centre {display:none;}.detail .detail-controls {display:block;}
+.following .centre {top:18px;left:18px;width:340px;transform:none;padding:10px 16px;text-align:left;}
+.following .centre .inspect,.following .centre .controls,.following #route {display:none;}
+#play {margin-top:10px;}#play button {margin:3px;}
+#actions {display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+.legends {display:flex;gap:20px;align-items:start;justify-content:space-between;margin-top:10px;}
+.seat-legend,#towns {display:flex;gap:7px 12px;flex-wrap:wrap;font-size:12px;}
+.seat-legend {flex-shrink:0;}
+.seat-legend span,#towns span {border-bottom:3px solid var(--seat);padding:2px 0 3px;}
+#towns {justify-content:end;}
+footer {display:flex;justify-content:space-between;gap:16px;font-size:12px;color:#59705f;line-height:1.5;}
+footer p {margin:8px 0;}
+details {font-size:13px;color:#526454;border-top:1px solid #d4d9c9;padding-top:8px;}
+summary {cursor:pointer;width:fit-content;}
+pre {overflow:auto;padding:12px;background:#e9e9df;border-radius:8px;max-height:220px;}
+ol {columns:3;padding-left:24px;line-height:1.8;}
+@media (max-width:900px) {
+  main {padding:14px;}header {display:block;}.intro {margin-top:8px;}
+  #setup {gap:12px;justify-content:start;}.legends,footer {display:block;}
+  #towns {justify-content:start;margin-top:8px;}ol {columns:2;}
+}
