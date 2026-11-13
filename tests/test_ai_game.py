@@ -22,6 +22,53 @@ def fake_command(tmp_path):
     return [sys.executable, str(script)]
 
 
+@pytest.fixture
+def echo_command(tmp_path):
+    script = tmp_path / "echo_player.py"
+    script.write_text(
+        "import json, re, sys\n"
+        "prompt = sys.stdin.read()\n"
+        "choices = re.findall(r'^- `([^`]+)`$', prompt, re.MULTILINE)\n"
+        "action = 'pass' if 'pass' in choices else choices[0]\n"
+        "print(json.dumps({'action': action, 'message': 'args=' + ' '.join(sys.argv[1:])}))\n",
+        encoding="utf-8",
+    )
+    return [sys.executable, str(script)]
+
+
+def _said_by_seat(report):
+    return {event["player"]: event["text"] for event in report["said"]}
+
+
+def test_claude_seats_can_name_their_model_and_sit_at_the_same_table(tmp_path, echo_command):
+    seats = ("claude:sonnet", "claude:opus", "claude", "normal")
+    report = play_ai_game(seats, rounds=1, log_path=tmp_path / "models.json", commands={"claude": echo_command})
+    said = _said_by_seat(report)
+    assert report["seats"] == list(seats)
+    assert said[0] == "args=--model sonnet" and said[1] == "args=--model opus" and said[2] == "args="
+
+
+@pytest.mark.parametrize("seat", ["claude:", "claude:-x", "claude:bad model", "claude:opus:extra", "codex:o3", "normal:x"])
+def test_a_malformed_model_seat_is_refused_before_a_command_runs(seat, tmp_path, echo_command):
+    with pytest.raises(ValueError, match="seat"):
+        play_ai_game((seat, "normal"), log_path=tmp_path / "never.json", commands={"claude": echo_command})
+    assert not (tmp_path / "never.json").exists()
+
+
+def test_the_report_keeps_every_event_and_the_economy_with_the_tournament_definitions(tmp_path):
+    from traveler_quartet.match.runner import play_game_rounds
+    from traveler_quartet.match.tournament import COMPUTERS, game_metrics
+    from traveler_quartet.rules.engine import new_game
+
+    target = tmp_path / "bots.json"
+    report = play_ai_game(("normal",) * 4, seed=3, log_path=target)
+    final, timed = play_game_rounds(new_game(seed=3, player_count=4), [COMPUTERS["normal"]] * 4)
+    assert [(e["round"], e["kind"], e["player"]) for e in report["events"]] == [(r, e.kind, e.player) for r, e in timed]
+    assert report["economy"] == game_metrics(final, timed)
+    assert report["economy"]["houses"] == sum(e["kind"] == "built" for e in report["events"]) > 0
+    assert json.loads(target.read_text(encoding="utf-8")) == report
+
+
 def test_a_real_command_plays_a_short_game_and_writes_its_report(tmp_path, fake_command):
     target = tmp_path / "match.json"
     report = play_ai_game(("claude", "normal"), seed=1, rounds=2, log_path=target,

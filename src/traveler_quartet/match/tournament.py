@@ -67,24 +67,27 @@ def _has_whole_pair(state: GameState) -> bool:
                for pair in state.economy.pairs for player in range(len(state.players)))
 
 
-def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool,
-              rounds: Optional[int], changes: Mapping[str, int]) -> Dict[str, object]:
-    order = seating(seats, game_number)
-    state = starting_state(seed, len(seats), disasters, rounds, changes)
-    final, timed = play_game_rounds(state, [COMPUTERS[seats[entrant]] for entrant in order])
-    winner_seat = ranking(final)[0][0]
+def game_metrics(final: GameState, timed: Tuple[TimedEvent, ...]) -> Dict[str, object]:
+    """The economy of ONE game, counted from its events -- the same definitions for computers and AI players."""
     result = {
         "first_house": _first_house_round(timed),
         "houses": sum(1 for _, e in timed if e.kind == "built"),
         "whole_pair": _has_whole_pair(final),
         "bankruptcies": sum(1 for _, e in timed if e.kind == "bankrupt"),
         "rounds": final.round,
-        "winner_seat": winner_seat,
-        "winner_entrant": order[winner_seat],
     }
     for name, kinds in COUNTED.items():
         result[name] = sum(1 for _, e in timed if e.kind in kinds)
     return result
+
+
+def _one_game(seed: int, seats: Sequence[str], game_number: int, disasters: bool,
+              rounds: Optional[int], changes: Mapping[str, int]) -> Dict[str, object]:
+    order = seating(seats, game_number)
+    state = starting_state(seed, len(seats), disasters, rounds, changes)
+    final, timed = play_game_rounds(state, [COMPUTERS[seats[entrant]] for entrant in order])
+    winner_seat = ranking(final)[0][0]
+    return {**game_metrics(final, timed), "winner_seat": winner_seat, "winner_entrant": order[winner_seat]}
 
 
 def run_tournament(games: int, first_seed: int, seats: Sequence[str], disasters: bool = True,
