@@ -183,6 +183,18 @@ If an agent fails after play starts, the command saves a partial report before e
 and messages, the failing round and seat, and the error. Its ranking is marked provisional. This handles reported
 exceptions; it does not guarantee recovery from a killed process or a disk failure, and it does not resume the game.
 
+### Check what the AI players said against what they did
+
+```
+python -m traveler_quartet talk --report <ai game report.json> --log <verdicts.json> --model sonnet
+```
+
+The game is first REPLAYED from its report (it must give back the same events, one by one, or the command refuses).
+Then a Claude model reads each table message ALONE -- it never sees what happened before or after -- and lists its
+checkable statements: an announce of the move in progress, a promise about a later move, a claim about the state.
+The ENGINE gives each verdict: supported, contradicted, or undeterminable. A promise is contradicted only when the
+promised move was legal at one of the speaker's later decisions and never played.
+
 ## Inspirations
 
 The towns wink at isekai and fantasy works we love, including *Konosuba*, *Spice & Wolf*, *Amagi Brilliant Park*,

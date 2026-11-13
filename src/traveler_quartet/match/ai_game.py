@@ -9,6 +9,7 @@ import time
 from typing import Dict, List, Mapping, Optional, Sequence
 import uuid
 
+from traveler_quartet.match.replay import plain
 from traveler_quartet.match.runner import TimedEvent, play_game_rounds
 from traveler_quartet.match.tournament import COMPUTERS, COUNTED, game_metrics
 from traveler_quartet.players.command_player import CLAUDE, CODEX, CommandPlayer, run_command
@@ -50,7 +51,7 @@ def _validate(seats: Sequence[str], rounds: Optional[int], commands: Mapping[str
         raise ValueError("rounds must be positive")
 
 
-def _log_target(log_path: Optional[Path]) -> Path:
+def log_target(log_path: Optional[Path]) -> Path:
     target = Path(log_path) if log_path is not None else (
         Path(tempfile.gettempdir()) / f"traveler-quartet-{uuid.uuid4().hex}.json")
     target = target.expanduser().resolve()
@@ -74,15 +75,6 @@ def _players(seats: Sequence[str], commands: Mapping[str, List[str]], history=No
     return choosers, agents
 
 
-def _plain(value):
-    """Tuples as lists, so the report in memory equals the report read back from its JSON log."""
-    if isinstance(value, (tuple, list)):
-        return [_plain(item) for item in value]
-    if isinstance(value, dict):
-        return {key: _plain(item) for key, item in value.items()}
-    return value
-
-
 def _report(final, timed, seats, agents, started: float) -> dict:
     journals = {seat: agent.log for seat, agent in agents.items()}
     decisions = [decision for journal in journals.values() for decision in journal]
@@ -102,7 +94,7 @@ def _report(final, timed, seats, agents, started: float) -> dict:
         "fallbacks": sum(d["fallback"] for d in decisions),
         "minutes": round((time.monotonic() - started) / 60, 3),
         "economy": game_metrics(final, tuple(timed)),
-        "events": [{"round": round_number, "kind": event.kind, "player": event.player, "data": _plain(dict(event.data))}
+        "events": [{"round": round_number, "kind": event.kind, "player": event.player, "data": plain(dict(event.data))}
                    for round_number, event in timed],
     }
 
@@ -128,7 +120,7 @@ def play_ai_game(seats: Sequence[str], seed: int = 1, rounds: Optional[int] = No
     _validate(seats, rounds, commands)
     if notebook_cap is not None and notebook_cap < 1:
         raise ValueError("the notebook cap must be positive")
-    target = _log_target(log_path)
+    target = log_target(log_path)
     initial = new_game(seed=seed, player_count=len(seats))
     if rounds is not None:
         initial = replace(initial, economy=replace(initial.economy, rounds=rounds))
