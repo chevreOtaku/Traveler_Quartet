@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Traveler Quartet | The merchant shelf</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./gallery.css">
+</head>
+<body>
+  <header>
+    <div class="masthead"><span>Traveler Quartet</span><span>Character studies / 03</span></div>
+    <div class="intro">
+      <div><p class="eyebrow">The merchant shelf</p><h1>Small traders. Big personalities.</h1></div>
+      <p class="lede">Six everyday merchants, ready for the road.<br> Original chibi sculpts in polished toy resin.</p>
+    </div>
+  </header>
+  <main>
+    <div class="toolbar">
+      <div class="view-controls" role="group" aria-label="View angle">
+        <button type="button" data-angle="front" aria-pressed="true">Front</button>
+        <button type="button" data-angle="three-quarter" aria-pressed="false">Three-quarter</button>
+        <button type="button" data-angle="back" aria-pressed="false">Back</button>
+        <button type="button" data-angle="board" aria-pressed="false">Board view</button>
+      </div>
+      <p class="approval">Art study <span>/</span> Awaiting approval</p>
+    </div>
+    <p id="status" role="status">Preparing the seven sculpts...</p>
+    <noscript>This gallery needs JavaScript and WebGL to show the merchants.</noscript>
+    <div class="shelf-scroll" tabindex="0" aria-label="Seven merchant studies; scroll horizontally on narrow screens">
+      <section id="shelf" class="shelf" aria-label="Six merchants and the alternative dwarf woman"></section>
+    </div>
+    <section class="scale-note" aria-label="Scale and design notes">
+      <p><span class="note-title">Small, on purpose.</span> The lower row uses the board camera and 88 pixels per square.
+        Each figure is 0.70 units tall, with a footprint no wider than 0.42 units.</p>
+      <p><span class="note-title">One open choice.</span> The dwarf woman appears twice, without a beard and with one.
+        Both versions share the same face, hair and clothes.</p>
+    </section>
+  </main>
+  <footer><span>Original primitives / No external textures / Board scene lighting</span>
+    <span>Codex &middot; 13 Nov 2026 &middot; <a href="./MANIFEST.md">CC BY-NC-SA 4.0</a></span></footer>
+  <canvas id="render-layer" aria-hidden="true"></canvas>
+  <script type="module">
+    const status = document.querySelector("#status");
+    try { const {startGallery} = await import("./gallery.js"); startGallery(); }
+    catch (error) { status.textContent = "The gallery could not start: " + error.message; status.dataset.error = "true"; }
+  </script>
+</body>
+</html>
