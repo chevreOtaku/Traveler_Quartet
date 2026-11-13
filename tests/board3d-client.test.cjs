@@ -12,6 +12,14 @@ const snap = (revision=1,end=1,position=1) => {
   return data;
 };
 
+test('a public snapshot must say the kind of every seat (human, remote, computer)', () => {
+  assert.deepEqual(C.validateSnapshot(snap()).seats, fixture.before.seats);
+  const missing=snap(); delete missing.seats;
+  assert.throws(()=>C.validateSnapshot(missing), /Invalid public snapshot/);
+  const leveled=snap(); leveled.seats=leveled.seats.map(()=>'normal');
+  assert.throws(()=>C.validateSnapshot(leveled), /Invalid public snapshot/);
+});
+
 test('snapshot then bounded public events, no token, ordered awaited playback then snapshot', async () => {
   const calls=[],seen=[],data=snap(3,3,3);
   let release;

@@ -45,6 +45,10 @@ canvas {display:block;width:100%;height:100%;}
 .inspect {margin-top:8px;}
 .detail-controls {display:none;position:absolute;bottom:22px;left:50%;transform:translateX(-50%);}
 .detail .centre {display:none;}.detail .detail-controls {display:block;}
+.following .centre {top:18px;left:18px;width:340px;transform:none;padding:10px 16px;text-align:left;}
+.following .centre .inspect,.following .centre .controls,.following #route {display:none;}
+#play {margin-top:10px;}#play button {margin:3px;}
+#actions {display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
 .legends {display:flex;gap:20px;align-items:start;justify-content:space-between;margin-top:10px;}
 .seat-legend,#towns {display:flex;gap:7px 12px;flex-wrap:wrap;font-size:12px;}
 .seat-legend {flex-shrink:0;}

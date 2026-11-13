@@ -1,6 +1,7 @@
 "use strict";
 globalThis.Board3DClient = (() => {
   const M=typeof module!=="undefined" ? require("./movement.js") : globalThis.Board3DMovement;
+  const Cam=typeof module!=="undefined" ? require("./camera.js") : globalThis.Board3DCamera;
   const natural=n=>Number.isSafeInteger(n) && n>=0;
   function validateSnapshot(snapshot) {
     const v=snapshot?.view;
@@ -8,7 +9,8 @@ globalThis.Board3DClient = (() => {
         !Array.isArray(v?.board) || v.board.length!==40 ||
         !v.board.every((s,i)=>s.index===i && typeof s.name==="string") ||
         !Array.isArray(v.players) || v.players.length<2 || v.players.length>4 ||
-        !v.players.every((p,i)=>p.seat===i && natural(p.position) && p.position<40))
+        !v.players.every((p,i)=>p.seat===i && natural(p.position) && p.position<40) ||
+        !Cam.validSeats(snapshot.seats,v.players.length))
       throw new Error("Invalid public snapshot");
     return snapshot;
   }

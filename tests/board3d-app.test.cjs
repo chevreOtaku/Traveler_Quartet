@@ -5,8 +5,8 @@ const vm = require('node:vm');
 const fixture = require('../examples/board3d/fixture.json');
 const tick=()=>new Promise(setImmediate);
 
-function page(search='',reduced=false) {
-  const elements=new Map(),calls=[],places=[],poses=[],timers=[];
+function page(search='',reduced=false,table='computers') {
+  const elements=new Map(),calls=[],places=[],poses=[],timers=[],follows=[];
   let animation=null;
   function element(id) {
     if (!elements.has(id)) elements.set(id,{value:'',children:[],handlers:{},style:{setProperty(){}},
@@ -23,18 +23,21 @@ function page(search='',reduced=false) {
     data:{from:38,to:1,steps:3,travel:'walk',kind:'dice'}};
   const stage={setBoard(){},setPlayers(players,positions){if(positions)places.push([...positions]);},
     place:(seat,index)=>places.push([seat,index]),pose:(seat,frame)=>poses.push([seat,frame]),
-    select(){},highlight(){},setOut(){},setDetail(){},stop(){animation=null;},
+    select(){},highlight(){},setOut(){},setDetail(){},setFollow:seat=>follows.push(seat),stop(){animation=null;},
     animate(fn){animation=fn;}};
+  if (table==='human') snapshot.seats=['human','computer','computer','computer'];
+  const seatView={view:{your_turn:true,legal_actions:['roll']},over:false,revision:1};
+  const reply=url=>url.includes('fixture')?fixture:url==='/games'?{game:'real-id',tokens:table==='human'?{tok:0}:{}}:
+    url.endsWith('/view')||url.endsWith('/act')?seatView:url.includes('/events')?{events:[event]}:snapshot;
   const context=vm.createContext({URLSearchParams,createScene:()=>stage,matchMedia:()=>motion,
     location:{search},history:{replaceState(){}},document:{getElementById:element,createElement:()=>element(Symbol())},
+    sessionStorage:{store:{},getItem(k){return this.store[k]??null;},setItem(k,v){this.store[k]=v;}},
     clearTimeout(){},setTimeout:(fn,delay)=>{timers.push([fn,delay]);return timers.length;},
-    fetch:async(url,options)=>{calls.push([url,options]);return {ok:true,json:async()=>structuredClone(
-      url.includes('fixture')?fixture:url==='/games'?{game:'real-id',tokens:{}}:
-        url.includes('/events')?{events:[event]}:snapshot)};}});
-  for (const name of ['layout','movement','client']) vm.runInContext(fs.readFileSync(`examples/board3d/${name}.js`,'utf8'),context);
+    fetch:async(url,options)=>{calls.push([url,options]);return {ok:true,json:async()=>structuredClone(reply(url))};}});
+  for (const name of ['layout','movement','camera','play','client']) vm.runInContext(fs.readFileSync(`examples/board3d/${name}.js`,'utf8'),context);
   vm.runInContext(fs.readFileSync('examples/board3d/app.js','utf8').replace(/^import .*;\r?\n/,''),context);
-  element('seed').value='1';element('rounds').value='5';
-  return {element,calls,places,poses,motion,timers,snapshot,
+  element('seed').value='1';element('rounds').value='5';element('table').value=table;
+  return {element,calls,places,poses,motion,timers,snapshot,follows,
     frame(now){if(animation && !animation(now))animation=null;},
     submit:id=>element(id).handlers.submit({preventDefault(){}})};
 }
@@ -53,6 +56,37 @@ test('page creates four computers and plays the real public route before the fin
   assert.ok(p.calls.every(([url,options])=>!url.includes('/view') && !url.includes('/act') && !options?.headers?.Authorization));
   assert.equal(p.element('towns').children.length,8);
   assert.equal(p.element('squares').children.length,40);
+});
+
+test('a table without a human never moves the camera', async () => {
+  const p=page();p.submit('start-form');await tick();
+  p.frame(0);p.frame(260);p.frame(520);p.frame(780);await tick();
+  assert.deepEqual(p.follows,[]);
+});
+
+test('with a human: the camera follows the human pawn, then returns; the seat acts with its token', async () => {
+  const p=page('',false,'human');p.submit('start-form');await tick();
+  assert.deepEqual(JSON.parse(p.calls[0][1].body).seats,['human','normal','normal','normal']);
+  assert.deepEqual(p.follows,[0]);
+  p.frame(0);p.frame(380);p.frame(760);p.frame(1140);await tick();
+  const hold=p.timers.find(([,delay])=>delay===650);
+  assert.ok(hold,'a short hold at the arrival before the camera goes back');
+  hold[0]();await tick();await tick();
+  assert.deepEqual(p.follows,[0,null]);
+  const view=p.calls.find(([url])=>url.endsWith('/view'));
+  assert.equal(view[1].headers.Authorization,'Bearer tok');
+  const [button]=p.element('actions').children;
+  assert.equal(button.textContent,'Roll the dice');
+  button.handlers.click();await tick();
+  const act=p.calls.find(([url])=>url.endsWith('/act'));
+  assert.deepEqual(JSON.parse(act[1].body),{action:'roll',expected_revision:1});
+  assert.equal(act[1].headers.Authorization,'Bearer tok');
+  assert.ok(p.calls.every(([url])=>!url.includes('tok')),'the token never goes in a URL');
+});
+
+test('with a human but reduced motion: no camera move at all', async () => {
+  const p=page('',true,'human');p.submit('start-form');await tick();
+  assert.deepEqual(p.follows,[]);
 });
 
 test('fixture mode uses no server and reduced motion places every merchant directly', async () => {

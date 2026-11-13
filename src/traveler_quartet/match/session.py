@@ -18,7 +18,15 @@ from traveler_quartet.rules.engine import GameState, actor, apply, legal_actions
 from traveler_quartet.rules.state import Event
 
 REMOTE = "remote"
+HUMAN = "human"
+PLAYED_FROM_AFAR = (REMOTE, HUMAN)
 MAX_COMPUTER_STEPS = 20000
+
+
+def seat_kind(seat: str) -> str:
+    """What a spectator may know of a seat: a HUMAN, a REMOTE player (an AI or a human, undeclared), or a COMPUTER
+    -- never which computer level, never a token. A front shows a human's moves up close (D51)."""
+    return seat if seat in PLAYED_FROM_AFAR else "computer"
 
 
 class Unauthorized(ValueError):
@@ -53,7 +61,7 @@ def _record(session: Session, round_now: int, events) -> None:
 def _advance(session: Session) -> None:
     """The computers play until a remote seat must answer (or the game is over)."""
     for _ in range(MAX_COMPUTER_STEPS):
-        if session.state.over or session.seats[actor(session.state)] == REMOTE:
+        if session.state.over or session.seats[actor(session.state)] in PLAYED_FROM_AFAR:
             return
         answer = COMPUTERS[session.seats[actor(session.state)]](session.state, legal_actions(session.state))
         action = answer[0] if isinstance(answer, tuple) else answer
@@ -66,10 +74,10 @@ def _advance(session: Session) -> None:
 def new_session(seats: Sequence[str], seed: int, make_token: Callable[[], str] = lambda: secrets.token_urlsafe(16),
                 rounds: Optional[int] = None) -> Session:
     """`rounds`: another game length (a short game to try things; the rules keep theirs)."""
-    unknown = [s for s in seats if s != REMOTE and s not in COMPUTERS]
+    unknown = [s for s in seats if s not in PLAYED_FROM_AFAR and s not in COMPUTERS]
     if unknown:
-        raise ValueError(f"unknown seats {unknown}; use {REMOTE!r} or one of {sorted(COMPUTERS)}")
-    tokens = {make_token(): seat for seat, kind in enumerate(seats) if kind == REMOTE}
+        raise ValueError(f"unknown seats {unknown}; use {REMOTE!r}, {HUMAN!r} or one of {sorted(COMPUTERS)}")
+    tokens = {make_token(): seat for seat, kind in enumerate(seats) if kind in PLAYED_FROM_AFAR}
     state = new_game(seed=seed, player_count=len(seats))
     if rounds is not None:
         state = replace(state, economy=replace(state.economy, rounds=rounds))
@@ -126,7 +134,7 @@ def watched(session: Session) -> Dict[str, object]:
     """What a spectator receives: the public view, no text to act on, no token -- one snapshot (view, revision,
     log_length): render it with exactly the events below `log_length`."""
     return {"view": spectator(session.state), "over": session.state.over, "revision": session.revision,
-            "log_length": len(session.log)}
+            "log_length": len(session.log), "seats": [seat_kind(seat) for seat in session.seats]}
 
 
 def seen(session: Session, token: str) -> Dict[str, object]:

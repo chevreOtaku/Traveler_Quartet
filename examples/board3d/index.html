@@ -19,7 +19,11 @@
       <form id="start-form">
         <label>Seed <input id="seed" type="number" step="1" value="1" required></label>
         <label>Rounds <select id="rounds"><option>5</option><option>10</option><option>30</option></select></label>
-        <button id="start" type="submit">Watch four computers</button>
+        <label>Table <select id="table">
+          <option value="computers">Four computers (watch)</option>
+          <option value="human">You and three computers (play)</option>
+        </select></label>
+        <button id="start" type="submit">Start</button>
       </form>
       <form id="connect-form">
         <label>Game ID <input id="game" required autocomplete="off"></label>
@@ -41,6 +45,10 @@
           <div class="controls">
             <button id="replay" disabled>Replay / retry</button>
             <button id="skip" disabled>Go to latest</button>
+          </div>
+          <div id="play" hidden>
+            <p class="eyebrow" id="play-title">Your turn</p>
+            <div id="actions" role="group" aria-label="Your legal actions"></div>
           </div>
           <div class="inspect">
             <label>Figurine <select id="seat">
@@ -73,6 +81,8 @@
   </main>
   <script src="./layout.js"></script>
   <script src="./movement.js"></script>
+  <script src="./camera.js"></script>
+  <script src="./play.js"></script>
   <script src="./client.js"></script>
   <script type="module" src="./app.js"></script>
 </body>

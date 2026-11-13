@@ -2,10 +2,13 @@ import {createScene} from "./scene.js";
 
 const element=id=>document.getElementById(id);
 const C=globalThis.Board3DClient,L=globalThis.Board3DLayout,M=globalThis.Board3DMovement;
+const Cam=globalThis.Board3DCamera,P=globalThis.Board3DPlay;
 const motion=matchMedia("(prefers-reduced-motion: reduce)");
 const params=new URLSearchParams(location.search),fixtureMode=params.get("mode")==="fixture";
 let stage,client,game=params.get("game"),fixture=null,timer=null,detailView=false,busy=false;
-let activeMove=null,skip=false,board=null;
+let activeMove=null,skip=false,board=null,seatKinds=[],player=null,playerRevision=null;
+const HOP_MS={board:260,follow:380},FOLLOW_HOLD_MS=650;
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 function error(message="") {element("error").textContent=message;element("error").hidden=!message;}
 function setBusy(value) {
@@ -14,7 +17,8 @@ function setBusy(value) {
   element("skip").disabled=!value;
 }
 function reset(snapshot,positions,replaying) {
-  board=snapshot.view.board;stage.setBoard(board);stage.setPlayers(snapshot.view.players,positions,replaying);
+  board=snapshot.view.board;seatKinds=snapshot.seats;
+  stage.setBoard(board);stage.setPlayers(snapshot.view.players,positions,replaying);
   element("dice").textContent="-- / --";element("route").textContent="";
   element("move-title").textContent=replaying ? "Replaying the server's public journal" : "Public table";
   element("status").textContent=replaying ? "Starting the recorded journey." : "Public snapshot loaded.";
@@ -25,6 +29,7 @@ function reset(snapshot,positions,replaying) {
   }
 }
 function showSnapshot(snapshot) {
+  seatKinds=snapshot.seats;
   stage.setPlayers(snapshot.view.players);stage.highlight(-1);
   element("dice").textContent=snapshot.view.last_dice.join(" / ");
   element("move-title").textContent=`Round ${snapshot.view.round} / revision ${snapshot.revision}`;
@@ -48,18 +53,65 @@ async function showEvent(row) {
   element("route").textContent=[row.data.from,...route,...(route.length?[]:[row.data.to])].map(i=>String(i).padStart(2,"0")).join(" > ");
   stage.place(row.player,row.data.from);
   if (skip || motion.matches || row.data.travel==="teleport") {stage.place(row.player,row.data.to);return;}
-  await new Promise(resolve=>{
+  const followed=Cam.followSeat(seatKinds,row,motion.matches||skip);
+  if (followed!==null) following(followed);
+  await walk(row,followed===null ? HOP_MS.board : HOP_MS.follow);
+  if (followed!==null) {
+    if (!skip) await pause(FOLLOW_HOLD_MS);
+    following(null);
+  }
+}
+function following(seat) {
+  stage.setFollow(seat);
+  element("board").classList.toggle("following",seat!==null);
+}
+function walk(row,hopMs) {
+  return new Promise(resolve=>{
     let started;
     const finish=()=>{stage.stop();stage.place(row.player,row.data.to);activeMove=null;resolve();};
     activeMove=finish;
     stage.animate(now=>{
       started ??= now;
-      const frame=M.motionFrame(row,40,(now-started)/260,motion.matches||skip);
+      const frame=M.motionFrame(row,40,(now-started)/hopMs,motion.matches||skip);
       stage.pose(row.player,frame);
       if (frame.done) {activeMove=null;resolve();}
       return !frame.done;
     });
   });
+}
+function authorized(path,options={}) {
+  return fetch(`/games/${encodeURIComponent(game)}${path}`,{...options,
+    headers:{...(options.headers||{}),"Authorization":`Bearer ${player.token}`}});
+}
+async function updatePanel() {
+  const panel=element("play"),actions=element("actions");
+  panel.hidden=!player;actions.replaceChildren();
+  if (!player || !game) return;
+  const response=await authorized("/view"),data=await response.json();
+  if (!response.ok) throw new Error(data.error||"Your seat could not be read");
+  playerRevision=data.revision;
+  const legal=data.view.your_turn && !data.over ? data.view.legal_actions : [];
+  element("play-title").textContent=data.over ? "Game over" :
+    legal.length ? `Your turn, player ${player.seat}` : "The computers are playing";
+  for (const action of legal) {
+    const button=document.createElement("button");button.type="button";
+    button.textContent=P.actionLabel(action,board);button.disabled=busy;
+    button.addEventListener("click",()=>run(()=>play(action)));
+    actions.append(button);
+  }
+}
+async function play(action) {
+  const response=await authorized("/act",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action,expected_revision:playerRevision})});
+  const data=await response.json();
+  if (!response.ok) throw new Error(data.error||"The engine refused that action");
+  await client.refresh();
+}
+function rememberSeat(id) {
+  try {
+    if (player) sessionStorage.setItem(P.storageKey(id),JSON.stringify(player));
+    else player=JSON.parse(sessionStorage.getItem(P.storageKey(id))||"null");
+  } catch {player=player||null;}
 }
 function schedule() {
   clearTimeout(timer);
@@ -70,7 +122,10 @@ async function run(work) {
   clearTimeout(timer);setBusy(true);skip=false;error();
   try {await work();}
   catch(e) {error(e.message+". Use Replay / retry to reconnect.");}
-  finally {setBusy(false);schedule();}
+  finally {
+    setBusy(false);schedule();
+    updatePanel().catch(e=>error(e.message));
+  }
 }
 async function replayFixture() {
   if (!fixture) {
@@ -87,7 +142,8 @@ async function replayFixture() {
   showSnapshot(fixture.after);element("status").textContent="Recorded fixture move complete.";
 }
 async function connect(id,replay=false) {
-  game=id;
+  if (id!==game) player=null;
+  game=id;rememberSeat(id);
   element("game").value=id;
   history.replaceState(null,"","?game="+encodeURIComponent(id));
   element("source").textContent="SERVER / PUBLIC JOURNAL";
@@ -96,12 +152,17 @@ async function connect(id,replay=false) {
 async function newGame() {
   const seed=Number(element("seed").value),rounds=Number(element("rounds").value);
   if (!Number.isSafeInteger(seed) || ![5,10,30].includes(rounds)) throw new Error("Choose an integer seed and a listed game length");
-  element("status").textContent="The server is playing four computers. Their public journal will follow.";
+  const human=element("table").value==="human";
+  const seats=human ? ["human","normal","normal","normal"] : ["normal","normal","normal","normal"];
+  element("status").textContent=human ? "A table for you and three computers." :
+    "The server is playing four computers. Their public journal will follow.";
   const response=await fetch("/games",{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({seats:["normal","normal","normal","normal"],seed,rounds})});
+    body:JSON.stringify({seats,seed,rounds})});
   const data=await response.json();
   if (!response.ok) throw new Error(data.error||"Game creation failed");
-  game=data.game;await connect(game,true);
+  player=human ? P.humanSeat(data.tokens) : null;
+  if (human && !player) throw new Error("The server gave no seat for you");
+  game=data.game;rememberSeat(game);await connect(game,true);
 }
 function init() {
   try {
@@ -127,7 +188,7 @@ function init() {
     });
     element("return").addEventListener("click",()=>element("detail").click());
     if (fixtureMode) run(replayFixture);
-    else if (game) run(()=>connect(game));
+    else if (game) run(()=>connect(game,params.get("replay")==="1"));
     else {setBusy(false);element("status").textContent="Start four computers, or enter an existing game ID.";}
   } catch(e) {error(`3D preview unavailable: ${e.message}`);setBusy(true);}
 }

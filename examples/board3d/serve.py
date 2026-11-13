@@ -10,8 +10,11 @@ sys.path.insert(0, str(ROOT.parents[1] / "src"))
 from traveler_quartet.match.server import make_server
 
 ASSETS = {"/": ROOT / "index.html"}
-for name in ("index.html", "style.css", "app.js", "scene.js", "pawn.js", "movement.js", "layout.js", "client.js", "fixture.json"):
+for name in ("index.html", "style.css", "app.js", "scene.js", "pawn.js", "movement.js", "layout.js", "client.js",
+             "camera.js", "play.js", "fixture.json"):
     ASSETS["/" + name] = ROOT / name
+for name in ("gallery.html", "gallery.css", "gallery.js", "merchants.js", "MANIFEST.md"):
+    ASSETS["/art/" + name] = ROOT / "art" / name
 ASSETS["/vendor/three/three.module.js"] = ROOT.parent / "vendor" / "three" / "three.module.js"
 
 

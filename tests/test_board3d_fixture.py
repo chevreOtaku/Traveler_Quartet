@@ -28,7 +28,8 @@ def test_fixture_contains_only_public_snapshots_and_events():
     fixture = runpy.run_path(str(DEMO / "make_fixture.py"))["make_fixture"]()
     assert set(fixture) == {"before", "after", "events"}
     for snapshot in (fixture["before"], fixture["after"]):
-        assert set(snapshot) == {"view", "over", "revision", "log_length"}
+        assert set(snapshot) == {"view", "over", "revision", "log_length", "seats"}
+        assert set(snapshot["seats"]) <= {"human", "remote", "computer"}
         assert not {"me", "others", "seed", "decks", "tokens", "legal_actions", "negotiations"} & snapshot["view"].keys()
         assert all("cards" not in player for player in snapshot["view"]["players"])
 
@@ -39,7 +40,8 @@ def test_server_exposes_only_explicit_assets_on_loopback():
     threading.Thread(target=server.serve_forever, daemon=True).start()
     root = f"http://127.0.0.1:{server.server_address[1]}"
     try:
-        for name in ("", "app.js", "movement.js", "layout.js", "client.js", "pawn.js", "scene.js", "style.css", "vendor/three/three.module.js"):
+        for name in ("", "app.js", "movement.js", "layout.js", "client.js", "camera.js", "play.js", "pawn.js", "scene.js",
+                     "style.css", "vendor/three/three.module.js", "art/gallery.html", "art/merchants.js"):
             with urllib.request.urlopen(root + "/" + name) as reply:
                 assert reply.status == 200 and reply.read()
         for name in ("../AGENTS.md", "make_fixture.py", "vendor/three/README.md"):

@@ -928,7 +928,13 @@
     },
     "over": false,
     "revision": 2,
-    "log_length": 4
+    "log_length": 4,
+    "seats": [
+      "computer",
+      "computer",
+      "computer",
+      "computer"
+    ]
   },
   "after": {
     "view": {
@@ -1859,7 +1865,13 @@
     },
     "over": false,
     "revision": 3,
-    "log_length": 7
+    "log_length": 7,
+    "seats": [
+      "computer",
+      "computer",
+      "computer",
+      "computer"
+    ]
   },
   "events": [
     {

@@ -1,7 +1,7 @@
 import * as THREE from "./vendor/three/three.module.js";
 import {makeMerchant} from "./pawn.js";
 
-const L=globalThis.Board3DLayout;
+const L=globalThis.Board3DLayout,Cam=globalThis.Board3DCamera;
 const material=(color,roughness=.65)=>new THREE.MeshStandardMaterial({color,roughness});
 
 export function createScene(host,labelHost) {
@@ -14,11 +14,13 @@ export function createScene(host,labelHost) {
   renderer.outputColorSpace=THREE.SRGBColorSpace;host.append(renderer.domElement);
   const boardCamera=new THREE.OrthographicCamera(-10,10,5,-5,.1,100);
   const detailCamera=new THREE.PerspectiveCamera(60,1,.01,100);
+  const followCamera=new THREE.PerspectiveCamera(50,1,.05,100);
   const pawns=L.seats.map((_,seat)=>makeMerchant(seat));
   const present=pawns.map(()=>false);
   pawns.forEach(p=>{p.visible=false;scene.add(p);});
   const labels=[],tiles=[],positions=new Map();
   let detail=false,selected=0,requested=false,animation=null,frameCount=0;
+  let follow=null,eye=null,aim=null,lastNow=0,settled=true;
   const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
   svg.classList.add("leaders");labelHost.append(svg);
   scene.add(new THREE.HemisphereLight("#f2f7ff","#afa38d",2));
@@ -32,8 +34,19 @@ export function createScene(host,labelHost) {
     if (requested || document.hidden) return;
     requested=true;requestAnimationFrame(draw);
   }
-  function updateCamera() {
+  function followFrame(now,aspect) {
+    const goal=Cam.followView(pawns[follow].position.toArray());
+    const seconds=eye ? (now-lastNow)/1000 : 0;
+    eye=eye ? Cam.approach(eye,goal.position,seconds) : goal.position;
+    aim=aim ? Cam.approach(aim,goal.target,seconds) : goal.target;
+    settled=Math.hypot(...eye.map((v,i)=>v-goal.position[i]))<.002;
+    followCamera.aspect=aspect;followCamera.position.set(...eye);followCamera.lookAt(...aim);
+    followCamera.updateProjectionMatrix();
+    return followCamera;
+  }
+  function updateCamera(now=lastNow) {
     const aspect=host.clientWidth/host.clientHeight;
+    if (follow!==null && !detail) return followFrame(now,aspect);
     // Keep a 120 px callout band above and below, and room for the side names.
     const vertical=11*.56/(1-260/host.clientHeight);
     const extent=Math.max(vertical,11/(aspect-480/host.clientHeight))/2;
@@ -50,15 +63,15 @@ export function createScene(host,labelHost) {
     requested=false;
     if (animation && !animation(now)) animation=null;
     pawns.forEach((pawn,seat)=>pawn.visible=present[seat] && (!detail || seat===selected));
-    const camera=updateCamera();renderer.render(scene,camera);frameCount++;
+    const camera=updateCamera(now);lastNow=now;renderer.render(scene,camera);frameCount++;
     updateLabels(camera);
-    if (animation) invalidate();
+    if (animation || (follow!==null && !settled)) invalidate();
   }
   function updateLabels(camera) {
-    const width=host.clientWidth,height=host.clientHeight;
-    svg.style.display=detail ? "none" : "";
+    const width=host.clientWidth,height=host.clientHeight,away=detail || follow!==null;
+    svg.style.display=away ? "none" : "";
     for (const {element,point,line,index} of labels) {
-      element.hidden=detail;
+      element.hidden=away;
       const p=point.clone().project(camera),px=(p.x*.5+.5)*width,py=(-p.y*.5+.5)*height;
       const [x,z]=L.tilePosition(index);
       let left,top,ax,ay;
@@ -124,6 +137,8 @@ export function createScene(host,labelHost) {
   return {setBoard,setPlayers,place,pose,invalidate,
     select(seat){L.seatOffset(seat);selected=seat;invalidate();},
     setDetail(value){detail=value;invalidate();},
+    setFollow(seat){follow=seat===null ? null : (L.seatOffset(seat),seat);eye=null;aim=null;settled=true;invalidate();},
+    get following(){return follow;},
     setOut(seat){present[seat]=false;invalidate();},
     highlight(index){tiles.forEach((t,i)=>t.material.emissive.set(i===index?"#514a21":"#000000"));invalidate();},
     animate(callback){animation=callback;invalidate();},stop(){animation=null;invalidate();},
