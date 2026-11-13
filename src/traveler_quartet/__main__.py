@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from traveler_quartet import __version__
 
-MODES = ("play", "cli", "tournament", "serve", "ai-game")
+MODES = ("play", "cli", "tournament", "serve", "ai-game", "talk")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -23,7 +23,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--set", action="append", default=[], metavar="NAME=AMOUNT",
                         help="tournament: simulate another amount, by its name in economy.json (repeatable)")
     parser.add_argument("--port", type=int, default=8765, help="serve: the local port (127.0.0.1 only)")
-    parser.add_argument("--log", help="ai-game: JSON log path, outside every repository")
+    parser.add_argument("--log", help="ai-game, talk: JSON output path, outside every repository")
+    parser.add_argument("--report", help="talk: the JSON report of an AI game whose table messages are judged")
+    parser.add_argument("--model", default="sonnet", help="talk: the Claude model that reads each message")
     parser.add_argument("--notebook-cap", type=int, default=None,
                         help="ai-game: each AI keeps private notes on its rivals, each capped at this many characters")
     parser.add_argument("--opponents", default="normal,normal,normal",
@@ -57,6 +59,22 @@ def _tournament(args: argparse.Namespace) -> int:
     return 0
 
 
+def _talk(args: argparse.Namespace) -> int:
+    from traveler_quartet.match.replay import ReplayMismatch
+    from traveler_quartet.match.talk import judge_log
+    if not args.report or not args.log:
+        print("traveler-quartet: talk needs --report <ai game report> and --log <output path>", file=sys.stderr)
+        return 2
+    try:
+        result = judge_log(args.report, args.log, model=args.model)
+    except (ValueError, OSError, ReplayMismatch, subprocess.SubprocessError) as error:
+        print(f"traveler-quartet: {error}", file=sys.stderr)
+        return 2
+    print(json.dumps({"messages": result["messages"], "summary": result["summary"],
+                      "by_speaker": result["by_speaker"]}, indent=2))
+    return 0
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
@@ -86,6 +104,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             return 2
         print(json.dumps(report, indent=2, ensure_ascii=False))
         return 0
+    if args.mode == "talk":
+        return _talk(args)
     print(f"traveler-quartet: '{args.mode}' is not built yet.", file=sys.stderr)
     return 1
 
