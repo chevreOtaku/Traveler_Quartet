@@ -35,7 +35,8 @@ test('actual merchant geometry including its numbered base fits the miniature en
   const three=await import(threeURL);
   let source=fs.readFileSync('examples/board3d/pawn.js','utf8');
   source=source.replace('./vendor/three/three.module.js',threeURL)
-    .replace('./layout.js',pathToFileURL(path.resolve('examples/board3d/layout.js')).href);
+    .replace('./layout.js',pathToFileURL(path.resolve('examples/board3d/layout.js')).href)
+    .replace('./art/merchants.js',pathToFileURL(path.resolve('examples/board3d/art/merchants.js')).href);
   const {makeMerchant}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
   for (let seat=0;seat<4;seat++) {
     const pawn=makeMerchant(seat),box=new three.Box3().setFromObject(pawn,true),size=box.getSize(new three.Vector3());

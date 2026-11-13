@@ -35,7 +35,9 @@ test('real scene projection keeps all forty callouts on screen, isolates detail 
     render(scene,camera){scene.updateMatrixWorld();camera.updateMatrixWorld();rendered=scene;}
   };
   const three=pathToFileURL(path.resolve('examples/vendor/three/three.module.js')).href;
-  const pawnSource=fs.readFileSync('examples/board3d/pawn.js','utf8').replace('./vendor/three/three.module.js',three);
+  const art=pathToFileURL(path.resolve('examples/board3d/art/merchants.js')).href;
+  const pawnSource=fs.readFileSync('examples/board3d/pawn.js','utf8').replace('./vendor/three/three.module.js',three)
+    .replace('./art/merchants.js',art);
   const source=fs.readFileSync('examples/board3d/scene.js','utf8')
     .replace('./vendor/three/three.module.js',three).replace('./pawn.js',dataURL(pawnSource))
     .replace('new THREE.WebGLRenderer','new globalThis.Board3DRenderer');
