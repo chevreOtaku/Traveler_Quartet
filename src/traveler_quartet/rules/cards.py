@@ -7,7 +7,7 @@ from typing import Mapping, Tuple
 
 from traveler_quartet.rules.board import DATA_DIR
 from traveler_quartet.rules.dice import roll
-from traveler_quartet.rules.state import GameState
+from traveler_quartet.rules.state import GameState, update_player
 
 DECKS = ("chance", "event", "adventurer")
 Card = Mapping[str, object]
@@ -38,6 +38,23 @@ def draw(state: GameState, deck: str) -> Tuple[GameState, Card]:
     top, rest = decks[deck][0], decks[deck][1:]
     decks[deck] = rest + (top,)
     return replace(state, decks=tuple((d, decks[d]) for d, _ in state.decks)), state.catalog[top]
+
+
+def keep_card(state: GameState, player: int, card_id: str) -> GameState:
+    """A kept card goes to the hand and LEAVES its deck while it is held: it cannot be drawn twice."""
+    deck = deck_of(state, card_id)
+    state = update_player(state, player, cards=state.players[player].cards + (card_id,))
+    return replace(state, decks=tuple((d, tuple(c for c in ids if c != card_id)) if d == deck else (d, ids)
+                                      for d, ids in state.decks))
+
+
+def return_card(state: GameState, player: int, card_id: str) -> GameState:
+    """A held card that is played, or whose holder goes out, leaves the hand and goes back UNDER its deck."""
+    held = list(state.players[player].cards)
+    held.remove(card_id)
+    deck = deck_of(state, card_id)
+    state = update_player(state, player, cards=tuple(held))
+    return replace(state, decks=tuple((d, ids + (card_id,)) if d == deck else (d, ids) for d, ids in state.decks))
 
 
 def card_die(state: GameState) -> Tuple[GameState, int]:
