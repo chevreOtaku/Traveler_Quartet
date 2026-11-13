@@ -39,13 +39,45 @@ def test_server_exposes_only_explicit_assets_on_loopback():
     threading.Thread(target=server.serve_forever, daemon=True).start()
     root = f"http://127.0.0.1:{server.server_address[1]}"
     try:
-        for name in ("", "app.js", "movement.js", "pawn.js", "scene.js", "style.css", "vendor/three/three.module.js"):
+        for name in ("", "app.js", "movement.js", "layout.js", "client.js", "pawn.js", "scene.js", "style.css", "vendor/three/three.module.js"):
             with urllib.request.urlopen(root + "/" + name) as reply:
                 assert reply.status == 200 and reply.read()
         for name in ("../AGENTS.md", "make_fixture.py", "vendor/three/README.md"):
             with pytest.raises(urllib.error.HTTPError) as error:
                 urllib.request.urlopen(root + "/" + name)
             assert error.value.code == 404
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_preview_delegates_four_computers_and_bounded_public_events_to_real_server():
+    server = runpy.run_path(str(DEMO / "serve.py"))["preview_server"](0)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    root = f"http://127.0.0.1:{server.server_address[1]}"
+    body = json.dumps({"seats": ["normal"] * 4, "seed": 1, "rounds": 1}).encode()
+    try:
+        request = urllib.request.Request(root + "/games", data=body, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(request) as reply:
+            created = json.load(reply)
+        assert created["tokens"] == {}
+        public = root + "/games/" + created["game"] + "/public"
+        with urllib.request.urlopen(public) as reply:
+            snapshot = json.load(reply)
+        assert snapshot["over"] and snapshot["revision"] > 0
+        assert len(snapshot["view"]["board"]) == 40
+        assert len(snapshot["view"]["players"]) == 4
+        end = snapshot["log_length"]
+        with urllib.request.urlopen(public + f"/events?since=0&until={end}") as reply:
+            rows = json.load(reply)["events"]
+        assert [row["index"] for row in rows] == list(range(end))
+        assert all(0 < row["revision"] <= snapshot["revision"] for row in rows)
+        assert any(row["kind"] == "moved" and row["data"]["travel"] == "walk" for row in rows)
+        with urllib.request.urlopen(public + "/events?since=0&until=1") as reply:
+            assert json.load(reply)["events"] == rows[:1]
+        with pytest.raises(urllib.error.HTTPError) as error:
+            urllib.request.urlopen(root + "/games/" + created["game"] + "/view")
+        assert error.value.code == 401
     finally:
         server.shutdown()
         server.server_close()

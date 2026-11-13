@@ -1,7 +1,9 @@
 import * as THREE from "./vendor/three/three.module.js";
 
 // Original merchant, built only from smooth primitives. The face points towards +Z.
-export function makeMerchant() {
+export function makeMerchant(seat=0) {
+  const {PAWN_HEIGHT,PAWN_WIDTH,seats}=globalThis.Board3DLayout;
+  if (!Number.isInteger(seat) || !seats[seat]) throw new Error("Unknown player seat");
   const pawn = new THREE.Group();
   const material = (color, roughness=0.24) => new THREE.MeshStandardMaterial({color, roughness, metalness:0});
   const skin = material("#edb68e"), hair = material("#693936");
@@ -19,7 +21,7 @@ export function makeMerchant() {
   const tube = (points,radius,mat) => mesh(new THREE.TubeGeometry(
     new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p))),32,radius,10,false),mat,[0,0,0]);
 
-  // Head diameter 1.72; overall height 3.16.
+  // Sculpting units only; the finished figure is normalized below, including its base.
   ball(skin,[0,2.25,0],[0.88,0.86,0.71]);
   ball(hair,[0,2.53,-0.16],[0.90,0.63,0.63]);
   for (const [x,y,z,s] of [[-.65,2.72,.32,.33],[-.38,2.92,.38,.31],[-.06,3.00,.32,.29],[.27,2.98,.25,.28],[.58,2.82,.25,.29]]) {
@@ -51,5 +53,26 @@ export function makeMerchant() {
   ball(material("#e7b64b"),[.48,.78,.466],[.052,.067,.025]);
   ball(skin,[0,2.06,.708],[.06,.055,.07]);
   tube([[-.09,1.95,.657],[0,1.92,.682],[.09,1.95,.657]],.018,dark);
-  return pawn;
+  const result=new THREE.Group(),bounds=new THREE.Box3().setFromObject(pawn,true);
+  const scale=(PAWN_HEIGHT-.10)/(bounds.max.y-bounds.min.y);
+  pawn.scale.setScalar(scale);pawn.position.y=.10-bounds.min.y*scale;
+  result.add(pawn);
+  const segments=[64,3,4,4][seat];
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(PAWN_WIDTH/2,PAWN_WIDTH/2,.10,segments),
+    material(seats[seat].color,.32));
+  base.position.y=.05;
+  if (seat===2) base.geometry.rotateY(Math.PI/4);
+  base.castShadow=true;base.receiveShadow=true;result.add(base);
+  // Raised numerals on the top of the base; the base outline is the seat's sign.
+  const digits=[[[[-1,-1],[-1,1],[1,1],[1,-1],[-1,-1]]],[[[0,-1],[0,1]]],
+    [[[-1,-1],[1,-1],[1,0],[-1,0],[-1,1],[1,1]]],
+    [[[-1,-1],[1,-1],[1,1],[-1,1]],[[-1,0],[1,0]]]];
+  for (const stroke of digits[seat]) {
+    const points=stroke.map(([x,z])=>new THREE.Vector3(x*.025,.104,.10+z*.027));
+    const curve=new THREE.CurvePath();
+    points.slice(1).forEach((p,i)=>curve.add(new THREE.LineCurve3(points[i],p)));
+    result.add(new THREE.Mesh(new THREE.TubeGeometry(curve,16,.007,6,false),white));
+  }
+  result.userData={seat,shape:seats[seat].shape};
+  return result;
 }

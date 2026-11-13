@@ -1,87 +1,138 @@
 import {createScene} from "./scene.js";
 
-const element = id => document.getElementById(id);
-const replay=element("replay"), detail=element("detail"), status=element("status");
+const element=id=>document.getElementById(id);
+const C=globalThis.Board3DClient,L=globalThis.Board3DLayout,M=globalThis.Board3DMovement;
 const motion=matchMedia("(prefers-reduced-motion: reduce)");
-const {movementSquares,motionFrame}=globalThis.Board3DMovement;
-let stage, fixture, event, size, detailView=false, playing=false;
+const params=new URLSearchParams(location.search),fixtureMode=params.get("mode")==="fixture";
+let stage,client,game=params.get("game"),fixture=null,timer=null,detailView=false,busy=false;
+let activeMove=null,skip=false,board=null;
 
-function updateMotionNote() {
-  element("motion-note").textContent=motion.matches
-    ? "Reduced motion: the merchant is placed directly at the destination."
-    : "A small hop for each square. No animation while at rest.";
+function error(message="") {element("error").textContent=message;element("error").hidden=!message;}
+function setBusy(value) {
+  busy=value;
+  for (const id of ["start","connect","replay"]) element(id).disabled=value;
+  element("skip").disabled=!value;
 }
-function complete() {
-  playing=false; replay.disabled=false;
-  status.textContent=`Arrived at ${fixture.after.view.board[event.data.to].name}.`;
-}
-function play() {
-  if (!event || playing) return;
-  playing=true; replay.disabled=true;
-  stage.place(event.data.from);
-  status.textContent=event.sentence;
-  if (motion.matches || event.data.travel === "teleport") {
-    stage.place(event.data.to); complete(); return;
+function reset(snapshot,positions,replaying) {
+  board=snapshot.view.board;stage.setBoard(board);stage.setPlayers(snapshot.view.players,positions,replaying);
+  element("dice").textContent="-- / --";element("route").textContent="";
+  element("move-title").textContent=replaying ? "Replaying the server's public journal" : "Public table";
+  element("status").textContent=replaying ? "Starting the recorded journey." : "Public snapshot loaded.";
+  element("squares").replaceChildren();
+  for (const square of board) {
+    const item=document.createElement("li");item.textContent=`[${square.index}] ${square.name}`;
+    element("squares").append(item);
   }
-  let started;
-  stage.animate(now=>{
-    started ??= now;
-    const frame=motionFrame(event,size,(now-started)/360,motion.matches);
-    stage.pose(frame);
-    if (frame.done) complete();
-    return !frame.done;
+}
+function showSnapshot(snapshot) {
+  stage.setPlayers(snapshot.view.players);stage.highlight(-1);
+  element("dice").textContent=snapshot.view.last_dice.join(" / ");
+  element("move-title").textContent=`Round ${snapshot.view.round} / revision ${snapshot.revision}`;
+  element("status").textContent=snapshot.over ? "Game complete. Showing the confirmed public table." : "Following the public table.";
+  const summary=snapshot.view.players.map(p=>`Player ${p.seat}: ${p.out?"out":`${p.cash} G, square ${p.position}`}`).join(" | ");
+  element("summary").textContent=summary;
+}
+async function showEvent(row) {
+  element("move-title").textContent=`Round ${row.round} / player ${row.player} / revision ${row.revision}`;
+  element("status").textContent=row.sentence;element("event").textContent=JSON.stringify(row,null,2);
+  element("summary").textContent="Public journal playback; balances appear at the confirmed snapshot.";
+  if (row.kind==="rolled") element("dice").textContent=row.data.dice.join(" / ");
+  if (row.kind==="bankrupt") stage.setOut(row.player);
+  if (row.kind!=="moved") {
+    if (!skip && !motion.matches) await new Promise(resolve=>setTimeout(resolve,65));
+    return;
+  }
+  const route=M.movementSquares(row,40);
+  stage.select(row.player);stage.highlight(row.data.to);
+  element("seat").value=String(row.player);
+  element("route").textContent=[row.data.from,...route,...(route.length?[]:[row.data.to])].map(i=>String(i).padStart(2,"0")).join(" > ");
+  stage.place(row.player,row.data.from);
+  if (skip || motion.matches || row.data.travel==="teleport") {stage.place(row.player,row.data.to);return;}
+  await new Promise(resolve=>{
+    let started;
+    const finish=()=>{stage.stop();stage.place(row.player,row.data.to);activeMove=null;resolve();};
+    activeMove=finish;
+    stage.animate(now=>{
+      started ??= now;
+      const frame=M.motionFrame(row,40,(now-started)/260,motion.matches||skip);
+      stage.pose(row.player,frame);
+      if (frame.done) {activeMove=null;resolve();}
+      return !frame.done;
+    });
   });
 }
-function validateFixture(data) {
-  const moves=data.events.filter(row=>row.kind === "moved");
-  if (moves.length !== 1) throw new Error("The fixture needs exactly one moved event");
-  const move=moves[0], board=data.before.view.board;
-  const route=movementSquares(move,board.length);
-  if (move.data.travel !== "walk" || move.data.steps < 2 || move.data.steps > 8 ||
-      route.length !== move.data.steps || board.length < 10 ||
-      !board.every((square,index)=>square.index===index && typeof square.name === "string") ||
-      data.after.revision !== data.before.revision+1 ||
-      !data.events.every(row=>row.index>=data.before.log_length && row.index<data.after.log_length && row.revision===data.after.revision) ||
-      data.before.view.players[move.player]?.position !== move.data.from ||
-      data.after.view.players[move.player]?.position !== move.data.to)
-    throw new Error("The public fixture does not match the single-walk study contract");
-  return move;
+function schedule() {
+  clearTimeout(timer);
+  if (client?.snapshot && !client.snapshot.over) timer=setTimeout(()=>run(()=>client.refresh()),1500);
 }
-async function load() {
+async function run(work) {
+  if (busy) return;
+  clearTimeout(timer);setBusy(true);skip=false;error();
+  try {await work();}
+  catch(e) {error(e.message+". Use Replay / retry to reconnect.");}
+  finally {setBusy(false);schedule();}
+}
+async function replayFixture() {
+  if (!fixture) {
+    const response=await fetch("./fixture.json");
+    if (!response.ok) throw new Error("Missing fixture.json; run make_fixture.py");
+    fixture=await response.json();
+  }
+  C.validateSnapshot(fixture.before);C.validateSnapshot(fixture.after);
+  const rows=C.windowRows(fixture.after,fixture.events,fixture.before.log_length,fixture.before.revision);
+  const positions=C.rewind(fixture.after,rows);
+  if (positions.some((p,i)=>p!==fixture.before.view.players[i].position)) throw new Error("Inconsistent fixture positions");
+  reset(fixture.before,positions,true);
+  for (const row of rows) await showEvent(row);
+  showSnapshot(fixture.after);element("status").textContent="Recorded fixture move complete.";
+}
+async function connect(id,replay=false) {
+  game=id;
+  element("game").value=id;
+  history.replaceState(null,"","?game="+encodeURIComponent(id));
+  element("source").textContent="SERVER / PUBLIC JOURNAL";
+  await client.connect(id,replay);
+}
+async function newGame() {
+  const seed=Number(element("seed").value),rounds=Number(element("rounds").value);
+  if (!Number.isSafeInteger(seed) || ![5,10,30].includes(rounds)) throw new Error("Choose an integer seed and a listed game length");
+  element("status").textContent="The server is playing four computers. Their public journal will follow.";
+  const response=await fetch("/games",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({seats:["normal","normal","normal","normal"],seed,rounds})});
+  const data=await response.json();
+  if (!response.ok) throw new Error(data.error||"Game creation failed");
+  game=data.game;await connect(game,true);
+}
+function init() {
   try {
     stage=createScene(element("viewport"),element("labels"));
-    detail.addEventListener("click",()=>{
-      detailView=!detailView; stage.setDetail(detailView);
-      detail.setAttribute("aria-pressed",String(detailView));
-      detail.textContent=detailView ? "Return to board" : "Inspect figurine";
-      element("view-note").textContent=detailView ? "FIGURINE DETAIL / 60°" : "BOARD VIEW / 60°";
-    });
-    const response=await fetch("./fixture.json");
-    if (!response.ok) throw new Error("fixture.json is missing; run python examples/board3d/make_fixture.py, then reload");
-    fixture=await response.json();
-    event=validateFixture(fixture); size=fixture.before.view.board.length;
-    stage.setBoard(fixture.before.view.board,event.data.from);
-    const route=movementSquares(event,size);
-    element("move-title").textContent=`Player ${event.player} / ${event.data.steps} squares / engine revision ${fixture.after.revision}`;
-    status.textContent=event.sentence;
-    element("route").textContent=[event.data.from,...route].map(i=>String(i).padStart(2,"0")).join(" → ");
-    element("event").textContent=JSON.stringify(event,null,2);
-    for (let slot=0;slot<10;slot++) {
-      const square=fixture.before.view.board[(event.data.from-1+slot+size)%size];
-      const item=document.createElement("li"); item.textContent=`[${square.index}] ${square.name}`;
-      element("squares").append(item);
+    for (const town of Object.values(L.towns)) {
+      const label=document.createElement("span");label.style.setProperty("--seat",town.color);
+      label.textContent=`T${town.number} / ${town.name}`;element("towns").append(label);
     }
-    replay.disabled=false; replay.addEventListener("click",play);
-  } catch (error) {
-    status.textContent=`Preview unavailable: ${error.message}`;
-    if (!stage) detail.disabled=true;
-    replay.disabled=true;
-  }
+    client=C.create({fetch:(...args)=>fetch(...args),onReset:reset,onEvent:showEvent,onSnapshot:showSnapshot,
+      onResync:reason=>error(`Resynchronized to a fresh public snapshot: ${reason}. The damaged interval was skipped.`)});
+    element("setup").hidden=fixtureMode;
+    element("source").textContent=fixtureMode ? "FIXTURE / RECORDED MOVE" : "SERVER / PUBLIC JOURNAL";
+    element("start-form").addEventListener("submit",event=>{event.preventDefault();run(newGame);});
+    element("connect-form").addEventListener("submit",event=>{event.preventDefault();run(()=>connect(element("game").value.trim()));});
+    element("replay").addEventListener("click",()=>run(()=>fixtureMode ? replayFixture() :
+      game ? connect(game,true) : Promise.reject(new Error("Start or connect to a game first"))));
+    element("skip").addEventListener("click",()=>{skip=true;activeMove?.();});
+    element("seat").addEventListener("change",()=>stage.select(Number(element("seat").value)));
+    element("detail").addEventListener("click",()=>{
+      detailView=!detailView;stage.setDetail(detailView);element("board").classList.toggle("detail",detailView);
+      element("detail").setAttribute("aria-pressed",String(detailView));
+      element("detail").textContent=detailView ? "Return to board" : "Inspect figurine";
+    });
+    element("return").addEventListener("click",()=>element("detail").click());
+    if (fixtureMode) run(replayFixture);
+    else if (game) run(()=>connect(game));
+    else {setBusy(false);element("status").textContent="Start four computers, or enter an existing game ID.";}
+  } catch(e) {error(`3D preview unavailable: ${e.message}`);setBusy(true);}
 }
-motion.addEventListener("change",()=>{
-  updateMotionNote();
-  if (!playing || !motion.matches) return;
-  stage.stop(); stage.place(event.data.to); complete();
-});
-updateMotionNote();
-load();
+function motionNote() {
+  element("motion-note").textContent=motion.matches ? "Reduced motion: direct arrivals." : "One small hop per square. No rendering while at rest.";
+  if (motion.matches) activeMove?.();
+}
+motion.addEventListener("change",motionNote);motionNote();init();

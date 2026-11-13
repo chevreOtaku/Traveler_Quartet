@@ -21,7 +21,7 @@ globalThis.Board3DMovement = (() => {
       return {from:d.to, to:d.to, progress:1, lift:0, done:true};
     const index = Math.floor(elapsedHops), progress = elapsedHops - index;
     return {from:index ? route[index - 1] : d.from, to:route[index], progress,
-      lift:Math.sin(progress * Math.PI) * 0.48, done:false};
+      lift:Math.sin(progress * Math.PI) * 0.12, done:false};
   }
   return {movementSquares, motionFrame};
 })();

@@ -3,43 +3,77 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#c6e1e8">
+  <meta name="theme-color" content="#e5e9dc">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./style.css">
-  <title>Traveler Quartet / Merchant study</title>
+  <title>Traveler Quartet / Four little merchants</title>
 </head>
 <body>
   <main>
     <header>
-      <div><p class="eyebrow">Traveler Quartet <span>/</span> 3D study 01</p>
-        <h1>A little merchant.<br>A real journey.</h1></div>
-      <p class="intro">One original figurine, ten public board squares.<br>Watch a computer's actual move, one hop at a time.</p>
+      <div><p class="eyebrow">Traveler Quartet <span>/</span> 3D study 02</p>
+        <h1>Four little merchants. A whole world.</h1></div>
+      <p class="intro">Forty squares, eight towns.<br>Real computer play, one small hop at a time.</p>
     </header>
-    <section class="stage" aria-label="Three dimensional merchant and board">
-      <div id="viewport" role="img" aria-label="Glossy chibi merchant on a pastel faceted board"></div>
-      <div id="labels" aria-hidden="true"></div>
-      <div class="stage-note"><span class="dot"></span> MERCHANT / TEAL APRON</div>
-      <div class="view-note" id="view-note">BOARD VIEW / 60°</div>
-      <div class="controls">
-        <button id="replay" disabled>Replay the move</button>
-        <button id="detail" aria-pressed="false">Inspect figurine</button>
+    <div id="setup">
+      <form id="start-form">
+        <label>Seed <input id="seed" type="number" step="1" value="1" required></label>
+        <label>Rounds <select id="rounds"><option>5</option><option>10</option><option>30</option></select></label>
+        <button id="start" type="submit">Watch four computers</button>
+      </form>
+      <form id="connect-form">
+        <label>Game ID <input id="game" required autocomplete="off"></label>
+        <button id="connect" type="submit">Watch table</button>
+      </form>
+      <a href="?mode=fixture">Recorded test move</a>
+    </div>
+    <p id="error" role="alert" hidden></p>
+    <div class="board-scroll" tabindex="0" aria-label="Board. Scroll horizontally on smaller screens.">
+      <section class="stage" id="board" aria-label="Three dimensional merchant and board">
+        <div id="viewport" role="img" aria-label="Four miniature chibi merchants on a forty square board"></div>
+        <div id="labels" aria-hidden="true"></div>
+        <div class="centre">
+          <p class="eyebrow" id="source">SERVER / PUBLIC JOURNAL</p>
+          <p class="dice-label">Last public dice</p><p id="dice">-- / --</p>
+          <p class="eyebrow" id="move-title">Public table</p>
+          <p id="status" role="status" aria-live="polite">Loading the board...</p>
+          <p id="route"></p>
+          <div class="controls">
+            <button id="replay" disabled>Replay / retry</button>
+            <button id="skip" disabled>Go to latest</button>
+          </div>
+          <div class="inspect">
+            <label>Figurine <select id="seat">
+              <option value="0">0 / circle</option><option value="1">1 / triangle</option>
+              <option value="2">2 / square</option><option value="3">3 / diamond</option>
+            </select></label>
+            <button id="detail" aria-pressed="false">Inspect figurine</button>
+          </div>
+        </div>
+        <div class="detail-controls"><button id="return" type="button">Return to board</button></div>
+      </section>
+    </div>
+    <div class="legends">
+      <div class="seat-legend" aria-label="Player bases">
+        <span style="--seat:#216b83">0 / circle</span><span style="--seat:#b85a39">1 / triangle</span>
+        <span style="--seat:#69529b">2 / square</span><span style="--seat:#527634">3 / diamond</span>
       </div>
-    </section>
+      <div id="towns" aria-label="Town colours and numbers"></div>
+    </div>
     <footer>
-      <div class="journey"><p class="eyebrow" id="move-title">Public engine replay</p>
-        <p id="status" role="status" aria-live="polite">Loading the public fixture…</p>
-        <p id="route"></p></div>
-      <div class="caption"><span>SMOOTH FIGURINE / FACETED WORLD</span>
-        <p id="motion-note">A small hop for each square. No animation while at rest.</p></div>
+      <p id="summary">The server computes all computer turns at creation; this page replays their public journal.</p>
+      <p id="motion-note">One small hop per square. No rendering while at rest.</p>
     </footer>
     <details><summary>Public event and board names</summary>
-      <p>This is an offline visual study of computer play. The replay uses the engine's signed movement event.</p>
-      <pre id="event">Waiting for fixture.json</pre>
+      <p>All-computer games are computed by the server before playback. An existing table is followed from its current public snapshot. This preview is a UX study, not a strategy measurement.</p>
+      <pre id="event">Waiting for public events</pre>
       <ol id="squares"></ol>
     </details>
-    <noscript>This study requires JavaScript and WebGL. Run make_fixture.py, then serve.py to preview it locally.</noscript>
+    <noscript>This study requires JavaScript and WebGL. Run examples/board3d/serve.py to preview it locally.</noscript>
   </main>
+  <script src="./layout.js"></script>
   <script src="./movement.js"></script>
+  <script src="./client.js"></script>
   <script type="module" src="./app.js"></script>
 </body>
 </html>
