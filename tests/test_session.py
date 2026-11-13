@@ -21,7 +21,7 @@ def test_only_remote_seats_get_a_token():
 def test_the_computers_play_until_a_remote_player_must_answer():
     s = new_session(("normal", "remote"), seed=1, make_token=_tokens())
     assert not s.state.over and s.seats[actor(s.state)] == "remote"
-    assert any(e.player == 0 for _, e in s.log)    # the computer at seat 0 has already played
+    assert any(e.player == 0 for _, e, _ in s.log)    # the computer at seat 0 has already played
 
 
 def test_an_unknown_token_is_refused():

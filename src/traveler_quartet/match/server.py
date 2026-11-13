@@ -1,17 +1,28 @@
 """The local server (step 7a) -- the standard library only; the page ASKS (no WebSocket); designed as if the players were
 FAR: a game, one token per remote player, every answer checked by the engine.
 
-    POST /games                      {"seats": ["remote", "normal", ...], "seed": 1}  -> 201 {"game", "tokens"}
-    GET  /games/<id>/view            -> 200 {"view", "text", "over", "log_length"}
-    POST /games/<id>/act             {"action": "...", "message": "..."}      -> 200 {"view", ...}
-    GET  /games/<id>/events?since=n  -> 200 {"events": [...]}
-    GET  /games/<id>/public          -> 200 {"view", "over", "log_length"}  -- a SPECTATOR (the stream), no token
-    GET  /games/<id>/public/events?since=n -> 200 {"events": [...]}       -- every kept card stays "a kept card"
+    POST /games                      {"seats": ["remote", "normal", ...], "seed": 1, "rounds"?: n}
+                                     -> 201 {"game", "tokens"}
+    GET  /games/<id>/view            -> 200 {"view", "text", "over", "revision", "log_length"}
+    POST /games/<id>/act             {"action": "...", "message"?: "...", "expected_revision"?: r}
+                                     -> 200 {"view", "text", "over", "revision", "log_length"}
+    GET  /games/<id>/events?since=a&until=b          -> 200 {"events": [...]}
+    GET  /games/<id>/public          -> 200 {"view", "over", "revision", "log_length"}  -- a SPECTATOR, no token
+    GET  /games/<id>/public/events?since=a&until=b   -> 200 {"events": [...]}  -- every kept card stays "a kept card"
 
-`POST /games` may give "rounds" (a shorter game to try things; a positive integer).
+- `rounds` (optional): a shorter game, a positive integer.
+- `revision`: +1 per SUCCESSFUL action of the game (computer or remote, with or without events); a refused action
+  changes nothing. Each event row carries the `revision` of its action, its `index` (the cursor), and a `sentence`.
+- A snapshot (`view`, `revision`, `log_length`) is taken under one lock. Read the events with `since` (included) and
+  `until` (EXCLUDED, optional; both clamped to the log) and render the snapshot with exactly the events below its
+  `log_length`. If `revision` grew while `log_length` did not (an eventless action, e.g. a sealed bid), refresh the view.
+- `expected_revision` (optional, recommended for a front): checked after authentication and BEFORE the action; if it is
+  not the current revision -> 409, with no effect at all. Refresh before retrying -- a retried request is never applied
+  twice.
 
 The token goes in the `Authorization: Bearer <token>` header, never in the URL (it would end up in logs). 401: unknown
-token ; 409: not your turn ; 400: a bad request or an illegal action (with the legal ones) ; 404: no such game or path.
+token ; 409: not your turn, or a stale `expected_revision` ; 400: a bad request (a malformed `rounds` or
+`expected_revision`) or an illegal action (with the legal ones) ; 404: no such game or path.
 `handle` is the whole server without the network; `make_server` binds it to 127.0.0.1 by default.
 """
 
@@ -21,11 +32,11 @@ import threading
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
-from typing import Dict, Mapping, Tuple
+from typing import Dict, Mapping, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from traveler_quartet.match.session import (NotYourTurn, Session, Unauthorized, act, events_for, new_session,
-                                            public_events, seen, watched)
+from traveler_quartet.match.session import (NotYourTurn, Session, StaleRevision, Unauthorized, act, events_for,
+                                            new_session, public_events, seen, watched)
 from traveler_quartet.rules.engine import IllegalAction, legal_actions
 
 Reply = Tuple[int, Dict[str, object]]
@@ -66,16 +77,31 @@ def _create(reg: Registry, body: bytes) -> Reply:
     return 201, {"game": game, "tokens": session.tokens}
 
 
+def _window(query: str) -> Tuple[int, Optional[int]]:
+    """`since` (included) and `until` (EXCLUDED, optional) of an events read."""
+    params = parse_qs(query)
+    until = params.get("until", [None])[0]
+    return int(params.get("since", ["0"])[0]), (None if until is None else int(until))
+
+
+def _expected_revision(data: Mapping[str, object]) -> Optional[int]:
+    value = data.get("expected_revision")
+    if value is None:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError("expected_revision must be a non-negative integer")
+    return value
+
+
 def _on_game(reg: Registry, game: str, verb: str, headers: Mapping[str, str], body: bytes, query: str) -> Reply:
     session, token = reg.games[game], _token(headers)
     if verb == "view":
         return 200, seen(session, token)
     if verb == "events":
-        since = int(parse_qs(query).get("since", ["0"])[0])
-        return 200, {"events": events_for(session, token, since)}
+        return 200, {"events": events_for(session, token, *_window(query))}
     data = _json(body)
     try:
-        act(session, token, str(data.get("action", "")), data.get("message"))
+        act(session, token, str(data.get("action", "")), data.get("message"), _expected_revision(data))
     except IllegalAction as error:
         return 400, {"error": str(error), "legal_actions": list(legal_actions(session.state))}
     return 200, seen(session, token)
@@ -89,7 +115,7 @@ def _spectate(reg: Registry, parts, query: str) -> Reply:
         return 200, watched(session)
     if parts[3] != "events":
         return 404, {"error": "no such path"}
-    return 200, {"events": public_events(session, int(parse_qs(query).get("since", ["0"])[0]))}
+    return 200, {"events": public_events(session, *_window(query))}
 
 
 def handle(reg: Registry, method: str, path: str, headers: Mapping[str, str], body: bytes) -> Reply:
@@ -108,7 +134,7 @@ def handle(reg: Registry, method: str, path: str, headers: Mapping[str, str], bo
                 return _on_game(reg, parts[1], parts[2], headers, body, url.query)
     except Unauthorized as error:
         return 401, {"error": str(error)}
-    except NotYourTurn as error:
+    except (NotYourTurn, StaleRevision) as error:
         return 409, {"error": str(error)}
     except ValueError as error:
         return 400, {"error": str(error)}

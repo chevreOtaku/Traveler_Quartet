@@ -58,6 +58,9 @@ def _sentences(names: Sequence[str], who: Callable) -> Dict[str, Callable[[Dict]
         "built": lambda d: f"built on {_square(names, d['square'])} (level {d['level']})",
         "mortgaged": lambda d: f"mortgaged {_square(names, d['square'])}",
         "jumped": lambda d: f"jumped from {_square(names, d['from'])} to {_square(names, d['to'])}",
+        "moved": lambda d: (f"teleported to {_square(names, d['to'])} ({d['kind']})" if d["travel"] == "teleport" else
+                            f"{'walked' if d['steps'] > 0 else 'went back'} {abs(d['steps'])} squares to "
+                            f"{_square(names, d['to'])}"),
         "sent_to_dungeon": lambda d: "was sent to the dungeon",
         "paid_to_player": lambda d: f"paid {d['amount']} to {who(d['to'])}",
         "paid_by_bank": lambda d: f"received {d['amount']} from the bank",
