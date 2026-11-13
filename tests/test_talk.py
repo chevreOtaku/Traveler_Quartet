@@ -62,6 +62,52 @@ def test_a_claim_is_checked_against_the_state_at_that_moment(game):
     assert verdict(Statement("E", "", "own", town="atlantis", player=owner), decision, []) == UNDETERMINABLE
 
 
+@pytest.fixture(scope="module")
+def buyer(tmp_path_factory):
+    script = tmp_path_factory.mktemp("buyer") / "buyer.py"
+    script.write_text(
+        "import json, re, sys\n"
+        "prompt = sys.stdin.read()\n"
+        "choices = re.findall(r'^- `([^`]+)`$', prompt, re.MULTILINE)\n"
+        "print(json.dumps({'action': 'buy' if 'buy' in choices else choices[0], 'message': 'mine!'}))\n",
+        encoding="utf-8",
+    )
+    report = play_ai_game(("claude", "normal"), seed=2, rounds=15, log_path=tmp_path_factory.mktemp("b") / "b.json",
+                          commands={"claude": [sys.executable, str(script)]})
+    decisions, _, _ = replay(report)
+    return decisions
+
+
+def test_a_claim_said_with_a_move_may_speak_of_the_state_that_move_makes(buyer):
+    """v2 (13/11): « Bards' Corner is mine! » said WITH `buy` was judged on the state BEFORE the purchase."""
+    purchase = next(d for d in buyer if d.action == "buy")
+    square = purchase.state.players[purchase.seat].position
+    assert purchase.state.owners[square] is None
+    assert verdict(Statement("E", "it is mine", "own", square=square), purchase, []) == SUPPORTED
+    assert verdict(Statement("E", "it is not mine", "own", square=square, negated=True), purchase, []) == SUPPORTED
+    other = next(i for i, sq in enumerate(purchase.state.board.squares) if sq.town and i != square
+                 and purchase.state.owners[i] is None)
+    assert verdict(Statement("E", "that one is mine", "own", square=other), purchase, []) == CONTRADICTED
+
+
+def test_a_claim_on_how_many_districts_of_a_town_is_counted(buyer):
+    """v2 (13/11): « two of three in orange » was read as « all of orange »."""
+    decision = next(d for d in reversed(buyer) if any(o == d.seat for o in d.state.owners))
+    town, squares = next((t, s) for t, s in decision.state.board.towns.items()
+                         if any(decision.state.owners[i] == decision.seat for i in s))
+    count = sum(1 for i in squares if decision.state.owners[i] == decision.seat)
+    assert verdict(Statement("E", "", "own", town=town, amount=count), decision, []) == SUPPORTED
+    assert verdict(Statement("E", "", "own", town=town, amount=count + 2), decision, []) == CONTRADICTED
+
+
+def test_the_extractor_is_told_what_each_verb_means_in_this_game(game):
+    from traveler_quartet.match.talk import extraction_prompt
+
+    _, decisions = game
+    prompt = extraction_prompt(next(d for d in decisions if d.message))
+    assert "sell = sell a BUILDING" in prompt and "selling or buying a district between players for gold is an offer" in prompt
+
+
 def test_a_promise_is_contradicted_only_when_the_move_was_possible_and_not_played(game):
     _, decisions = game
     first = _passes(decisions)[0]

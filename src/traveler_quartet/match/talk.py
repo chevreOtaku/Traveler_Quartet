@@ -13,7 +13,7 @@ from typing import Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from traveler_quartet.match.replay import Decision, replay
 from traveler_quartet.players.command_player import run_command
-from traveler_quartet.rules.engine import GameState, legal_actions, negotiations
+from traveler_quartet.rules.engine import GameState, apply, legal_actions, negotiations
 
 EXTRACTOR_SYSTEM_PROMPT = "You list the checkable statements of one message. Answer with the JSON object asked for, nothing else."
 EXTRACTOR = ["claude", "-p", "--restricted", "--strict-mcp-config", "--output-format", "text",
@@ -63,6 +63,12 @@ def extraction_prompt(decision: Decision) -> str:
         "- E: a claim about the CURRENT state: who owns what, how much gold someone has.\n"
         "- Anything else (jokes, questions, feelings, threats with no concrete move): do NOT list it.\n"
         f"Verbs (exactly one per statement): {verbs}.\n"
+        "What the verbs mean in THIS game: buy = buy from the bank the district you stand on; pass = decline that "
+        "purchase; offer = propose, or counter, a TRADE with another player (selling or buying a district between "
+        "players for gold is an offer); accept / refuse = answer a trade or a stall request; sell = sell a BUILDING "
+        "back to the bank; build = build on your district; raise = raise in a public auction; bid = a sealed bid; "
+        "drop = leave an auction; curse = play the curse on a player; own = who owns a district or how many of a "
+        "town (put the count in amount); cash = how much gold a player has.\n"
         "Answer with ONE JSON object and nothing else:\n"
         '{"statements": [{"class": "A|P|E", "quote": "<the words>", "verb": "<verb>", "square": <number or null>, '
         '"town": "<town or null>", "player": <N or null>, "amount": <integer or null>, "negated": <true|false>, '
@@ -124,20 +130,31 @@ def _announce(statement: Statement, decision: Decision) -> str:
     return SUPPORTED if did != statement.negated else CONTRADICTED
 
 
-def _claim(statement: Statement, decision: Decision) -> str:
-    state, who = decision.state, decision.seat if statement.player is None else statement.player
-    if not 0 <= who < len(state.players):
-        return UNDETERMINABLE
+def _claim_true(statement: Statement, state: GameState, who: int) -> Optional[bool]:
     if statement.verb == "own":
         targets = _targets(statement, state)
         if not targets:
-            return UNDETERMINABLE
-        true = all(state.owners[i] == who for i in targets)
-    elif statement.verb == "cash" and statement.amount is not None:
-        true = abs(state.players[who].cash - statement.amount) <= max(10, statement.amount // 10)
-    else:
+            return None
+        owned = sum(1 for i in targets if state.owners[i] == who)
+        counted = statement.town is not None and statement.square is None and statement.amount is not None
+        return owned == statement.amount if counted else owned == len(targets)
+    if statement.verb == "cash" and statement.amount is not None:
+        return abs(state.players[who].cash - statement.amount) <= max(10, statement.amount // 10)
+    return None
+
+
+def _claim(statement: Statement, decision: Decision) -> str:
+    """A claim goes WITH a move: it holds if it is true just before or just after that move (« Bards' Corner is mine! »
+    said with `buy` speaks of the state the move makes) -- contradicted only if false at both."""
+    who = decision.seat if statement.player is None else statement.player
+    if not 0 <= who < len(decision.state.players):
         return UNDETERMINABLE
-    return SUPPORTED if true != statement.negated else CONTRADICTED
+    before = _claim_true(statement, decision.state, who)
+    if before is None:
+        return UNDETERMINABLE
+    after = _claim_true(statement, apply(decision.state, decision.action)[0], who)
+    holds = (before != statement.negated) or (after != statement.negated)
+    return SUPPORTED if holds else CONTRADICTED
 
 
 def _promise(statement: Statement, decision: Decision, later: Sequence[Decision]) -> str:
