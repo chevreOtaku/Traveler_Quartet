@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#c6e1e8">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <title>Traveler Quartet / Merchant study</title>
+</head>
+<body>
+  <main>
+    <header>
+      <div><p class="eyebrow">Traveler Quartet <span>/</span> 3D study 01</p>
+        <h1>A little merchant.<br>A real journey.</h1></div>
+      <p class="intro">One original figurine, ten public board squares.<br>Watch a computer's actual move, one hop at a time.</p>
+    </header>
+    <section class="stage" aria-label="Three dimensional merchant and board">
+      <div id="viewport" role="img" aria-label="Glossy chibi merchant on a pastel faceted board"></div>
+      <div id="labels" aria-hidden="true"></div>
+      <div class="stage-note"><span class="dot"></span> MERCHANT / TEAL APRON</div>
+      <div class="view-note" id="view-note">BOARD VIEW / 60°</div>
+      <div class="controls">
+        <button id="replay" disabled>Replay the move</button>
+        <button id="detail" aria-pressed="false">Inspect figurine</button>
+      </div>
+    </section>
+    <footer>
+      <div class="journey"><p class="eyebrow" id="move-title">Public engine replay</p>
+        <p id="status" role="status" aria-live="polite">Loading the public fixture…</p>
+        <p id="route"></p></div>
+      <div class="caption"><span>SMOOTH FIGURINE / FACETED WORLD</span>
+        <p id="motion-note">A small hop for each square. No animation while at rest.</p></div>
+    </footer>
+    <details><summary>Public event and board names</summary>
+      <p>This is an offline visual study of computer play. The replay uses the engine's signed movement event.</p>
+      <pre id="event">Waiting for fixture.json</pre>
+      <ol id="squares"></ol>
+    </details>
+    <noscript>This study requires JavaScript and WebGL. Run make_fixture.py, then serve.py to preview it locally.</noscript>
+  </main>
+  <script src="./movement.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
