@@ -65,6 +65,32 @@ def test_a_forced_move_is_played_without_using_a_logged_decision(tmp_path):
     assert len(decisions) == asked and played > 0
 
 
+def test_a_message_goes_to_its_own_move_when_the_same_move_is_made_twice_in_a_round(tmp_path):
+    """Found on a real game (13/11): two `raise:10` in one auction, the first silent, the second with a message --
+    matched by round and action, the message went to the first one."""
+    counter = tmp_path / "calls.txt"
+    script = tmp_path / "every_other.py"
+    script.write_text(
+        "import json, pathlib, re, sys\n"
+        f"counter = pathlib.Path(r'{counter}')\n"
+        "calls = int(counter.read_text()) + 1 if counter.exists() else 1\n"
+        "counter.write_text(str(calls))\n"
+        "prompt = sys.stdin.read()\n"
+        "choices = re.findall(r'^- `([^`]+)`$', prompt, re.MULTILINE)\n"
+        "raises = [c for c in choices if c.startswith('raise:')]\n"
+        "pick = 'pass' if 'pass' in choices else raises[0] if raises else choices[0]\n"
+        "print(json.dumps({'action': pick, 'message': 'call %d' % calls if calls % 2 == 0 else ''}))\n",
+        encoding="utf-8",
+    )
+    report = play_ai_game(("claude", "normal", "normal", "normal"), seed=3, rounds=20, log_path=tmp_path / "g.json",
+                          commands={"claude": [sys.executable, str(script)]})
+    decisions, _, _ = replay(report)
+    silent_then_spoken = [(a, b) for a in decisions for b in decisions
+                          if a.rank + 1 == b.rank and (a.state.round, a.action) == (b.state.round, b.action)
+                          and a.message is None and b.message]
+    assert silent_then_spoken, "the witness: the same move twice in a round, silent first, then spoken"
+
+
 def test_a_damaged_event_is_refused(report):
     damaged = copy.deepcopy(report)
     built = next(e for e in damaged["events"] if e["kind"] == "rolled")
