@@ -163,6 +163,13 @@ With the `claude` and `codex` commands installed and signed in:
 python -m traveler_quartet ai-game --seats claude,codex,normal,normal --rounds 10 --seed 1
 ```
 
+A `claude` seat plays with the account's default model; `claude:<model>` picks one, so two models can sit at the same
+table:
+
+```
+python -m traveler_quartet ai-game --seats claude:opus,claude:sonnet,normal,normal --seed 1
+```
+
 The agents use their existing command-line subscriptions. Each real choice starts a new agent invocation, so a game
 can take several minutes and uses those accounts' limits. Computer seats can be `easy`, `normal`, `hard` or `adaptive`.
 Two to four players are required. Without `--rounds`, the normal 30-round limit applies; the example is a short pilot.
