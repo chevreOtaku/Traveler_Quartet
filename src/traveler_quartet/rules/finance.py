@@ -2,6 +2,7 @@ from dataclasses import replace
 from typing import Optional
 
 from traveler_quartet.rules.buildings import town_has_buildings
+from traveler_quartet.rules.cards import return_card
 from traveler_quartet.rules.economy import STALL, mortgage_value
 from traveler_quartet.rules.state import Debt, Event, GameState, Step, change_cash, set_at, with_player
 
@@ -72,5 +73,7 @@ def bankrupt(state: GameState) -> Step:
     partners = tuple(None if (i in owned or p == me) else p for i, p in enumerate(state.partners))
     state = replace(state, owners=owners, buildings=buildings, mortgaged=mortgaged, debt=None,
                     stalls_left=state.stalls_left + stalls_back, partners=partners)
+    for card in state.players[me].cards:
+        state = return_card(state, me, card)
     state = with_player(state, me, replace(state.players[me], cash=0, out=True))
     return state, (Event("bankrupt", me, (("to", debt.creditor), ("amount", left))),)

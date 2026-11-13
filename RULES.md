@@ -52,3 +52,6 @@ bind those who believe them.
 - **Crises** hit a trade; if you own its whole pair, both towns pay, **x1.5**.
 - **The curse** is played on another player. Roll a die: **even**, you may keep it; **odd**, play it now.
 - **The karma mirror**, kept **secret**: the next curse aimed at you **goes back** to whoever cast it.
+
+A card you **keep** leaves its deck while you hold it, so nobody else can draw it. Once played, it goes back **under**
+its deck; a player who is out puts his kept cards back the same way.

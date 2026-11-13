@@ -1,5 +1,6 @@
 from dataclasses import replace
 
+from traveler_quartet.rules.cards import return_card
 from traveler_quartet.rules.moves import moved
 from traveler_quartet.rules.state import Event, GameState, Step, change_cash, update_player
 from traveler_quartet.rules.turns import end_turn
@@ -41,7 +42,5 @@ def stay_inside(state: GameState) -> Step:
 
 def use_rope(state: GameState) -> Step:
     me = state.current
-    cards = list(state.players[me].cards)
-    cards.remove("rope")
-    state = update_player(state, me, dungeon_turns=0, dungeon_locked=False, cards=tuple(cards))
+    state = update_player(return_card(state, me, "rope"), me, dungeon_turns=0, dungeon_locked=False)
     return state, (Event("used_rope", me),)

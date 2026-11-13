@@ -3,7 +3,7 @@ from typing import Callable, Dict, Optional, Tuple
 
 from traveler_quartet.rules import auctions, buildings, dungeon, finance, partners, portals, trades
 from traveler_quartet.rules.card_effects import crisis_on, resolve
-from traveler_quartet.rules.cards import load_cards, shuffled_decks
+from traveler_quartet.rules.cards import load_cards, return_card, shuffled_decks
 from traveler_quartet.rules.board import Board, load_board
 from traveler_quartet.rules.dice import roll
 from traveler_quartet.rules.economy import Economy, load_economy
@@ -225,20 +225,14 @@ def _curse(state: GameState, target: int) -> Step:
     towns = tuple(state.board.towns)
     events = (Event("cursed", me, (("target", target),)),)
     if "mirror" in state.players[target].cards:
-        state = update_player(state, target, cards=_without(state.players[target].cards, "mirror"))
+        state = return_card(state, target, "mirror")
         events += (Event("mirrored", target, (("back_to", me),)),)
         target = me
     state, event = crisis_on(state, target, towns, per_building)
     events += (event,)
     if state.pending == "target":
         return after_landing(state), events
-    return update_player(state, me, cards=_without(state.players[me].cards, "curse")), events
-
-
-def _without(cards: Tuple[str, ...], card: str) -> Tuple[str, ...]:
-    out = list(cards)
-    out.remove(card)
-    return tuple(out)
+    return return_card(state, me, "curse"), events
 
 
 SIMPLE_ACTIONS: Dict[str, Callable[[GameState], Step]] = {

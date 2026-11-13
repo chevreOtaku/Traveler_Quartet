@@ -5,7 +5,7 @@ from dataclasses import replace
 from typing import Callable, Dict, List, Tuple
 
 from traveler_quartet.rules import finance
-from traveler_quartet.rules.cards import Card, card_die, carousel, draw
+from traveler_quartet.rules.cards import Card, card_die, carousel, draw, keep_card
 from traveler_quartet.rules.disasters import (buildings_of, damage, destroy, owns_a_whole_pair, pay_what_he_can)
 from traveler_quartet.rules.dungeon import send_to_dungeon
 from traveler_quartet.rules.economy import STALL, owns_whole_town
@@ -121,8 +121,7 @@ def you_pay_others_gain(state, card):
 
 
 def keep(state, card):
-    me = state.current
-    state = update_player(state, me, cards=state.players[me].cards + (card["id"],))
+    state = keep_card(state, state.current, card["id"])
     return state, (_card_event(state, card),), "continue"
 
 
