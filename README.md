@@ -170,6 +170,11 @@ table:
 python -m traveler_quartet ai-game --seats claude:opus,claude:sonnet,normal,normal --seed 1
 ```
 
+`--offer-style` sets how every AI seat of the table sees and writes a trade offer: `fields` (the default -- the
+contract's six fields explained under the list of choices), `named` (the same place, the offer written as a JSON object
+with named fields, translated into the same contract) or `listed` (the same syntax, each open offer shown in the list
+of choices). Only the offer part of the text changes; the report records the style.
+
 The agents use their existing command-line subscriptions. Each real choice starts a new agent invocation, so a game
 can take several minutes and uses those accounts' limits. Computer seats can be `easy`, `normal`, `hard` or `adaptive`.
 Two to four players are required. Without `--rounds`, the normal 30-round limit applies; the example is a short pilot.

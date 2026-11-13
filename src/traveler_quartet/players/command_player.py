@@ -17,7 +17,7 @@ from typing import Callable, List, Optional, Sequence, Tuple
 
 from traveler_quartet.players.notebook import NOTES_FORMAT, notes_section, update_notes
 from traveler_quartet.players.recent import TimedEvent, summary_lines
-from traveler_quartet.players.text import render
+from traveler_quartet.players.text import OFFER_STYLES, render
 from traveler_quartet.players.view import view
 from traveler_quartet.rules.engine import GameState, IllegalAction, apply, negotiations
 
@@ -56,6 +56,32 @@ def parse_answer(text: str) -> Optional[Tuple[str, str]]:
     return (data["action"].strip(), str(data.get("message") or "")) if data else None
 
 
+def _side(part) -> List[str]:
+    """One side of a named offer -> its three contract fields. Strict: a wrong type is an error, never a guess."""
+    part = {} if part is None else part
+    gold, squares, cards = part.get("gold", 0), part.get("squares", []), part.get("cards", [])
+    if type(gold) is not int or not isinstance(squares, list) or not isinstance(cards, list):
+        raise TypeError("not a named offer")
+    if any(type(i) is not int for i in squares) or any(not isinstance(c, str) or ":" in c or "," in c for c in cards):
+        raise TypeError("not a named offer")
+    return [str(gold), ",".join(str(i) for i in squares), ",".join(cards)]
+
+
+def contract_action(reply: dict) -> Optional[str]:
+    """An offer or counter-offer written with NAMED fields (the `named` style) -> the engine's contract, `offer:<player>:`
+    or `counter:` then the six fields; None if `reply` is not one. The engine still decides whether it is legal."""
+    kind = str(reply.get("action", "")).strip()
+    if kind not in ("offer", "counter"):
+        return None
+    try:
+        if kind == "offer" and type(reply.get("to")) is not int:
+            return None
+        head = f"offer:{reply['to']}" if kind == "offer" else "counter"
+        return ":".join([head] + _side(reply.get("give")) + _side(reply.get("ask")))
+    except (AttributeError, TypeError):
+        return None
+
+
 def _legal(state: GameState, action: str) -> bool:
     try:
         apply(state, action)
@@ -72,10 +98,21 @@ class CommandPlayer:
     """A chooser for the runner: `(state, legal) -> (action, message)`. `ask(prompt) -> text` is the AI."""
 
     def __init__(self, ask: Callable[[str], str], seat: int, retries: int = 2,
-                 history: Optional[Callable[[], Sequence[TimedEvent]]] = None, notebook_cap: Optional[int] = None):
+                 history: Optional[Callable[[], Sequence[TimedEvent]]] = None, notebook_cap: Optional[int] = None,
+                 offer_style: str = "fields"):
+        if offer_style not in OFFER_STYLES:
+            raise ValueError(f"unknown offer style {offer_style!r}; known: {', '.join(OFFER_STYLES)}")
         self.ask, self.seat, self.retries, self.log = ask, seat, retries, []
         self.history, self.cursor = history, 0
         self.notebook_cap, self.notes = notebook_cap, {}
+        self.offer_style = offer_style
+
+    def _action(self, reply: Optional[dict]) -> Optional[str]:
+        """The action an answer plays: a named offer is translated only for a `named` seat (the others play as before)."""
+        if not reply:
+            return None
+        named = contract_action(reply) if self.offer_style == "named" else None
+        return named or reply["action"].strip()
 
     def negotiable(self, state: GameState) -> bool:
         return bool(negotiations(state))
@@ -93,13 +130,13 @@ class CommandPlayer:
         summary = self._summary(state)
         notebook = notes_section(self.notes, self.notebook_cap) if self.notebook_cap else ""
         answer_format = ANSWER_FORMAT + (NOTES_FORMAT if self.notebook_cap else "")
-        prompt = f"{INTRO}\n\n{render(view(state, self.seat))}{summary}{notebook}\n\n{answer_format}"
+        prompt = f"{INTRO}\n\n{render(view(state, self.seat), self.offer_style)}{summary}{notebook}\n\n{answer_format}"
         started, sizes = time.time(), {"prompt_chars": len(prompt), "summary_chars": len(summary)}
         if self.history is not None:
             self.cursor = len(self.history())
         for attempt in range(1, self.retries + 2):
             reply = parse_reply(self.ask(prompt))
-            action = reply["action"].strip() if reply else None
+            action = self._action(reply)
             if action and _legal(state, action):
                 self._keep_notes(state, reply.get("notes"), sizes)
                 self._note(state, attempt, action, False, started, sizes)

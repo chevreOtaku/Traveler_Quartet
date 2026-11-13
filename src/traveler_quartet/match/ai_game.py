@@ -13,6 +13,7 @@ from traveler_quartet.match.replay import plain
 from traveler_quartet.match.runner import TimedEvent, play_game_rounds
 from traveler_quartet.match.tournament import COMPUTERS, COUNTED, game_metrics
 from traveler_quartet.players.command_player import CLAUDE, CODEX, CommandPlayer, run_command
+from traveler_quartet.players.text import OFFER_STYLES
 from traveler_quartet.rules.endgame import ranking
 from traveler_quartet.rules.engine import GameState, actor, new_game
 
@@ -62,14 +63,15 @@ def log_target(log_path: Optional[Path]) -> Path:
     return target
 
 
-def _players(seats: Sequence[str], commands: Mapping[str, List[str]], history=None, notebook_cap=None):
+def _players(seats: Sequence[str], commands: Mapping[str, List[str]], history=None, notebook_cap=None,
+             offer_style="fields"):
     choosers, agents = [], {}
     for seat, name in enumerate(seats):
         if name in COMPUTERS:
             choosers.append(COMPUTERS[name])
         else:
             agent = CommandPlayer(run_command(seat_command(name, commands)), seat=seat, history=history,
-                                  notebook_cap=notebook_cap)
+                                  notebook_cap=notebook_cap, offer_style=offer_style)
             agents[str(seat)] = agent
             choosers.append(agent)
     return choosers, agents
@@ -99,8 +101,9 @@ def _report(final, timed, seats, agents, started: float) -> dict:
     }
 
 
-def _write_report(target: Path, state, timed, seats, agents, started, seed, error=None) -> dict:
-    report = {**_report(state, timed, seats, agents, started), "seed": seed, "log_path": str(target)}
+def _write_report(target: Path, state, timed, seats, agents, started, seed, offer_style, error=None) -> dict:
+    report = {**_report(state, timed, seats, agents, started), "seed": seed, "offer_style": offer_style,
+              "log_path": str(target)}
     if error is not None:
         report["error"] = {"type": type(error).__name__, "message": str(error),
                            "round": state.round, "seat": actor(state), "pending": state.pending}
@@ -114,22 +117,26 @@ def _write_report(target: Path, state, timed, seats, agents, started, seed, erro
 def play_ai_game(seats: Sequence[str], seed: int = 1, rounds: Optional[int] = None,
                  log_path: Optional[Path] = None,
                  commands: Optional[Mapping[str, List[str]]] = None,
-                 notebook_cap: Optional[int] = None) -> Dict[str, object]:
-    """`notebook_cap`: each AI seat keeps a private notebook on its rivals, each note capped (None = no notebook)."""
+                 notebook_cap: Optional[int] = None, offer_style: str = "fields") -> Dict[str, object]:
+    """`notebook_cap`: each AI seat keeps a private notebook on its rivals, each note capped (None = no notebook).
+    `offer_style`: how every AI seat of the table sees and writes a trade offer (`players.text.OFFER_STYLES`)."""
     commands = COMMANDS if commands is None else commands
     _validate(seats, rounds, commands)
     if notebook_cap is not None and notebook_cap < 1:
         raise ValueError("the notebook cap must be positive")
+    if offer_style not in OFFER_STYLES:
+        raise ValueError(f"unknown offer style {offer_style!r}; known: {', '.join(OFFER_STYLES)}")
     target = log_target(log_path)
     initial = new_game(seed=seed, player_count=len(seats))
     if rounds is not None:
         initial = replace(initial, economy=replace(initial.economy, rounds=rounds))
     progress = GameProgress(initial)
-    choosers, agents = _players(seats, commands, history=lambda: progress.timed, notebook_cap=notebook_cap)
+    choosers, agents = _players(seats, commands, history=lambda: progress.timed, notebook_cap=notebook_cap,
+                                offer_style=offer_style)
     started = time.monotonic()
     try:
         final, timed = play_game_rounds(initial, choosers, on_step=progress.record)
     except Exception as error:
-        _write_report(target, progress.state, progress.timed, seats, agents, started, seed, error)
+        _write_report(target, progress.state, progress.timed, seats, agents, started, seed, offer_style, error)
         raise RuntimeError(f"game interrupted; partial log saved to {target}: {type(error).__name__}") from error
-    return _write_report(target, final, timed, seats, agents, started, seed)
+    return _write_report(target, final, timed, seats, agents, started, seed, offer_style)
