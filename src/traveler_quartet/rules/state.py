@@ -59,6 +59,8 @@ class GameState:
     partners: Tuple[Optional[int], ...] = ()
     stall_request: Optional[Tuple[int, int]] = None
     sealed: Optional[object] = None
+    talks: int = 0
+    listener: Optional[int] = None
 
     @property
     def over(self) -> bool:

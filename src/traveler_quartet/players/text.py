@@ -120,12 +120,21 @@ def _negotiation(names: Sequence[str], style: str) -> List[str]:
     return ["", CONTRACT, "Open now: " + ", ".join(f"`{n}`" for n in names)]
 
 
+def _question(seen: Seen) -> str:
+    if seen["pending"] == "talk":
+        return f"Player {seen['talk']['speaker']} speaks to you: answer them in your message"
+    return QUESTIONS.get(seen["pending"], seen["pending"])
+
+
 def _choices(seen: Seen, style: str) -> List[str]:
     if not seen["your_turn"]:
         return []
-    lines = ["", "## Your choices", f"{QUESTIONS.get(seen['pending'], seen['pending'])} (question: `{seen['pending']}`)", ""]
+    names = seen["negotiations"]
+    lines = ["", "## Your choices", f"{_question(seen)} (question: `{seen['pending']}`)", ""]
     lines += [f"- `{a}`" for a in seen["legal_actions"]]
-    return lines + _negotiation(seen["negotiations"], style)
+    lines += [f"- `{n}` -- speak to player {n.split(':')[1]}; they answer before you go on"
+              for n in names if n.startswith("talk:")]
+    return lines + _negotiation([n for n in names if not n.startswith("talk:") and n != "reply"], style)
 
 
 def _header(seen: Seen) -> List[str]:

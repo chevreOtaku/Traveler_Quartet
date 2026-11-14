@@ -55,6 +55,8 @@ def _sentences(names: Sequence[str], who: Callable) -> Dict[str, Callable[[Dict]
         "trade_done": lambda d: f"accepted the offer of {who(d['with'])}",
         "trade_refused": lambda d: f"refused the offer of {who(d['from'])}",
         "said": lambda d: f"said: \"{d.get('text')}\"",
+        "talked": lambda d: f"spoke to {who(d['to'])}",
+        "replied": lambda d: f"answered {who(d['to'])}",
         "built": lambda d: f"built on {_square(names, d['square'])} (level {d['level']})",
         "mortgaged": lambda d: f"mortgaged {_square(names, d['square'])}",
         "jumped": lambda d: f"jumped from {_square(names, d['from'])} to {_square(names, d['to'])}",
