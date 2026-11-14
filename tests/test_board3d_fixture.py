@@ -40,7 +40,8 @@ def test_server_exposes_only_explicit_assets_on_loopback():
     threading.Thread(target=server.serve_forever, daemon=True).start()
     root = f"http://127.0.0.1:{server.server_address[1]}"
     try:
-        for name in ("", "app.js", "movement.js", "layout.js", "client.js", "camera.js", "play.js", "pawn.js", "scene.js",
+        for name in ("", "app.js", "movement.js", "layout.js", "client.js", "camera.js", "play.js", "trade.js", "pawn.js",
+                     "scene.js",
                      "style.css", "vendor/three/three.module.js", "art/gallery.html", "art/merchants.js",
                      "art/gallery.js", "art/gallery.css"):
             with urllib.request.urlopen(root + "/" + name) as reply:
