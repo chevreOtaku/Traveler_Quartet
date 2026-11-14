@@ -175,9 +175,10 @@ contract's six fields explained under the list of choices), `named` (the same pl
 with named fields, translated into the same contract) or `listed` (the same syntax, each open offer shown in the list
 of choices). Only the offer part of the text changes; the report records the style.
 
-`--talks-per-turn N` turns table talk on: at the start of its turn, a seat may play `talk:<player>` up to N times; the
-player spoken to must answer with `reply` before the turn goes on. Both need words in the message (an answer without
-words is refused and asked again). Computer seats never talk. Off by default; the report records the number.
+`--talks-per-turn N` turns table talk on: at any decision, a seat may first play `talk:<player>` (up to N times per
+turn for each seat); the player spoken to answers with `reply`, then the same question is asked again. Both need words
+in the message (an answer without words is refused and asked again), and the AI seats' text proposes the talk. Computer
+seats never talk. Off by default; the report records the number.
 
 The agents use their existing command-line subscriptions. Each real choice starts a new agent invocation, so a game
 can take several minutes and uses those accounts' limits. Computer seats can be `easy`, `normal`, `hard` or `adaptive`.

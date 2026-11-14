@@ -64,13 +64,14 @@ def negotiations(state: GameState) -> Tuple[str, ...]:
     the six fields of the contract) and `counter` (the six fields). Kept apart from `legal_actions` on purpose: a
     template played bare is refused (E13). With table talk on, `talk:<player>` and the answer `reply` are here too:
     their content is the WORDS of the table message, which a computer player does not write."""
-    if state.pending == "roll":
-        return _offer_actions(state) + table_talk.talk_actions(state)
-    if state.pending == "trade" and state.trade.counters < trades.MAX_COUNTERS:
-        return ("counter",)
     if state.pending == "talk":
         return ("reply",)
-    return ()
+    talks = table_talk.talk_actions(state, actor(state))
+    if state.pending == "roll":
+        return _offer_actions(state) + talks
+    if state.pending == "trade" and state.trade.counters < trades.MAX_COUNTERS:
+        return ("counter",) + talks
+    return talks
 
 
 def _offer_actions(state: GameState) -> Tuple[str, ...]:
@@ -142,9 +143,9 @@ def apply(state: GameState, action: str) -> Step:
         receiver, terms = contract
         return trades.offer(state, receiver, terms) if name == "offer" else trades.counter(state, terms)
     if name == "talk":
-        if action not in table_talk.talk_actions(state) or state.pending != "roll":
+        if action not in table_talk.talk_actions(state, actor(state)):
             raise IllegalAction(f"{action!r} is not open now")
-        return table_talk.talk(state, int(argument))
+        return table_talk.talk(state, actor(state), int(argument))
     if action not in legal_actions(state):
         raise IllegalAction(f"{action!r} is not legal now; legal: {legal_actions(state)}")
     if argument:

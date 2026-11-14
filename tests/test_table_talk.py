@@ -66,7 +66,12 @@ def test_at_most_the_rules_number_of_talks_per_turn_and_a_new_turn_gives_them_ba
     assert not any(n.startswith("talk:") for n in negotiations(state))
     with pytest.raises(IllegalAction):
         apply(state, "talk:1")
-    assert any(n.startswith("talk:") for n in negotiations(end_turn(state)))
+    later = end_turn(state)
+    for _ in range(8):
+        if later.current == 0:
+            break
+        later = end_turn(later)
+    assert later.current == 0 and any(n.startswith("talk:") for n in negotiations(later)), "the SAME seat, a new turn"
 
 
 @pytest.mark.parametrize("action", ["talk:0", "talk:7", "talk:x", "reply"])
@@ -75,20 +80,60 @@ def test_no_talk_to_oneself_nor_to_nobody_and_no_reply_without_a_question(action
         apply(talking(), action)
 
 
-@pytest.mark.parametrize("pending", ["buy", "talk"])
-def test_no_talk_in_the_middle_of_another_question(pending):
-    """Else the question would be lost: a talk ends on `roll`, so a purchase, or an answer, would never be asked."""
-    state = replace(talking(), pending=pending, listener=1 if pending == "talk" else None)
+def _auction(state):
+    from traveler_quartet.rules.auctions import Auction
+    return replace(state, pending="auction", auction=Auction(square=6, price=40, leader=None, bidders=(1, 2)))
+
+
+@pytest.mark.parametrize("pending, speaker", [("buy", 0), ("auction", 1)])
+def test_a_talk_in_the_middle_of_a_question_comes_back_to_that_question(pending, speaker):
+    """The talk is proposed at ANY decision (D53); after the answer, the same question is asked again."""
+    state = _auction(talking()) if pending == "auction" else replace(talking(), pending=pending)
+    assert actor(state) == speaker
+    listener = 2 if speaker != 2 else 1
+    talked, events = apply(state, f"talk:{listener}")
+    assert (talked.pending, actor(talked)) == ("talk", listener) and events[0].player == speaker
+    assert f"Player {speaker} speaks to you" in render(view(talked, listener))
+    back, events = apply(talked, "reply")
+    assert (back.pending, actor(back), back.auction) == (pending, speaker, state.auction)
+    assert [(e.kind, e.player, dict(e.data)) for e in events] == [("replied", listener, {"to": speaker})]
+
+
+def test_each_seat_has_its_own_talks_in_a_turn():
+    state = _auction(talking(per_turn=2))
+    for _ in range(2):
+        state, _ = apply(apply(state, "talk:2")[0], "reply")
+    assert not any(n.startswith("talk:") for n in negotiations(state)), "the bidder spent its two talks"
+    state = replace(state, pending="roll", auction=None)
+    assert [n for n in negotiations(state) if n.startswith("talk:")] == ["talk:1", "talk:2"], "the current player kept its own"
+
+
+def test_no_talk_while_an_answer_is_awaited():
+    state, _ = apply(talking(), "talk:1")
     with pytest.raises(IllegalAction):
         apply(state, "talk:2")
 
 
-def test_the_speaker_sees_one_line_per_rival_and_the_offer_text_does_not_change():
+INVITATION = ('At any decision you may first speak to another player (`talk:<player>`, your words in "message"): they '
+              "answer you, then you decide. Talking can open a negotiation that leads to a trade.")
+
+
+def test_the_speaker_sees_one_line_per_rival_the_invitation_and_the_same_offer_text():
     plain = render(view(talking(per_turn=0), 0)).splitlines()
     lines = render(view(talking(), 0)).splitlines()
     assert "- `talk:1` -- speak to player 1; they answer before you go on" in lines
     assert "- `talk:2` -- speak to player 2; they answer before you go on" in lines
-    assert [l for l in lines if not l.startswith("- `talk:")] == plain
+    kept = [l for l in lines if not l.startswith("- `talk:")]
+    at = kept.index(INVITATION)
+    assert kept[at - 1] == "" and kept[:at - 1] + kept[at + 1:] == plain
+
+
+def test_the_invitation_is_there_at_any_decision_and_never_when_talk_is_off_or_spent():
+    assert INVITATION in render(view(_auction(talking()), 1))
+    assert INVITATION not in render(view(_auction(talking(per_turn=0)), 1))
+    state = talking(per_turn=1)
+    state, _ = apply(apply(state, "talk:1")[0], "reply")
+    assert INVITATION not in render(view(state, 0))
 
 
 def test_the_rival_spoken_to_is_asked_with_the_speakers_seat():
@@ -142,6 +187,38 @@ def test_an_ai_table_with_talk_records_the_dialogue_and_replays_it(tmp_path):
     assert report["talks_per_turn"] == 2 and report["fallbacks"] == 0
     decisions, _, _ = replay(report)
     assert [d.action for d in decisions if d.action in ("talk:1", "reply")][:2] == ["talk:1", "reply"]
+
+
+def test_a_seat_with_one_move_is_still_asked_when_it_may_talk_first():
+    from factory import cash
+    state = cash(_auction(talking()), 1, 0)
+    assert legal_actions(state) == ("drop",)
+    ai = Scripted('{"action": "drop", "message": ""}')
+    assert CommandPlayer(ai, seat=1)(state, legal_actions(state)) == ("drop", None) and len(ai.prompts) == 1
+    assert CommandPlayer(Scripted(), seat=1)(cash(_auction(talking(per_turn=0)), 1, 0), ("drop",)) == ("drop", None)
+
+
+def test_an_ai_table_talks_in_the_middle_of_a_purchase_and_buys_after_the_answer(tmp_path):
+    script = tmp_path / "buyer.py"
+    script.write_text(
+        "import json, re, sys\n"
+        "prompt = sys.stdin.read()\n"
+        "choices = re.findall(r'^- `([^`]+)`$', prompt, re.MULTILINE)\n"
+        "if '(question: `talk`)' in prompt:\n"
+        "    print(json.dumps({'action': 'reply', 'message': 'Buy it, I will not bid.'}))\n"
+        "elif '(question: `buy`)' in prompt and 'answered you' not in prompt and '- `talk:1` --' in prompt:\n"
+        "    print(json.dumps({'action': 'talk:1', 'message': 'Will you fight me for this one?'}))\n"
+        "else:\n"
+        "    print(json.dumps({'action': 'buy' if 'buy' in choices else choices[0], 'message': ''}))\n",
+        encoding="utf-8")
+    report = play_ai_game(("claude", "claude"), rounds=2, log_path=tmp_path / "buy.json", talks_per_turn=2,
+                          commands={"claude": [sys.executable, str(script)]})
+    kinds = [e["kind"] for e in report["events"]]
+    first = kinds.index("talked")
+    assert kinds[first - 1: first + 3] == ["said", "talked", "said", "replied"]
+    assert "bought" in kinds[first + 3:first + 6], "the purchase question came back and was answered"
+    decisions, _, _ = replay(report)
+    assert any(d.action == "talk:1" and d.state.pending == "buy" for d in decisions)
 
 
 def test_an_ai_table_refuses_a_negative_number_of_talks(tmp_path):

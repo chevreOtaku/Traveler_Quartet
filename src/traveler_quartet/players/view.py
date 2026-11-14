@@ -69,7 +69,7 @@ def _negotiation(state: GameState) -> Dict[str, object]:
     if state.stall_request is not None:
         out["stall_request"] = list(state.stall_request)
     if state.pending == "talk":
-        out["talk"] = {"speaker": state.current, "listener": state.listener}
+        out["talk"] = {"speaker": state.speaker, "listener": state.listener}
     return out
 
 

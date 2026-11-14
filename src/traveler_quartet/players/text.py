@@ -26,6 +26,9 @@ CONTRACT_NAMED = ('To offer a trade, answer {"action": "offer", "to": <player>, 
                   '"to", with "action": "counter". What each side receives must be worth between half and double what '
                   "it gives.")
 FIELDS = "<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:<ask_cards>"
+# Table talk (an option of the table): the sentence that PROPOSES it, shown with the talk lines at any decision.
+TALK_INVITATION = ('At any decision you may first speak to another player (`talk:<player>`, your words in "message"): '
+                   "they answer you, then you decide. Talking can open a negotiation that leads to a trade.")
 # How an AI seat sees an open negotiation: `fields` = the contract explained under the choices (the default) ;
 # `named` = the same place, written with named fields ; `listed` = the same syntax, each open offer IN the choices.
 OFFER_STYLES = ("fields", "named", "listed")
@@ -132,8 +135,9 @@ def _choices(seen: Seen, style: str) -> List[str]:
     names = seen["negotiations"]
     lines = ["", "## Your choices", f"{_question(seen)} (question: `{seen['pending']}`)", ""]
     lines += [f"- `{a}`" for a in seen["legal_actions"]]
-    lines += [f"- `{n}` -- speak to player {n.split(':')[1]}; they answer before you go on"
-              for n in names if n.startswith("talk:")]
+    talks = [n for n in names if n.startswith("talk:")]
+    lines += [f"- `{n}` -- speak to player {n.split(':')[1]}; they answer before you go on" for n in talks]
+    lines += ["", TALK_INVITATION] if talks else []
     return lines + _negotiation([n for n in names if not n.startswith("talk:") and n != "reply"], style)
 
 
