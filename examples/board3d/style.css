@@ -49,6 +49,12 @@ canvas {display:block;width:100%;height:100%;}
 .following .centre .inspect,.following .centre .controls,.following #route {display:none;}
 #play {margin-top:10px;}#play button {margin:3px;}
 #actions {display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+.trade-offer {flex-basis:100%;font-size:14px;line-height:1.4;margin:0 0 4px;}
+.trade {flex-basis:100%;text-align:left;border-top:0;padding-top:4px;max-height:260px;overflow:auto;}
+.trade summary {font-weight:600;color:#294e55;margin:0 auto 6px;}
+.trade p {margin:8px 0 4px;font-size:12px;}.trade input[type="number"] {width:90px;padding:4px 6px;}
+.trade label {display:flex;margin:2px 0;}.trade-rule {color:#617366;}
+.centre:has(.trade[open]) {top:18px;}
 .legends {display:flex;gap:20px;align-items:start;justify-content:space-between;margin-top:10px;}
 .seat-legend,#towns {display:flex;gap:7px 12px;flex-wrap:wrap;font-size:12px;}
 .seat-legend {flex-shrink:0;}

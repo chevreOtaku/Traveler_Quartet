@@ -2,11 +2,11 @@ import {createScene} from "./scene.js";
 
 const element=id=>document.getElementById(id);
 const C=globalThis.Board3DClient,L=globalThis.Board3DLayout,M=globalThis.Board3DMovement;
-const Cam=globalThis.Board3DCamera,P=globalThis.Board3DPlay;
+const Cam=globalThis.Board3DCamera,P=globalThis.Board3DPlay,T=globalThis.Board3DTrade;
 const motion=matchMedia("(prefers-reduced-motion: reduce)");
 const params=new URLSearchParams(location.search),fixtureMode=params.get("mode")==="fixture";
 let stage,client,game=params.get("game"),fixture=null,timer=null,detailView=false,busy=false;
-let activeMove=null,skip=false,board=null,seatKinds=[],player=null,playerRevision=null;
+let activeMove=null,skip=false,board=null,seatKinds=[],player=null,playerRevision=null,panelKey=null;
 const HOP_MS={board:260,follow:380},FOLLOW_HOLD_MS=650;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
@@ -85,20 +85,30 @@ function authorized(path,options={}) {
 }
 async function updatePanel() {
   const panel=element("play"),actions=element("actions");
-  panel.hidden=!player;actions.replaceChildren();
-  if (!player || !game) return;
+  panel.hidden=!player;
+  if (!player || !game) {actions.replaceChildren();panelKey=null;return;}
   const response=await authorized("/view"),data=await response.json();
   if (!response.ok) throw new Error(data.error||"Your seat could not be read");
+  const key=`${game}:${player.seat}:${data.revision}`;
+  if (key===panelKey) return;  // the game has not moved: keep what the human is typing in a trade form
+  panelKey=key;actions.replaceChildren();
   playerRevision=data.revision;
   const legal=data.view.your_turn && !data.over ? data.view.legal_actions : [];
   element("play-title").textContent=data.over ? "Game over" :
     legal.length ? `Your turn, player ${player.seat}` : "The computers are playing";
+  if (legal.length && data.view.trade) {
+    const offer=document.createElement("p");offer.className="trade-offer";offer.textContent=T.offerWords(data.view);
+    actions.append(offer);
+  }
   for (const action of legal) {
     const button=document.createElement("button");button.type="button";
     button.textContent=P.actionLabel(action,board);button.disabled=busy;
     button.addEventListener("click",()=>run(()=>play(action)));
     actions.append(button);
   }
+  if (!legal.length) return;
+  for (const open of T.forms(data.view))
+    actions.append(T.form(tag=>document.createElement(tag),data.view,open,action=>run(()=>play(action))));
 }
 async function play(action) {
   const response=await authorized("/act",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -115,11 +125,11 @@ function rememberSeat(id) {
 }
 function schedule() {
   clearTimeout(timer);
-  if (client?.snapshot && !client.snapshot.over) timer=setTimeout(()=>run(()=>client.refresh()),1500);
+  if (client?.snapshot && !client.snapshot.over) timer=setTimeout(()=>run(()=>client.refresh(),{keepError:true}),1500);
 }
-async function run(work) {
+async function run(work,{keepError=false}={}) {
   if (busy) return;
-  clearTimeout(timer);setBusy(true);skip=false;error();
+  clearTimeout(timer);setBusy(true);skip=false;if (!keepError) error();
   try {await work();}
   catch(e) {error(e.message+". Use Replay / retry to reconnect.");}
   finally {
