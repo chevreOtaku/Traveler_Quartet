@@ -31,7 +31,7 @@ rules stay as simple as the classic family property game, and the tone of the ca
 | Length | **30 rounds**; the richest player wins (cash + value of districts and buildings) |
 | Board | 40 squares, 4 sides, **8 towns**, 22 districts |
 | Platform | a Python rules engine served to a light web page on `localhost`; multiplayer on a private server later |
-| Pawns | 8 cute chibi merchants: human, elf, dwarf and orc, each as a man and a woman |
+| Pawns | 6 cute chibi merchants: human, elf and dwarf, each as a man and a woman |
 | Languages | English, with a French translation |
 
 ## The board
