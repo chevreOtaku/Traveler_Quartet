@@ -28,6 +28,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", default="sonnet", help="talk: the Claude model that reads each message")
     parser.add_argument("--notebook-cap", type=int, default=None,
                         help="ai-game: each AI keeps private notes on its rivals, each capped at this many characters")
+    parser.add_argument("--offer-style", choices=("fields", "named", "listed"), default="fields",
+                        help="ai-game: how the AI seats see and write a trade offer -- fields (the contract under the "
+                             "choices), named (written with named fields), listed (each open offer in the choices)")
     parser.add_argument("--opponents", default="normal,normal,normal",
                         help="cli: the computers you play against, comma-separated (easy, normal, hard, adaptive)")
     return parser
@@ -98,7 +101,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         try:
             report = play_ai_game(tuple(seat.strip() for seat in args.seats.split(",")),
                                   seed=args.seed, rounds=args.rounds, log_path=args.log,
-                                  notebook_cap=args.notebook_cap)
+                                  notebook_cap=args.notebook_cap, offer_style=args.offer_style)
         except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as error:
             print(f"traveler-quartet: {error}", file=sys.stderr)
             return 2

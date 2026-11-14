@@ -147,6 +147,53 @@ def test_judge_log_writes_the_verdicts_outside_every_repository(game, tmp_path):
         judge_log(source, repo / "verdicts.json", command=command)
 
 
+def _said_with(state, action, seat=0):
+    from traveler_quartet.match.replay import Decision
+    return Decision(seat=seat, rank=0, state=state, action=action, message="...")
+
+
+def test_an_amount_said_in_an_auction_may_be_the_raise_or_the_new_price():
+    """v3 (13/11): a player says the TOTAL (« 70 for it »), the engine plays the INCREMENT (`raise:10`)."""
+    from dataclasses import replace
+    from factory import game as new
+    from traveler_quartet.rules.auctions import Auction
+    state = replace(new(), pending="auction", auction=Auction(square=6, price=60, leader=1, bidders=(0, 1)))
+    raised, dropped = _said_with(state, "raise:10"), _said_with(state, "drop")
+    for verb in ("raise", "offer", "bid"):
+        assert verdict(Statement("A", "70 for it", verb, amount=70), raised, []) == SUPPORTED
+        assert verdict(Statement("A", "ten more", verb, amount=10), raised, []) == SUPPORTED
+        assert verdict(Statement("A", "80 for it", verb, amount=80), raised, []) == CONTRADICTED
+        assert verdict(Statement("A", "I go higher", verb), dropped, []) == CONTRADICTED
+    assert verdict(Statement("A", "so I'm in for it", "buy"), raised, []) == SUPPORTED
+    for verb in ("accept", "pass", "drop"):
+        assert verdict(Statement("A", "It's yours", verb), dropped, []) == SUPPORTED
+        assert verdict(Statement("A", "It's yours", verb), raised, []) == CONTRADICTED
+
+
+def test_a_verb_said_with_a_move_is_read_in_the_family_of_its_question():
+    """v3 (13/11): « a fair offer » with a sealed bid is the bid; « I'll take it » with a purchase is the purchase."""
+    from dataclasses import replace
+    from factory import at, game as new
+    sealed = replace(new(), pending="sealed")
+    assert verdict(Statement("A", "a fair offer: 150", "offer", amount=150), _said_with(sealed, "bid:150"), []) == SUPPORTED
+    assert verdict(Statement("A", "a fair offer: 150", "offer", amount=150), _said_with(sealed, "bid:90"), []) == CONTRADICTED
+    buying = replace(at(new(), 0, 18), pending="buy")
+    assert verdict(Statement("A", "I'll take it", "accept"), _said_with(buying, "buy"), []) == SUPPORTED
+    assert verdict(Statement("A", "I'll take it", "accept"), _said_with(buying, "pass"), []) == CONTRADICTED
+    rolling = new()
+    assert verdict(Statement("A", "deal", "accept"), _said_with(rolling, "roll"), []) == CONTRADICTED
+
+
+def test_roll_announces_are_counted_apart_and_the_judge_says_its_version(game):
+    report, _ = game
+    answer = json.dumps({"statements": [{"class": "A", "quote": "Let's roll", "verb": "roll"},
+                                        {"class": "A", "quote": "I pass", "verb": "pass"}]})
+    result = judge(report, lambda prompt: answer)
+    assert result["judge_version"] == 3 and result["roll_announces"] == result["messages"] > 0
+    assert set(result["summary"]) == {"A"} and sum(result["summary"]["A"].values()) == result["messages"]
+    assert all(row["roll_announce"] == (row["verb"] == "roll") for row in result["statements"])
+
+
 def test_judge_reads_every_message_and_counts_the_verdicts(game):
     report, decisions = game
     answer = json.dumps({"statements": [{"class": "A", "quote": "I pass", "verb": "pass", "negated": False}]})

@@ -20,6 +20,15 @@ CONTRACT = ("To offer a trade, write `offer:<player>:<give_gold>:<give_squares>:
             "<ask_cards>` (squares by number, comma-separated; an empty field = nothing). A counter-offer: "
             "`counter:<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:<ask_cards>`. What each side "
             "receives must be worth between half and double what it gives.")
+CONTRACT_NAMED = ('To offer a trade, answer {"action": "offer", "to": <player>, "give": {"gold": <amount>, "squares": '
+                  '[<square numbers>], "cards": [<card ids>]}, "ask": {"gold": <amount>, "squares": [<square numbers>], '
+                  '"cards": [<card ids>]}, "message": "..."} (leave out what is empty). A counter-offer: the same without '
+                  '"to", with "action": "counter". What each side receives must be worth between half and double what '
+                  "it gives.")
+FIELDS = "<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:<ask_cards>"
+# How an AI seat sees an open negotiation: `fields` = the contract explained under the choices (the default) ;
+# `named` = the same place, written with named fields ; `listed` = the same syntax, each open offer IN the choices.
+OFFER_STYLES = ("fields", "named", "listed")
 Seen = Dict[str, object]
 
 
@@ -89,14 +98,34 @@ def _to_buy(seen: Seen) -> List[str]:
     return ["", f"[{sq['index']}] {sq['name']}: price {sq['price']} -- you own {mine} of {len(town)} in {sq['town']}."]
 
 
-def _choices(seen: Seen) -> List[str]:
+def _listed(name: str) -> str:
+    if name == "counter":
+        return f"- `counter:{FIELDS}` -- a counter-offer"
+    return f"- `{name}:{FIELDS}` -- a trade with player {name.split(':')[1]}"
+
+
+def _named_open(names: Sequence[str]) -> str:
+    rivals = [n.split(":")[1] for n in names if n.startswith("offer:")]
+    parts = ([f"`offer` to player {', '.join(rivals)}"] if rivals else []) + (["`counter`"] if "counter" in names else [])
+    return "Open now: " + ", ".join(parts)
+
+
+def _negotiation(names: Sequence[str], style: str) -> List[str]:
+    if not any(n.startswith("offer:") or n == "counter" for n in names):
+        return []
+    if style == "listed":
+        return [_listed(n) for n in names] + ["", CONTRACT]
+    if style == "named":
+        return ["", CONTRACT_NAMED, _named_open(names)]
+    return ["", CONTRACT, "Open now: " + ", ".join(f"`{n}`" for n in names)]
+
+
+def _choices(seen: Seen, style: str) -> List[str]:
     if not seen["your_turn"]:
         return []
     lines = ["", "## Your choices", f"{QUESTIONS.get(seen['pending'], seen['pending'])} (question: `{seen['pending']}`)", ""]
     lines += [f"- `{a}`" for a in seen["legal_actions"]]
-    if any(n.startswith("offer:") or n == "counter" for n in seen["negotiations"]):
-        lines += ["", CONTRACT, "Open now: " + ", ".join(f"`{n}`" for n in seen["negotiations"])]
-    return lines
+    return lines + _negotiation(seen["negotiations"], style)
 
 
 def _header(seen: Seen) -> List[str]:
@@ -114,7 +143,10 @@ def _header(seen: Seen) -> List[str]:
     return lines
 
 
-def render(seen: Seen) -> str:
+def render(seen: Seen, offer_style: str = "fields") -> str:
+    """`offer_style`: how an open negotiation is shown (OFFER_STYLES) -- the rest of the text never changes."""
+    if offer_style not in OFFER_STYLES:
+        raise ValueError(f"unknown offer style {offer_style!r}; known: {', '.join(OFFER_STYLES)}")
     me = seen["me"]
     lines = _header(seen) + [_rules(seen)]
     lines += ["", "## Yours"] + (_owned(seen, me["seat"]) or ["- nothing yet"])
@@ -130,4 +162,4 @@ def render(seen: Seen) -> str:
         lines += ["", _offer(seen)]
     if "debt" in seen:
         lines += ["", f"You owe {seen['debt']} gold."]
-    return "\n".join(lines + _to_buy(seen) + _choices(seen))
+    return "\n".join(lines + _to_buy(seen) + _choices(seen, offer_style))
