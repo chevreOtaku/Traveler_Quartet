@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><link rel="icon" href="data:,">
+<title>Traveler Quartet - The merchant's road</title>
+<link rel="stylesheet" href="board.css">
+<script src="model.js" defer></script><script src="client.js" defer></script>
+<script src="render.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+<main class="shell">
+<header class="masthead">
+  <div class="brand"><span class="brand-mark">TQ</span><span>TRAVELER<b>QUARTET</b></span></div>
+  <div class="chapter"><span class="eyebrow">THE MERCHANT'S ROAD</span><span>Small beginnings. Questionable investments.</span></div>
+  <div class="top-actions"><a id="streamLink" target="_blank" rel="noopener" hidden>Open public view</a><button id="new" class="quiet" hidden>New game</button></div>
+  <span id="connection" class="connection">LOCAL TABLE</span>
+</header>
+<p id="error" role="alert" hidden></p>
+<section id="setup" class="setup">
+  <div class="welcome"><span class="eyebrow">A SEAT AT THE TABLE</span><h1>Your fortune<br>starts here<span>.</span></h1><p>Four merchants. Eight towns.<br>One very unpredictable road.</p><img src="village.svg" alt="An original fantasy market village."></div>
+  <form id="startForm" class="setup-form">
+    <span class="eyebrow">START A LOCAL GAME</span><h2>Pack your satchel.</h2>
+    <p>You are player 0. Choose your company for the road.</p>
+    <fieldset id="setupFields">
+      <label>Computer opponents<select id="count"><option value="1">1 opponent</option><option value="2">2 opponents</option><option value="3" selected>3 opponents</option></select></label>
+      <div class="form-grid"><label>Game length<select id="rounds"><option value="5">5 rounds</option><option value="10" selected>10 rounds</option><option value="30">30 rounds</option></select></label><label>Seed<input id="seed" type="number" step="1" value="1" required></label></div>
+      <div class="form-grid">
+        <label>Player 1<select id="bot1"><option>easy</option><option selected>normal</option><option>hard</option><option>adaptive</option></select></label>
+        <label id="bot2Label">Player 2<select id="bot2"><option>easy</option><option selected>normal</option><option>hard</option><option>adaptive</option></select></label>
+        <label id="bot3Label">Player 3<select id="bot3"><option>easy</option><option selected>normal</option><option>hard</option><option>adaptive</option></select></label>
+      </div>
+      <button type="submit" class="primary">Take your seat <span aria-hidden="true">&rarr;</span></button>
+    </fieldset>
+    <p class="fine">This board plays a real local match. Your seat survives a reload in this tab while the server stays running.</p>
+  </form>
+</section>
+<section id="missingSeat" class="notice" hidden><h1>This tab has no player seat.</h1><p>Reopen the original player tab, or watch the public table.</p><a id="watchLink">Watch this game</a></section>
+<div id="game" hidden>
+  <section id="players" class="players" aria-label="Public players"></section>
+  <div class="match-line"><span id="round"></span><span id="order"></span><span id="acting"></span></div>
+  <div class="table-layout">
+    <section class="board-area" aria-label="Game board">
+      <div id="board" class="board">
+        <div class="board-center">
+          <div class="center-heading"><span class="eyebrow">EIGHT TOWNS. ONE ROAD.</span><h1>Traveler<br><i>Quartet.</i></h1></div>
+          <img class="center-village" src="village.svg" alt="">
+          <div class="dice-block"><span class="eyebrow">LAST ROLL</span><div id="dice" class="dice"></div><span id="double"></span></div>
+          <img class="center-merchant" src="merchant.svg" alt="Provisional human merchant in a cap and apron.">
+          <div class="center-caption"><span id="centerMessage">Every fortune starts somewhere.</span><small id="jackpot"></small></div>
+        </div>
+      </div>
+      <div class="board-caption"><span>SELECT A SQUARE TO READ ITS DEED</span><span id="viewMode"></span></div>
+    </section>
+    <aside class="sidebar">
+      <section class="deed" aria-labelledby="propertyName">
+        <div class="section-heading"><span class="eyebrow" id="squareKind">ON THE ROAD</span><span id="squareNumber"></span></div>
+        <div id="townName" class="town-name"></div><h2 id="propertyName"></h2>
+        <p id="ownership" class="ownership"></p>
+        <dl class="amounts"><div><dt>PRICE</dt><dd id="price"></dd></div><div><dt>CURRENT RENT</dt><dd id="rent"></dd></div></dl>
+        <p id="buildingInfo" class="fine"></p><div id="townList" class="town-list"></div>
+        <button id="mySquare" class="text-button">Back to my position</button>
+      </section>
+      <section class="question" aria-labelledby="questionTitle">
+        <span class="eyebrow" id="questionLabel">YOUR NEXT MOVE</span><h2 id="questionTitle"></h2>
+        <p id="questionDetail"></p><p id="debt" class="debt" hidden></p><div id="contract" class="contract" hidden></div>
+        <div id="playerControls">
+          <label>Message with your next action<textarea id="message" rows="2" maxlength="2000" placeholder="What do you say to the table?"></textarea></label>
+          <div id="actions" class="actions"></div>
+          <form id="bidForm" hidden><label>Sealed bid<select id="bid"></select></label><button type="submit" class="primary">Submit sealed bid</button></form>
+          <details id="trade" hidden><summary>Offer a trade / counter-offer</summary>
+            <form id="tradeForm"><fieldset id="tradeFields">
+              <label>Partner<select id="recipient"></select></label>
+              <div class="form-grid"><label>Gold you give<input id="giveGold" type="number" min="0" step="1" value="0" required></label><label>Gold you ask<input id="askGold" type="number" min="0" step="1" value="0" required></label></div>
+              <div class="form-grid"><label>Squares you give<input id="giveSquares" placeholder="1, 3" pattern="[0-9, ]*"></label><label>Squares you ask<input id="askSquares" placeholder="6" pattern="[0-9, ]*"></label></div>
+              <div class="form-grid"><label>Cards you give<input id="giveCards" placeholder="rope" pattern="[a-zA-Z0-9_, ]*"></label><label>Cards you ask<input id="askCards" placeholder="mirror" pattern="[a-zA-Z0-9_, ]*"></label></div>
+              <p class="fine">Use square numbers and card IDs, separated by commas. The table checks your contract.</p><button type="submit" class="secondary">Send proposal</button>
+            </fieldset></form>
+          </details>
+        </div>
+        <ol id="ranking" class="ranking" hidden></ol>
+      </section>
+    </aside>
+  </div>
+  <div class="below-table">
+    <section class="journal"><div class="section-heading"><span class="eyebrow">THE TABLE JOURNAL</span><span id="journalCount"></span></div><ol id="events" aria-label="Game events"></ol></section>
+    <section class="pockets" id="pockets"><span class="eyebrow">YOUR SATCHEL / PRIVATE</span><h2>A few things for the road.</h2><div id="hand"></div><details><summary>Your full text view</summary><pre id="textView"></pre></details></section>
+  </div>
+</div>
+<footer><span>TRAVELER QUARTET <b>/</b> CONNECTED BOARD PREVIEW</span><span>Fortune favours the merchant.</span></footer>
+</main>
+</body></html>

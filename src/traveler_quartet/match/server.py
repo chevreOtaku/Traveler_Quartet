@@ -1,13 +1,14 @@
 """The local server (step 7a) -- the standard library only; the page ASKS (no WebSocket); designed as if the players were
 FAR: a game, one token per remote player, every answer checked by the engine.
 
-    POST /games                      {"seats": ["remote", "normal", ...], "seed": 1, "rounds"?: n}
-                                     -> 201 {"game", "tokens"}
+    POST /games                      {"seats": ["human", "remote", "normal", ...], "seed": 1, "rounds"?: n}
+                                     -> 201 {"game", "tokens"}   ("human" and "remote" seats get a token)
     GET  /games/<id>/view            -> 200 {"view", "text", "over", "revision", "log_length"}
     POST /games/<id>/act             {"action": "...", "message"?: "...", "expected_revision"?: r}
                                      -> 200 {"view", "text", "over", "revision", "log_length"}
     GET  /games/<id>/events?since=a&until=b          -> 200 {"events": [...]}
-    GET  /games/<id>/public          -> 200 {"view", "over", "revision", "log_length"}  -- a SPECTATOR, no token
+    GET  /games/<id>/public          -> 200 {"view", "over", "revision", "log_length", "seats"}  -- a SPECTATOR, no
+                                     token; "seats": each seat's kind -- "human", "remote" or "computer"
     GET  /games/<id>/public/events?since=a&until=b   -> 200 {"events": [...]}  -- every kept card stays "a kept card"
 
 - `rounds` (optional): a shorter game, a positive integer.

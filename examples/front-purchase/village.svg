@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" fill="none">
+<defs>
+  <linearGradient id="hill" x2="0" y2="1"><stop stop-color="#cfdbb6"/><stop offset="1" stop-color="#dfe2c3"/></linearGradient>
+  <linearGradient id="grass" x2="0" y2="1"><stop stop-color="#c7d1a4"/><stop offset="1" stop-color="#e4dfb8"/></linearGradient>
+  <linearGradient id="roof" x2="1" y2="1"><stop stop-color="#b88657"/><stop offset="1" stop-color="#976e48"/></linearGradient>
+  <g id="tree" stroke="#7d8c60" stroke-width="2" stroke-linejoin="round"><path d="M0 5v42" stroke="#8c7951" stroke-width="5"/><path d="M-23 16 0-38 23 16Z" fill="#a8b882"/><path d="M-18 2 0-40 18 2Z" fill="#b7c396"/><path d="M-12-12 0-44 12-12Z" fill="#c1cda2"/></g>
+  <g id="bush" stroke="#87976b" stroke-width="1.7"><path d="M-30 5c-7-14 7-28 19-21 3-20 30-20 34-1 18-6 29 12 19 22Z" fill="#aebd89"/><path d="M-19 4q13-18 19-2M13 3q7-16 16-8"/></g>
+  <g id="cabbage" stroke="#7f9865" stroke-width="1.7"><ellipse cy="2" rx="17" ry="12" fill="#a2b37f"/><path d="M-15 4Q-27-12-7-9Q0-21 7-10Q25-11 15 5" fill="#bccb98"/><path d="M-8 10q-13-24 2-21 16-2 13 21M-8-4q13 1 15 13M1-10q-5 9-9 11"/></g>
+  <g id="house" stroke="#8a7956" stroke-width="2" stroke-linejoin="round">
+    <path d="m0 24 50-27 66 36-49 29Z" fill="#9ea981" opacity=".25" stroke="none"/>
+    <path d="M7-42 55-66 55 21 7 45Z" fill="#e9ddba"/>
+    <path d="m55-66 51 27v84L55 21Z" fill="#d0c29c"/>
+    <path d="m-4-40 55-58 68 42-12 19-52-29L7-25Z" fill="url(#roof)"/>
+    <path d="m55-66-55 27M20-51l50-28M40-69l49 29" stroke="#c59b6b"/>
+    <path d="M16-17v26l17-8v-27Z" fill="#91a29a"/><path d="M76-8v24l14 8V-1Z" fill="#8d9d91"/>
+    <path d="M40-3v31l14-8v-31Z" fill="#9f8b61"/><path d="M7 17 55-7l51 25M55-66v87" stroke="#9b875d" stroke-width="4"/>
+  </g>
+  <g id="fence" stroke="#a99567" stroke-width="3" stroke-linecap="round"><path d="m0 0 80 35M0 15l80 35M0-8v29M20 0v29M40 9v29M60 18v29M80 27v29"/></g>
+</defs>
+<!-- A quiet horizon: hills, fields and a completely original market village. -->
+<ellipse cx="502" cy="422" rx="384" ry="89" fill="#b4bd8c" opacity=".18"/>
+<path d="M9 240Q174 158 282 220Q420 80 575 194Q743 119 950 240L960 376 0 355Z" fill="#dfe5cb"/>
+<path d="M94 271Q236 160 369 251Q493 186 596 252Q765 171 932 286L944 375 60 370Z" fill="url(#hill)"/>
+<path d="M106 298 421 200 884 351 571 517 109 405Z" fill="url(#grass)"/>
+<path d="m421 200 463 151-7 16-307 170-461-118v-14l462 112 313-166Z" fill="#b5bd91" opacity=".7"/>
+<path d="m519 255-50 49 74 37-80 63-100 29 137 43 96-44 102-86-116-53 40-35Z" fill="#ede1b7"/>
+<path d="m537 338-73 63-97 30M582 291l115 55-97 85" stroke="#d4c799" stroke-width="2" stroke-dasharray="8 9"/>
+<!-- Rows of fields. -->
+<path d="m165 326 139-44 114 44-134 49Z" fill="#b6bf8b" stroke="#a1ad7b" stroke-width="2"/>
+<path d="m192 317 115 45m-82-56 115 45m-80-56 115 43" stroke="#d2d6a8" stroke-width="8"/>
+<use href="#cabbage" x="219" y="322"/><use href="#cabbage" x="260" y="306"/>
+<use href="#cabbage" x="276" y="343"/><use href="#cabbage" x="319" y="326"/>
+<use href="#cabbage" x="339" y="308"/><use href="#cabbage" x="381" y="329"/>
+<use href="#tree" x="203" y="241" transform="translate(50 50) scale(.8)"/>
+<use href="#tree" x="186" y="256" transform="translate(42 60) scale(.8)"/>
+<use href="#tree" x="829" y="335"/><use href="#tree" x="868" y="310" transform="translate(100 25) scale(.85)"/>
+<!-- Windmill. -->
+<g stroke="#928865" stroke-width="2.2" stroke-linejoin="round">
+<path d="m401 236 61-20 31 16-61 23Z" fill="#b7c291" opacity=".5" stroke="none"/>
+<path d="m415 157 30-11 14 83-51 17Z" fill="#eae2c3"/>
+<path d="m445 146 18 12 12 78-16-7Z" fill="#c9c6a3"/>
+<path d="m405 159 24-44 42 36-26-5Z" fill="#a99a73"/>
+<path d="m438 179-13 35M438 179l32 14M438 179l13-34M438 179l-32-13" stroke="#8e8260" stroke-width="5"/>
+<path d="m423 213-11-5 12-36 12 4Zm35-69 10 5-12 31-12-5ZM471 187l-3 13-33-14 4-11ZM405 173l4-12 28 12-4 10Z" fill="#f8f0d3"/>
+<circle cx="438" cy="179" r="6" fill="#a48d59"/>
+<path d="M426 220v17l12-4v-17Z" fill="#a99d72"/>
+</g>
+<use href="#house" x="526" y="249" transform="translate(72 14) scale(.83)"/>
+<use href="#house" x="664" y="281" transform="translate(58 13) scale(.87)"/>
+<!-- Main shop: timber, slate-green shutters, striped canvas. -->
+<g stroke="#756f4d" stroke-width="2.4" stroke-linejoin="round">
+<path d="m538 362 104-54 130 69-107 61Z" fill="#7b8e6230" stroke="none"/>
+<path d="m558 244 93-41v126l-93 49Z" fill="#f3e7c4"/>
+<path d="m651 203 94 48v126l-94-48Z" fill="#dfd0a7"/>
+<path d="m541 247 74-105 145 100-15 24-94-63-82 57Z" fill="url(#roof)"/>
+<path d="m552 243 64-87 133 88M564 242l55-72 112 76M578 239l44-55 94 61" stroke="#c49b6b" stroke-width="3"/>
+<path d="m615 142 36 61M651 203v126m-93-34 93-44 94 47M579 235v131m140-129v126" stroke="#9a8157" stroke-width="6"/>
+<path d="m576 269 26-12v30l-26 12Z" fill="#93a58b"/><path d="m682 249 31 15v33l-31-16Z" fill="#9fb18f"/>
+<path d="m585 265v29m-9-8 26-12m94-19v33m-14-22 31 15" stroke="#e9e7c5" stroke-width="2"/>
+<path d="m616 286 26-13v64l-26 14Z" fill="#ac9c6d"/>
+<path d="M631 291v42" stroke="#928457"/><circle cx="634" cy="316" r="2" fill="#eddda4"/>
+<path d="m665 298 69 36v38l-69-36Z" fill="#7a9a77"/>
+<path d="m661 284 80 39 13 27-94-45Z" fill="#faf0ce"/>
+<path d="m675 291 10 5 14 28-11-5Zm25 12 11 5 13 29-11-5Zm25 12 11 5 12 27-10-5Z" fill="#91ab83" stroke="none"/>
+<path d="M665 308v54m75-18v55" stroke="#9f885e" stroke-width="4"/>
+<path d="m660 356 90 43 9-9-92-44Z" fill="#b69d6c"/>
+<path d="m673 361 64 31v17l-64-31Z" fill="#b09764"/>
+<path d="m654 234 48 25v24l-48-24Z" fill="#d3bf84"/>
+<path d="m668 249 19 10m-14-13v14m7-8v11" stroke="#907b4a"/>
+</g>
+<use href="#cabbage" x="693" y="355" transform="translate(210 91) scale(.72)"/>
+<use href="#cabbage" x="716" y="366" transform="translate(209 88) scale(.72)"/>
+<use href="#cabbage" x="747" y="381" transform="translate(209 88) scale(.72)"/>
+<!-- Foreground flower patches, fence and a very patient delivery cart. -->
+<use href="#fence" x="154" y="376"/><use href="#fence" x="234" y="411"/>
+<use href="#bush" x="773" y="423"/><use href="#bush" x="192" y="391"/>
+<g stroke="#90805a" stroke-width="2" stroke-linejoin="round">
+<path d="m339 365 47-17 35 16-47 21Z" fill="#c3ac78"/>
+<path d="m339 365 35 20v31l-35-19Z" fill="#ae9564"/><path d="m374 385 47-21v31l-47 21Z" fill="#c6ad79"/>
+<path d="m350 388 70 33" stroke-width="4"/><circle cx="356" cy="405" r="10" fill="#827951"/><circle cx="398" cy="412" r="11" fill="#827951"/><circle cx="356" cy="405" r="3" fill="#d4bd88"/><circle cx="398" cy="412" r="3" fill="#d4bd88"/>
+</g>
+<use href="#cabbage" x="364" y="362"/><use href="#cabbage" x="392" y="361"/>
+<g stroke="#8c9a70" stroke-width="2" stroke-linecap="round"><path d="m337 451 1-7m4 7 3-5m-58-32 1-7m6 9 3-5m423 46 1-7m5 8 3-5m-82-10 2-8m5 9 4-5"/></g>
+<g fill="#c8aa60"><circle cx="330" cy="445" r="3"/><circle cx="337" cy="439" r="3"/><circle cx="723" cy="449" r="3"/><circle cx="730" cy="445" r="3"/></g>
+<g stroke="#a4b08c" stroke-width="2" stroke-linecap="round"><path d="M665 157q8-8 16 0 8-8 16 0M730 185q6-6 12 0 6-6 12 0"/></g>
+</svg>
