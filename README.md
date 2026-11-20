@@ -180,6 +180,10 @@ turn for each seat); the player spoken to answers with `reply`, then the same qu
 in the message (an answer without words is refused and asked again), and the AI seats' text proposes the talk. Computer
 seats never talk. Off by default; the report records the number.
 
+`--trade-in-debt 1` lets a debtor offer a trade (`offer:<player>`, the same contract) before mortgaging or going
+bankrupt. The trade comes back to the debt; if the cash then covers it, the debt is paid and the turn ends, as after a
+mortgage. Off by default; the report records it.
+
 The agents use their existing command-line subscriptions. Each real choice starts a new agent invocation, so a game
 can take several minutes and uses those accounts' limits. Computer seats can be `easy`, `normal`, `hard` or `adaptive`.
 Two to four players are required. Without `--rounds`, the normal 30-round limit applies; the example is a short pilot.

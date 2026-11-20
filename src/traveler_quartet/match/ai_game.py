@@ -103,7 +103,8 @@ def _report(final, timed, seats, agents, started: float) -> dict:
 
 def _write_report(target: Path, state, timed, seats, agents, started, seed, offer_style, error=None) -> dict:
     report = {**_report(state, timed, seats, agents, started), "seed": seed, "offer_style": offer_style,
-              "talks_per_turn": state.economy.talks_per_turn, "log_path": str(target)}
+              "talks_per_turn": state.economy.talks_per_turn, "trade_in_debt": state.economy.trade_in_debt,
+              "log_path": str(target)}
     if error is not None:
         report["error"] = {"type": type(error).__name__, "message": str(error),
                            "round": state.round, "seat": actor(state), "pending": state.pending}
@@ -118,10 +119,11 @@ def play_ai_game(seats: Sequence[str], seed: int = 1, rounds: Optional[int] = No
                  log_path: Optional[Path] = None,
                  commands: Optional[Mapping[str, List[str]]] = None,
                  notebook_cap: Optional[int] = None, offer_style: str = "fields",
-                 talks_per_turn: Optional[int] = None) -> Dict[str, object]:
+                 talks_per_turn: Optional[int] = None, trade_in_debt: Optional[int] = None) -> Dict[str, object]:
     """`notebook_cap`: each AI seat keeps a private notebook on its rivals, each note capped (None = no notebook).
     `offer_style`: how every AI seat of the table sees and writes a trade offer (`players.text.OFFER_STYLES`).
-    `talks_per_turn`: table talk -- how many times a player may speak to a rival who must answer (None = the rules)."""
+    `talks_per_turn`: table talk -- how many times a player may speak to a rival who must answer (None = the rules).
+    `trade_in_debt`: 1 = a debtor may offer a trade before mortgaging or going bankrupt, 0 = not (None = the rules)."""
     commands = COMMANDS if commands is None else commands
     _validate(seats, rounds, commands)
     if notebook_cap is not None and notebook_cap < 1:
@@ -130,12 +132,16 @@ def play_ai_game(seats: Sequence[str], seed: int = 1, rounds: Optional[int] = No
         raise ValueError(f"unknown offer style {offer_style!r}; known: {', '.join(OFFER_STYLES)}")
     if talks_per_turn is not None and talks_per_turn < 0:
         raise ValueError("the number of talks per turn cannot be negative")
+    if trade_in_debt not in (None, 0, 1):
+        raise ValueError("trade_in_debt is 0 or 1")
     target = log_target(log_path)
     initial = new_game(seed=seed, player_count=len(seats))
     if rounds is not None:
         initial = replace(initial, economy=replace(initial.economy, rounds=rounds))
     if talks_per_turn is not None:
         initial = replace(initial, economy=replace(initial.economy, talks_per_turn=talks_per_turn))
+    if trade_in_debt is not None:
+        initial = replace(initial, economy=replace(initial.economy, trade_in_debt=trade_in_debt))
     progress = GameProgress(initial)
     choosers, agents = _players(seats, commands, history=lambda: progress.timed, notebook_cap=notebook_cap,
                                 offer_style=offer_style)

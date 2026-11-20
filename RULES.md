@@ -46,6 +46,10 @@ gold, districts of a town with no buildings, and kept cards (the rope is worth *
 receives must be worth **between half and double** what they give. Anything said on the side is free: promises only
 bind those who believe them.
 
+**Trading in debt** (an option, off unless the table sets `trade_in_debt`): when you owe more than you have, you may
+also offer a trade before mortgaging or going bankrupt. Once the trade is accepted or refused you are back in your
+debt; as soon as your cash covers it, it is paid and your turn ends.
+
 **Table talk** (an option, off unless the table sets `talks_per_turn`): at any decision you may first speak to
 another player, who must answer; then you decide -- **[2]** times per turn for each player when the option is on.
 Talking commits no one to anything; only an offer does.

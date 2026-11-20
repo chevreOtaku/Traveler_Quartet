@@ -16,6 +16,8 @@ QUESTIONS = {
     "target": "Choose the player your curse is played on.",
     "debt": "You owe more than you have: sell houses or mortgage a district, or go bankrupt.",
 }
+# The debt question when the table allows an offer during a debt (`trade_in_debt`, D54); without it, the text above.
+DEBT_WITH_TRADE = "You owe more than you have: sell houses, mortgage a district or offer a trade, or go bankrupt."
 CONTRACT = ("To offer a trade, write `offer:<player>:<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:"
             "<ask_cards>` (squares by number, comma-separated; an empty field = nothing). A counter-offer: "
             "`counter:<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:<ask_cards>`. What each side "
@@ -126,6 +128,8 @@ def _negotiation(names: Sequence[str], style: str) -> List[str]:
 def _question(seen: Seen) -> str:
     if seen["pending"] == "talk":
         return f"Player {seen['talk']['speaker']} speaks to you: answer them in your message"
+    if seen["pending"] == "debt" and any(n.startswith("offer:") for n in seen["negotiations"]):
+        return DEBT_WITH_TRADE
     return QUESTIONS.get(seen["pending"], seen["pending"])
 
 

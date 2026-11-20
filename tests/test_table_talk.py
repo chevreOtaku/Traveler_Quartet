@@ -1,5 +1,5 @@
-"""Table talk -- an option, OFF by default (`talks_per_turn` = 0): at the start of its turn a player may speak to one
-rival, who must answer before the turn goes on. The words travel as table messages; the engine gives the floor and
+"""Table talk -- an option, OFF by default (`talks_per_turn` = 0): at any decision a player may speak to a rival,
+who must answer before the same question is asked again. The words travel as table messages; the engine gives the floor and
 takes it back."""
 
 import json

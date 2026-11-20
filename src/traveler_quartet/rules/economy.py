@@ -42,6 +42,7 @@ class Economy:
     seat_bonus_cash: int
     rotate_first_player: int
     talks_per_turn: int
+    trade_in_debt: int
 
 
 def load_economy(path: Path = DATA_DIR / "economy.json") -> Economy:
