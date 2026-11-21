@@ -96,6 +96,8 @@ async function updatePanel() {
   const legal=data.view.your_turn && !data.over ? data.view.legal_actions : [];
   element("play-title").textContent=data.over ? "Game over" :
     legal.length ? `Your turn, player ${player.seat}` : "The computers are playing";
+  const owed=legal.length ? P.debtWords(data.view) : "";
+  if (owed) {const debt=document.createElement("p");debt.className="debt";debt.textContent=owed;actions.append(debt);}
   if (legal.length && data.view.trade) {
     const offer=document.createElement("p");offer.className="trade-offer";offer.textContent=T.offerWords(data.view);
     actions.append(offer);

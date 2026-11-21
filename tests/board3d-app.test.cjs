@@ -179,3 +179,18 @@ test('motion preference change and Go to latest both settle an active hop', asyn
     assert.match(p.element('status').textContent,/Game complete/);
   }
 });
+
+test('with a human in a REAL debt (the engine view): the debt is said, the mortgages and the offer form are there', async () => {
+  const debt=JSON.parse(require('node:fs').readFileSync(require('node:path').join(__dirname,'board3d-debt-view.json'),'utf8'));
+  const p=page('',true,'human',debt.view);
+  p.submit('start-form');await tick();await tick();
+  const nodes=p.element('actions').children.flatMap(all);
+  assert.equal(nodes.find(n=>n.className==='debt')?.textContent,'You owe 680 gold to player 1.');
+  assert.deepEqual(nodes.filter(n=>n.type==='button' && /^Mortgage /.test(n.textContent)).length,3);
+  assert.equal(nodes.filter(n=>n.className==='trade').length,1);
+  nodes.find(n=>n.name==='ask_gold').value='440';
+  for (const box of nodes.filter(n=>n.type==='checkbox' && n.dataset.side==='give')) box.checked=true;
+  nodes.find(n=>n.name==='send').handlers.click();await tick();
+  const act=p.calls.find(([url])=>url.endsWith('/act'));
+  assert.equal(JSON.parse(act[1].body).action,'offer:1:0:11,13,14::440::');
+});

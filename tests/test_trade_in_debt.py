@@ -188,3 +188,13 @@ def test_an_ai_table_refuses_a_value_other_than_zero_or_one(tmp_path, value):
     with pytest.raises(ValueError):
         play_ai_game(("claude", "normal"), rounds=1, log_path=tmp_path / "bad.json", trade_in_debt=value,
                      commands=_first_choice(tmp_path))
+
+
+def test_the_human_debt_view_given_to_the_3d_page_is_what_the_engine_sends():
+    """The page's test reads `board3d-debt-view.json`: it must be the engine's view of a human in a REAL debt."""
+    from pathlib import Path
+    from debt_view import TARGET, debt_view
+    assert json.loads(Path(TARGET).read_text(encoding="utf-8")) == debt_view()
+    seen = debt_view()["view"]
+    assert (seen["pending"], seen["negotiations"], seen["debt_context"]) == (
+        "debt", ["offer:1", "offer:2"], {"debtor": 0, "to": 1, "amount": 680})

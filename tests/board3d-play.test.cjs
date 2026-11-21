@@ -26,3 +26,12 @@ test("the tab's seat comes from the ONE token the server gave it", () => {
   assert.equal(P.humanSeat(undefined), null);
   assert.equal(P.storageKey("g1"), "traveler-quartet:seat:g1");
 });
+
+test("a human in debt reads how much they owe and to whom; nobody else's debt is said as theirs", () => {
+  const owing = (to, debtor = 0) => ({me: {seat: 0}, debt_context: {debtor, to, amount: 680}});
+  assert.equal(P.debtWords(owing(1)), "You owe 680 gold to player 1.");
+  assert.equal(P.debtWords(owing("bank")), "You owe 680 gold to the bank.");
+  assert.equal(P.debtWords(owing("jackpot")), "You owe 680 gold to the jackpot.");
+  assert.equal(P.debtWords(owing(1, 2)), "");
+  assert.equal(P.debtWords({me: {seat: 0}}), "");
+});
