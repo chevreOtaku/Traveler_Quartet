@@ -1,4 +1,4 @@
-"""The offer during a DEBT (D54) -- an option of the table, OFF by default (`trade_in_debt` = 0). With it on, a debtor
+"""The offer during a DEBT (D54) -- the RULE since 21/11 (`trade_in_debt` = 1; a table may set it to 0). A debtor
 may offer a trade before mortgaging or going bankrupt; the trade comes back to the debt it came from, and the debt is
 paid as soon as the cash covers it -- exactly as after a mortgage. The half-to-double rule still holds.
 
@@ -39,8 +39,8 @@ def kinds(events):
     return [e.kind for e in events]
 
 
-def test_the_option_is_off_by_default_and_a_debt_has_no_offer():
-    assert new_game(seed=1, player_count=3).economy.trade_in_debt == 0
+def test_the_rule_is_on_by_default_and_a_table_without_it_has_no_offer_in_a_debt():
+    assert new_game(seed=1, player_count=3).economy.trade_in_debt == 1
     state = in_debt(option=0)
     assert negotiations(state) == ()
     with pytest.raises(IllegalAction):

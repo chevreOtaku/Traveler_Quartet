@@ -36,7 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
                              "answer, at any decision (default: the rules, 0)")
     parser.add_argument("--trade-in-debt", type=int, choices=(0, 1), default=None,
                         help="ai-game: 1 = a debtor may offer a trade before mortgaging or going bankrupt "
-                             "(default: the rules, 0)")
+                             "(default: the rules, 1)")
     parser.add_argument("--opponents", default="normal,normal,normal",
                         help="cli: the computers you play against, comma-separated (easy, normal, hard, adaptive)")
     return parser
