@@ -38,6 +38,7 @@ def _square(names: Sequence[str], index) -> str:
 
 
 def _sentences(names: Sequence[str], who: Callable) -> Dict[str, Callable[[Dict], str]]:
+    whom = lambda to: who(to) if isinstance(to, int) else ("the jackpot" if to == "jackpot" else "the bank")
     return {
         "rolled": lambda d: f"rolled {d['dice'][0]} and {d['dice'][1]}",
         "bought": lambda d: f"bought {_square(names, d['square'])} for {d['price']}",
@@ -69,6 +70,25 @@ def _sentences(names: Sequence[str], who: Callable) -> Dict[str, Callable[[Dict]
         "paid_to_bank": lambda d: f"paid {d['amount']} to the bank",
         "jackpot_won": lambda d: f"won the jackpot ({d['amount']})",
         "bankrupt": lambda d: f"went bankrupt (to {who(d['to']) if isinstance(d['to'], int) else d['to']})",
+        "debt_opened": lambda d: f"owes {d['amount']} to {whom(d['to'])} and is in debt",
+        "debt_paid": lambda d: f"paid the debt of {d['amount']} to {whom(d['to'])}",
+        "sold": lambda d: f"sold a building on {_square(names, d['square'])} (now level {d['level']})",
+        "unmortgaged": lambda d: f"lifted the mortgage on {_square(names, d['square'])}",
+        "cursed": lambda d: f"cursed {who(d['target'])}",
+        "mirrored": lambda d: f"sent the curse back to {who(d['back_to'])} with the mirror",
+        "crisis": lambda d: f"paid {d['amount']} in a crisis",
+        "disaster": lambda d: f"drew a disaster: {d['destroyed']} buildings destroyed in {d['town']}",
+        "left_dungeon": lambda d: (f"paid {d['paid']} to leave the dungeon" if "paid" in d else
+                                   f"left the dungeon with a {d['by']}"),
+        "stayed_in_dungeon": lambda d: f"stayed in the dungeon ({d['left']} turns left)",
+        "used_rope": lambda d: "used the rope to leave the dungeon",
+        "stayed": lambda d: "stayed on the portal",
+        "auction_unsold": lambda d: f"saw nobody buy {_square(names, d['square'])} at auction",
+        "stall_requested": lambda d: f"asked {who(d['owner'])} to share a stall on {_square(names, d['square'])}",
+        "stall_shared": lambda d: f"shared a stall on {_square(names, d['square'])} with {who(d['partner'])}",
+        "stall_refused": lambda d: (f"refused to share a stall on {_square(names, d['square'])} with "
+                                    f"{who(d['requester'])}"),
+        "partner_refunded": lambda d: f"refunded {d['amount']} to {who(d['to'])}, the stall partner",
     }
 
 
@@ -95,4 +115,11 @@ def summary_lines(events: Sequence[TimedEvent], catalog: Mapping[str, Mapping[st
     shown = list(events)[-cap:] if cap else []
     left_out = len(events) - len(shown)
     lines = [f"- ({left_out} earlier events not shown)"] if left_out else []
-    return lines + [f"- round {r}: {sentence(public_event(catalog, e, viewer), names, viewer)}" for r, e in shown]
+    return lines + [f"- round {r}: {_read(catalog, public_event(catalog, e, viewer), names, viewer)}" for r, e in shown]
+
+
+def _read(catalog: Mapping[str, Mapping[str, object]], shown: Dict[str, object], names: Sequence[str], viewer: int) -> str:
+    """The sentence, and for a card drawn IN PUBLIC what it does (a kept card was already cut to 'a kept card')."""
+    text = sentence(shown, names, viewer)
+    card = catalog.get(str(shown["data"].get("card"))) if shown["kind"] == "card" else None
+    return f"{text}: {card['text']}" if card and card.get("text") else text
