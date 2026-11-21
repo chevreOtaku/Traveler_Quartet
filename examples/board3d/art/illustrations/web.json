@@ -1,0 +1,1108 @@
+{
+ "schema_version": 1,
+ "format": "webp",
+ "quality": 82,
+ "note": "Game exports of the catalogue's masters, same pixel size; the full-size PNG masters are kept outside git.",
+ "assets": [
+  {
+   "id": "01-cabbage-row-v1",
+   "file": "locations/01-cabbage-row-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 354846,
+   "sha256": "f7b7bdc3e50aa1d0fa6f4387235bb65e253dd21542ee3b14a1af9317c8c9090b",
+   "master_sha256": "b5bedd26c8616338a63885ead21c0e0895db6bb58d593237311e8fa986be16d9"
+  },
+  {
+   "id": "03-newcomers-gate-v1",
+   "file": "locations/03-newcomers-gate-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 440412,
+   "sha256": "6b7cf085b3e9fe7b31fdfa62a8613ed6b6936df2cc13ee0e94ecf169166e0136",
+   "master_sha256": "6727416e36c512e719a953d91173a9f94515ea8632545bedc0b8e0ac886a4e24"
+  },
+  {
+   "id": "05-portal-brown-purple-cart-v1",
+   "file": "portals/05-portal-brown-purple-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 462640,
+   "sha256": "39531c5ca2ff52bc7623b63388f9734fc9200c3b2119150ba688425ad6a3e055",
+   "master_sha256": "b2e82c9bf44bd287e2690fb0bba0bfd0194f4656a74ba72aea60bcdf4da731e9"
+  },
+  {
+   "id": "05-portal-brown-orange-cart-v1",
+   "file": "portals/05-portal-brown-orange-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 507238,
+   "sha256": "7b6f4003955b62821a2579128a9a7222d46bc4c33d8ab6a1463dcbecc8c03cf1",
+   "master_sha256": "aba46de076abb933f965df9d466f73921c19be88d06f9ba9e4dc2b4d8cf2a823"
+  },
+  {
+   "id": "05-portal-light-blue-purple-cart-v1",
+   "file": "portals/05-portal-light-blue-purple-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 502846,
+   "sha256": "fa6d561f234f5925929508eb59459dadc9568d06531ba6d83a01c514cd27914e",
+   "master_sha256": "7fbbe08e24f0dbffc5cea06f35f5994d8bf81d39b9c1d73cc4b24bfe85edbb09"
+  },
+  {
+   "id": "05-portal-light-blue-orange-cart-v1",
+   "file": "portals/05-portal-light-blue-orange-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 491404,
+   "sha256": "71604551bbbf144502dee280025046d5883fb28750b3cc2e05c0b17c7fba364c",
+   "master_sha256": "1ecdd9470629396d835373220562ebbaa6eb68429bca984957def5421646a202"
+  },
+  {
+   "id": "06-unpaid-shaft-v1",
+   "file": "locations/06-unpaid-shaft-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 522440,
+   "sha256": "69df249acff81e440c19c9b5ab7fef0a954c6482e6ce80f8e9b9d8dd91ec6d4a",
+   "master_sha256": "1ce6730953a36fe7ca5235cbe49f09040ef595dc680c273b6a2d36eff9a3c480"
+  },
+  {
+   "id": "08-night-shift-tunnel-v1",
+   "file": "locations/08-night-shift-tunnel-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 449570,
+   "sha256": "eb68b1e1a26b752b335dc8888f63ab67366b5df2198e8f5f7d6aeaa314b665fd",
+   "master_sha256": "a9d36b8ce72576c1c42956817e6a78b6f529f1389ced7f6ca2ff742aa9720cd9"
+  },
+  {
+   "id": "09-gem-cutters-lane-v1",
+   "file": "locations/09-gem-cutters-lane-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 508316,
+   "sha256": "394133ad19ddb0161d9b7b5f666db59ef436d0ffd221035d6d1b275bf69867dd",
+   "master_sha256": "640bdc2e42ce993d859d0838b41dc664dfb2b43778ec6066be592dec6c08764f"
+  },
+  {
+   "id": "10-dungeon-v1",
+   "file": "locations/10-dungeon-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 437214,
+   "sha256": "81bbe1de8633b596ba26b477eb0b24b83ebc2c0f4770084837b19f1392872941",
+   "master_sha256": "205ba06021226e653cc4edb9ec24ff0810de232fa8c58485ba362f95edd01661"
+  },
+  {
+   "id": "adventurer-mimic-v1",
+   "file": "adventurer/adventurer-mimic-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 365846,
+   "sha256": "704792ec9f33aad72d5d364de4b67293d80be13df81e0ac361f7c3365ea1663c",
+   "master_sha256": "786c7aee86b183996c2cc3c333c7fee0f4277e194d86e76975328e57bf87358a"
+  },
+  {
+   "id": "adventurer-chest-v1",
+   "file": "adventurer/adventurer-chest-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 351546,
+   "sha256": "d334c74fa4a5b7e10a0142d964eb092dbd69d1f9acf3861ceb7466a638093881",
+   "master_sha256": "4f1e658ff5f67af2277bc35212727cd33bb2360aacd11459bd02b5a72ef666b6"
+  },
+  {
+   "id": "adventurer-saint-v1",
+   "file": "adventurer/adventurer-saint-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 378202,
+   "sha256": "e4ed8e9d832b5c0d6b834e5d96a5de7f6a91a0db2bebdd9edc03d939db090de0",
+   "master_sha256": "9cd635a54ca3894c6876d95c928cc0a842a5c205c26432cb066da8aba5570ae6"
+  },
+  {
+   "id": "adventurer-goblins-v1",
+   "file": "adventurer/adventurer-goblins-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 410526,
+   "sha256": "625f90a2c13bae7ca0915ab10da31a611670f7cb755391d5ef2d7c7188489706",
+   "master_sha256": "1824a118df0975d4451077d4f973b51fe38a645918161ee90144a825a0b8531f"
+  },
+  {
+   "id": "adventurer-healer-v1",
+   "file": "adventurer/adventurer-healer-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 347504,
+   "sha256": "a6a8037485daf9b5bda2316929c7b78f094c20634619c7f0c288d16d18d8d0ac",
+   "master_sha256": "cf053f2c29daab73772a1108d1d6ea8d6138d9397c90b527b0a11e2b5bba89ff"
+  },
+  {
+   "id": "adventurer-exit-v1",
+   "file": "adventurer/adventurer-exit-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 384146,
+   "sha256": "0b67cb641475d626d49a1009e28cf3947cb9b54d15bc2bbd965f03b76a921398",
+   "master_sha256": "ffb05b51157877c25fb7f0ea99a53879ee9e3a98ca2b7a8c5d6203d5c98ad7ed"
+  },
+  {
+   "id": "adventurer-lost-v1",
+   "file": "adventurer/adventurer-lost-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 426902,
+   "sha256": "64f22c67978d1c4553cda13667a6b9789f1403417c398ae3f49011ee407d5f90",
+   "master_sha256": "f603d0c9ea1f0dbfbbcdf43c25d10955c7c1567cc544d60de3763ce01d40afa2"
+  },
+  {
+   "id": "adventurer-adventurers-v1",
+   "file": "adventurer/adventurer-adventurers-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 393678,
+   "sha256": "1920dd63e737bddec3c16a3f16c494058dcd9dcfe867f2b5232582f2424b463b",
+   "master_sha256": "07ceece55201a57b827f8e37483aec152820d3f17463c86d9b37a12481995478"
+  },
+  {
+   "id": "11-weeping-goddess-fountain-v1",
+   "file": "locations/11-weeping-goddess-fountain-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 521952,
+   "sha256": "b9a61d9c834c6899e2a847b413d76da11c73525bc3b92bef0e4f46900c263bc0",
+   "master_sha256": "89dbe278515139fabe22839c80ca5714db6e39f0df0a36ca4f8a0e46eee441e0"
+  },
+  {
+   "id": "13-made-up-god-chapel-v1",
+   "file": "locations/13-made-up-god-chapel-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 549420,
+   "sha256": "81dceac9ad1e1a3cdb99cc208684bede1952472b4a5d2a57a7a4e2e4536aa960",
+   "master_sha256": "020dda352d727404b79b029a16371b1de8bca45164a1abde61f5b0a69e60fa8e"
+  },
+  {
+   "id": "14-holy-nap-church-v1",
+   "file": "locations/14-holy-nap-church-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 484968,
+   "sha256": "5da16d9089eac674bd0ba410fac6fcfbbd63de96afd2bf2ac1281d827268ae56",
+   "master_sha256": "29e8644b42904d378ba5ca91ceb2c49f92e2ab7a58790c8de4f156cfb9b8aaf6"
+  },
+  {
+   "id": "12-mana-stone-mining-v1",
+   "file": "locations/12-mana-stone-mining-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 515690,
+   "sha256": "1217703382c0fffc73fd96c3972c1e7fb7772219d0663f8327311e49e1785c89",
+   "master_sha256": "0f427526aa6377b28a7d7cc28525f8967bd6c0c2ee2dd7c7a03ffdc94c34734e"
+  },
+  {
+   "id": "28-endless-spring-waterworks-v1",
+   "file": "locations/28-endless-spring-waterworks-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 563946,
+   "sha256": "dd8a5d34122e47e7bae7822c5b4265207eea819ff79310d9674e42c5edda1807",
+   "master_sha256": "1456929bdbcb8cb7b68ae5fa3a6f866ff443e428007df897323aeeb83e1f50cf"
+  },
+  {
+   "id": "16-hunters-rest-v1",
+   "file": "locations/16-hunters-rest-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 534770,
+   "sha256": "e8f37024c542965ba06f27b52b50fabe87e2d8b1c0a61db5aa1f27c613cbb2a8",
+   "master_sha256": "1cf5974c1cf6d5403aeefa9f3bd77a7c6eee53f7aeeb371c40aa58013eace367"
+  },
+  {
+   "id": "18-fishmongers-pier-v1",
+   "file": "locations/18-fishmongers-pier-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 600778,
+   "sha256": "3985bfa5ed828dafab014336f3d035496266a2a65e5b988196ff9e0b4d84b400",
+   "master_sha256": "8f74e3f8be76ae9d445957258b73f8ea093b5f4842da0ecc09b5e2607cc17de0"
+  },
+  {
+   "id": "19-barbarians-butchery-v1",
+   "file": "locations/19-barbarians-butchery-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 512634,
+   "sha256": "77b7ed259eb18424e688c498597859dc4798f3de71da8d1c80aa99071a59d60d",
+   "master_sha256": "60effb967b23bf8ddd94703eea041675e10e5e5cfb6de5de8f5e4f12f26181cf"
+  },
+  {
+   "id": "15-portal-purple-red-cart-v1",
+   "file": "portals/15-portal-purple-red-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 595190,
+   "sha256": "208c8e0f30deb91d4b25ca06b8ee717058174666bd4ac3c7f5bda15c4f5af422",
+   "master_sha256": "adc5896906872bacb41ee970c8cbc489980f76b87915a444a422534dcb1cc5d9"
+  },
+  {
+   "id": "15-portal-purple-yellow-cart-v1",
+   "file": "portals/15-portal-purple-yellow-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 590942,
+   "sha256": "e278efa02aad053bc7d7b3273f49242668905fd8a465536a86657560cf3c58c7",
+   "master_sha256": "3376832687039a995381fa654ed28a94cb5b42f3275326669315c7401e1a807a"
+  },
+  {
+   "id": "15-portal-orange-red-cart-v1",
+   "file": "portals/15-portal-orange-red-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 587734,
+   "sha256": "2b3540171295329b393e27f08188374212dc63954b7fb9549cde62f42737f17c",
+   "master_sha256": "ce078e8175909077ae9bd72039066177142cf06db1479d06d214427bf26e93f3"
+  },
+  {
+   "id": "15-portal-orange-yellow-cart-v1",
+   "file": "portals/15-portal-orange-yellow-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 586496,
+   "sha256": "308489a26f7c2b7590e7979b7a853e27e735d6fc0b326fe48e41238cc3da65b7",
+   "master_sha256": "7bcbe8c60362f1d5d846e21bb5876c2b6bcaa7a79350534539d9e6dfd476fbd4"
+  },
+  {
+   "id": "20-park-jackpot-v1",
+   "file": "locations/20-park-jackpot-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 575940,
+   "sha256": "043891d6d8803e889a70bc9c674ca2fea1b8cf8c67d1921940b61a5c5eadb02a",
+   "master_sha256": "2546977a1cfd2b8d3ee71e59b5dda6b9f678158dfa164568e8ca94066fe695bc"
+  },
+  {
+   "id": "21-dragon-go-round-v1",
+   "file": "locations/21-dragon-go-round-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 549034,
+   "sha256": "81e2c9808598bd765c98f9a79078b5cacaba8a6114c2c51fb00c9cd78c01d8bd",
+   "master_sha256": "64952565c936df32671f29cc8a4022c90be000f70fc3fe5ba31433e838bf070e"
+  },
+  {
+   "id": "23-mascot-avenue-v1",
+   "file": "locations/23-mascot-avenue-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 546426,
+   "sha256": "d01d2dd9c75389dadfbed5e53d5b9e0e4c303247fcaf8592802d4e3c66da5cd0",
+   "master_sha256": "5d6c6395a9547c989f17c961c98fec835068612faa012bd368601a11fa3e116b"
+  },
+  {
+   "id": "24-fireworks-square-v1",
+   "file": "locations/24-fireworks-square-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 553098,
+   "sha256": "96724ef89cb8733b4a66a2a8d0bff72de016c98bf16250c5a72ad08514966a0d",
+   "master_sha256": "30cf8a730cb397e7170849b2701fb0e16bb26726ac65fbe33aad178ccc7b6dc5"
+  },
+  {
+   "id": "26-villains-stage-v1",
+   "file": "locations/26-villains-stage-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 563486,
+   "sha256": "0f271c859b5a2f9700304ae5dd487b569fff42f65e6d559d7ccc84c06c750fc1",
+   "master_sha256": "7961ff9ec1aaf4c6bd213448b5ddd4f79f39e64d2509d1ad6033c09ff1899542"
+  },
+  {
+   "id": "27-bards-corner-v1",
+   "file": "locations/27-bards-corner-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 566930,
+   "sha256": "d2c881c55cab32bdd1e0306ccdfbcc2c74bedfb679bd620f75a891ecaed55659",
+   "master_sha256": "1761e95b1c24d21abe8586d059bdfb70516743756e5686a438412a9533c84a54"
+  },
+  {
+   "id": "29-puppet-lane-v1",
+   "file": "locations/29-puppet-lane-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 594818,
+   "sha256": "821ef3079750be00993af1312de2c4b370a42305b029242303dcf223155805de",
+   "master_sha256": "6569b21e905b94abdae1602e714671da92f9cb2e2d5a16da54209f6102236ac7"
+  },
+  {
+   "id": "25-portal-red-green-cart-v1",
+   "file": "portals/25-portal-red-green-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 595934,
+   "sha256": "aaa20ebd5612fddc59779864f35c163ecdacf576b1cc3320b35e4e3ed5aae61c",
+   "master_sha256": "72e7f964e1e5c31b2312847c6ab02e4b7ba0457092427d33ecbdcd4c69469641"
+  },
+  {
+   "id": "25-portal-red-dark-blue-cart-v1",
+   "file": "portals/25-portal-red-dark-blue-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 618166,
+   "sha256": "86d7258b06ac70df958df277dfad2a9cc79e07fb5868133200f6cd2275c91303",
+   "master_sha256": "f4698013b8b06a4d8e79dc06af59f32dceefd1dc21299d5d22903c4a52187d12"
+  },
+  {
+   "id": "25-portal-yellow-green-cart-v1",
+   "file": "portals/25-portal-yellow-green-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 568558,
+   "sha256": "7a68216d5d43c778b31c014954acc0cfe71c8da02e3701166613ef9e24ea9c91",
+   "master_sha256": "e64734c9b643f32a38ef8d0adf8cd1ba11d25c0f695b4a13bd4bb5bae418c067"
+  },
+  {
+   "id": "25-portal-yellow-dark-blue-cart-v1",
+   "file": "portals/25-portal-yellow-dark-blue-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 597588,
+   "sha256": "457767a396aeafa64520395db0ad3c44f81400a6673877b38f06df78349f5ecf",
+   "master_sha256": "74f91dd7e05992fcd2f3826b624add8fff870c95673c038abb56a03e3685fa6d"
+  },
+  {
+   "id": "31-moneychangers-street-v1",
+   "file": "locations/31-moneychangers-street-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 601794,
+   "sha256": "4f6ae0ea7f55ef4b27116adf7b3a8eb36293ccaee1c5db7a3793fc6557633c2e",
+   "master_sha256": "3045a72c138c1d703fa04fee044669ca261bbdd3f4951b07f219a18accaa3f03"
+  },
+  {
+   "id": "32-guild-weighed-coins-v1",
+   "file": "locations/32-guild-weighed-coins-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 603770,
+   "sha256": "232c11d52c6eb340e6ac7ac36fd4214269f08459e70a6b50f3cf0d02adbbba81",
+   "master_sha256": "048e59ee917635eb4f82c8ef2f181d5b96d40d3e2efca839bbf43b07046a012d"
+  },
+  {
+   "id": "34-harvest-vault-v1",
+   "file": "locations/34-harvest-vault-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 599334,
+   "sha256": "4ef4ad9eb8a0e64f1150ac6b4b56fdfb19eed9cafea3dae08348e24b3edbd1e5",
+   "master_sha256": "32ed2f3aef27ab8acae7c468645cd5f9d4a1b1afbc72d61b09ad83ef9aaadcce"
+  },
+  {
+   "id": "37-royal-bathhouse-v1",
+   "file": "locations/37-royal-bathhouse-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 662408,
+   "sha256": "12776dabf5aeeb50b81b2d18f63db4f8148a1c6ed8380d8668232054d5438e86",
+   "master_sha256": "bd04f415ec2d5cb51ec358ffd8beff7f79ec944f8f8206743f1ba12f15a84c22"
+  },
+  {
+   "id": "39-perfumers-terrace-v1",
+   "file": "locations/39-perfumers-terrace-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 663376,
+   "sha256": "0908928bfa509adc62489ffe0437fcff4e41a44afc0aa0fe31de688e6f73b6fc",
+   "master_sha256": "58083ec135568c86a1b5e59f84acdafe30a56e5a69b53aee5f855437db4197bc"
+  },
+  {
+   "id": "35-portal-green-brown-cart-v1",
+   "file": "portals/35-portal-green-brown-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 647434,
+   "sha256": "e2fee93c7bb3d3d1a147d880726cfe0773f6482276124fa1dc3cd6f0bd5f4706",
+   "master_sha256": "ac4ccb24edc8f84280ef643603b0df0603ec0dac9142504d5d5bf9c9ffd6440a"
+  },
+  {
+   "id": "35-portal-green-light-blue-cart-v1",
+   "file": "portals/35-portal-green-light-blue-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 658100,
+   "sha256": "b3c35ddd3e427d28f205e17920945758b1243408cc9bf0fbb425d9106cb64a11",
+   "master_sha256": "3639bed945c9141dcc79eb727c91dc140d71078b054b2bd9251a5ba83fbf7aa9"
+  },
+  {
+   "id": "35-portal-dark-blue-brown-cart-v1",
+   "file": "portals/35-portal-dark-blue-brown-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 643872,
+   "sha256": "d756cf8ac64011161f9b24073e91ef07772df962d98b5a1849c7e5a2c0fcc7e4",
+   "master_sha256": "de28ae2140fb60669e6ae4becbc5a335d9852ccf9f09e980651bd118ccc30c63"
+  },
+  {
+   "id": "35-portal-dark-blue-light-blue-cart-v1",
+   "file": "portals/35-portal-dark-blue-light-blue-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 665732,
+   "sha256": "e115dd5555145171e033e7634cce407a0e87ffd34e3c93947d8200301ff5bd93",
+   "master_sha256": "c20f542e5049251be4f928ee3a770e79d8b11ec271cbc9dbf94ce24e7623e4f8"
+  },
+  {
+   "id": "build-house-brown-v1",
+   "file": "construction/build-house-brown-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 392170,
+   "sha256": "2970096ba7b031ade74800de5e43cce9f61c149a35fae22e08ca87e9ebf05c04",
+   "master_sha256": "eb5c883c6515124dafc5aee27062b4e481a995a2ce9e85cad3f6d56dcc608b61"
+  },
+  {
+   "id": "build-stall-brown-v1",
+   "file": "construction/build-stall-brown-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 375188,
+   "sha256": "400595e7628c59e1d17cf7eb15b4e51409b0dc876e915ea2a0bad5481e8e7890",
+   "master_sha256": "37e6bc5eb45fa49892abe4452b90df40043b70c038121567ba963f06b252ab27"
+  },
+  {
+   "id": "build-house-light-blue-v1",
+   "file": "construction/build-house-light-blue-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 463130,
+   "sha256": "1555c3514eb186aa9a55f505018329c8748cdff416125dcc2cf79633435f7336",
+   "master_sha256": "b5d14319b7e332650053c7a364f96659dfdbfed01dd3b3a53c671c0f506cbc89"
+  },
+  {
+   "id": "build-stall-light-blue-v1",
+   "file": "construction/build-stall-light-blue-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 486380,
+   "sha256": "0ca2a03dce46c512f1a2ddcdf6405e1b2b791d82142c28b9ec7d332821b23fa8",
+   "master_sha256": "73acd5484c4eddb842d4a6fc16d5cfd09b75bc706e77c4384c37aee9dfd5e27b"
+  },
+  {
+   "id": "build-house-purple-v1",
+   "file": "construction/build-house-purple-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 450880,
+   "sha256": "f94ae63b6ab96befa2f3277c95343a68fe6ea2d46877a9de6967438167bbc084",
+   "master_sha256": "6d51f558dc6e9b9349d73bcb0a61e37c7f97aeb6b75eec91064947549bcf4a23"
+  },
+  {
+   "id": "build-stall-purple-v1",
+   "file": "construction/build-stall-purple-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 495350,
+   "sha256": "5dc0bf52221de8e63dc264df841790e1fad2e79c95b9a16f7447ab7cc880e474",
+   "master_sha256": "ec2ad6d278450143bb7a902c2ef0a9612faae4aaa913f8f1e326fc8a2f1ec951"
+  },
+  {
+   "id": "build-house-orange-v1",
+   "file": "construction/build-house-orange-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 465174,
+   "sha256": "d6935487e98a217158a67a544f02341d8d6011cd49c13c5a5d348ac45108c58e",
+   "master_sha256": "1e10a09538eb195986ae0ec55905db9628425f99abc750d768036b2385ee0e70"
+  },
+  {
+   "id": "build-stall-orange-v1",
+   "file": "construction/build-stall-orange-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 503914,
+   "sha256": "fc374e7cd3dce89ac41c7dcb6068cdaa99275d5047a6177cd8058f2b2a3bfde5",
+   "master_sha256": "ae6916bd360f2b290a6043b75b94a4723f898bd4356d5a814daa9a35e0f3a4d3"
+  },
+  {
+   "id": "build-house-red-v1",
+   "file": "construction/build-house-red-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 495734,
+   "sha256": "f545b735a5edda77b33188e8db4bc18338baa1fdd1a5b8cd02db914e5294da18",
+   "master_sha256": "5d02122fe12fb86c287a803cf3fc2ff6f91721225f376af5cca578cee3dacfa6"
+  },
+  {
+   "id": "build-stall-red-v1",
+   "file": "construction/build-stall-red-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 528760,
+   "sha256": "29d4a360c0c98e70c497657adef2cff5a5f0688ebb31b432bfca8899be61883d",
+   "master_sha256": "d819ee6d00e49ca76e2e1383e06cfcc193dfeb3727b79f12bf556b9fcad59c17"
+  },
+  {
+   "id": "build-house-yellow-v1",
+   "file": "construction/build-house-yellow-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 525710,
+   "sha256": "e50c6bce02f22cee0adff94930d8ca32818651502990a0b953dbfcc1c44bc3d1",
+   "master_sha256": "6e8ca5e1db9fbf78b38cdcf087e9c269eb88c505764c564dc21dd54e044588ca"
+  },
+  {
+   "id": "build-stall-yellow-v1",
+   "file": "construction/build-stall-yellow-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 528846,
+   "sha256": "ab83d7ebf07d173fbe092217983d38a763b1df144bc5ae1edd7eb13d892c5aeb",
+   "master_sha256": "6c388be136e03c44844dd7133967c224c6a924b9385532d1cdea0d8394c2d325"
+  },
+  {
+   "id": "build-house-green-v1",
+   "file": "construction/build-house-green-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 549708,
+   "sha256": "0b8245745d6b9b15832a0fa9bab169e069290b92b0056698133743170f35afec",
+   "master_sha256": "aef9420b3b801e2762ad7807e2b6a30884655af82b5019358289af5971a45acf"
+  },
+  {
+   "id": "build-stall-green-v1",
+   "file": "construction/build-stall-green-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 538388,
+   "sha256": "e5e826401a2a2fbf5d31432c4eb440ff2931e9a6f5b76fb77950a39a887b894c",
+   "master_sha256": "0f44606c8a246dd6a99d62bd0a67be9919970f26b2b695064bc2914e97acc05f"
+  },
+  {
+   "id": "build-house-dark-blue-v1",
+   "file": "construction/build-house-dark-blue-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 560500,
+   "sha256": "76afb3faa32cd828d79fb115cab36093d0f875e3789c4ccd615d94e197f92438",
+   "master_sha256": "e9e11cc04f94be2887c57a359870b9f41e3ca0bcedad67731a5ae43951e71f17"
+  },
+  {
+   "id": "build-stall-dark-blue-v1",
+   "file": "construction/build-stall-dark-blue-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 581242,
+   "sha256": "4d193137817457c13f28125f2320c874449a80712b5cd3501df7f9c0f3f3946e",
+   "master_sha256": "e5b11d4bf71c4baaa2dd14a743ba9dff49a04193f8ee5c27f441281196de4b52"
+  },
+  {
+   "id": "chance-birthday-v1",
+   "file": "chance/chance-birthday-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 436862,
+   "sha256": "3f9cc5e178094aaac2531d7d90a7c55c81f69ebc72c5d29a3e0ac8488fa13e60",
+   "master_sha256": "c4c7ace0760f753efc333d21f43751929a9d205631c81f9a66668fb86a15b440"
+  },
+  {
+   "id": "chance-slime-v1",
+   "file": "chance/chance-slime-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 407494,
+   "sha256": "a4c4b9d8fb23c5a1e502a234aafbd5bf0f7db11f62e14863eed9ca2193b9e0a8",
+   "master_sha256": "b1bab905b1ac6be217df3afeaab7e10e46a8f30e392980d36581b7da31b03a02"
+  },
+  {
+   "id": "chance-sword-v1",
+   "file": "chance/chance-sword-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 380078,
+   "sha256": "839c88c1544906f2e68533f4d291bc88d7d605b4338b657d3512629e85977ec7",
+   "master_sha256": "013e183f6a4d64926e517c66f3cd41af9501cb98339416b6047ea0b0c880d7f3"
+  },
+  {
+   "id": "chance-radish-v1",
+   "file": "chance/chance-radish-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 417858,
+   "sha256": "b949cbc9dd5d2278edde1d7f78dcb27cf4e7e37a0600eb12597f281e31ed2a72",
+   "master_sha256": "e716c7a0f533493051453ff3f9f1f5920b32c8192e14cede06f7e380a9fb940f"
+  },
+  {
+   "id": "chance-tax-collector-v1",
+   "file": "chance/chance-tax-collector-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 431198,
+   "sha256": "9642317cfd318aaab0b02192c9f636c340ba03a79f991953f67574d8792c2ac1",
+   "master_sha256": "c5256e2192c4636b0a74bd126dc73a8c073694455787fb843eb4943a68a0d47e"
+  },
+  {
+   "id": "chance-lost-hero-v1",
+   "file": "chance/chance-lost-hero-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 476072,
+   "sha256": "fff5c7a4338e5691cfb346d328b9d5152e0e5c86293c25bc65b70914069808ee",
+   "master_sha256": "abd84134a5644261bf9ab2f283a2ac57dc0ee6205d7543ea6b87a93a9fe90933"
+  },
+  {
+   "id": "chance-cart-v1",
+   "file": "chance/chance-cart-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 440056,
+   "sha256": "e748497971d1fc3cb3b4b3764918bb77edcca392259146a031fb75c509e8d8a8",
+   "master_sha256": "7321283eb9b2a9d276e73bb5ca0c3834af823bf1d6eeb44ed6a8762c676208c3"
+  },
+  {
+   "id": "chance-to-start-v1",
+   "file": "chance/chance-to-start-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 471092,
+   "sha256": "5332df32138fa27671a5f730a39a1f1aa9972191484e52bd46c00d4e5b61dcdc",
+   "master_sha256": "ec67d15abf6816d5f445dc6336f96d42f7ad6491e10f957e6cccff1d7c60b254"
+  },
+  {
+   "id": "chance-to-dungeon-v1",
+   "file": "chance/chance-to-dungeon-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 439742,
+   "sha256": "8b2a8b3db7c4402ff583438a8812e1e75d279cd0ceac34378f50a0100bf4f953",
+   "master_sha256": "63cd24768e5dcf0c98789733c115bb3dbe8261917842dbb7d8871548955a8f27"
+  },
+  {
+   "id": "chance-goddess-blessing-v1",
+   "file": "chance/chance-goddess-blessing-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 467912,
+   "sha256": "56d2026471da7006e146aaae2bb0232ba7fd36d5d6a67cd213cc7af27b3f2748",
+   "master_sha256": "1ce34e9e779778b77503388f64b5e974bb92509e15e33260745cfe30e57b9933"
+  },
+  {
+   "id": "chance-rope-v1",
+   "file": "chance/chance-rope-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 402204,
+   "sha256": "1ec8839326218065d7e2d3955ee63b60b944f0874052f5109a4fa00691a40cd6",
+   "master_sha256": "e7497ca146a53d4631d2197e3154542b84eed017a013cf32558a221dab344860"
+  },
+  {
+   "id": "chance-mirror-v1",
+   "file": "chance/chance-mirror-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 416850,
+   "sha256": "f03e49178cb040b38a560cbcd2ec35c55b46440d7d6472a84bc4ccc7b11dd0a8",
+   "master_sha256": "03078677bce6a0d4a14719b6a0634d80f2b51f3467b33176662854d0b0e2cf16"
+  },
+  {
+   "id": "chance-bonus-v1",
+   "file": "chance/chance-bonus-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 373348,
+   "sha256": "99e5110f6c5fb098449b0d0a5790fc965e14f6c179429314f320b678c533347e",
+   "master_sha256": "40918a8d3d3694f55d697d27e23ecc940a7fd20930a31b6bb176ac18b21b2689"
+  },
+  {
+   "id": "chance-mage-v1",
+   "file": "chance/chance-mage-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 436332,
+   "sha256": "b0f03791cb69f90c4bbc5797cc9b089fe7dd570e2e6a1289d5d6a09ae5b4a4f3",
+   "master_sha256": "486420cc77adb67150b7a475e9afc2fa5df44ca8f0d89471544221c973218330"
+  },
+  {
+   "id": "event-mayonnaise-v1",
+   "file": "event/event-mayonnaise-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 454218,
+   "sha256": "e9e1b89c7a5b0106551b927be2a807441ad7178dbc8179b5f032d81ceb98a0b2",
+   "master_sha256": "100eccb7043df8b3e642e33be1c4b8671720447d3a3a7f32ed853d1432697a3f"
+  },
+  {
+   "id": "event-credit-card-v1",
+   "file": "event/event-credit-card-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 417794,
+   "sha256": "bf4deeaaac5a160f39458392bcfcf6eb943fe3ef032db691f63a968a8272b419",
+   "master_sha256": "cf47628a1c4d2a3bef510973305da106a82c9efe3b1022583907b1475fec3919"
+  },
+  {
+   "id": "event-soap-v1",
+   "file": "event/event-soap-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 467604,
+   "sha256": "5d97a212a2d520ec0f680c6ed3ef41fbceaa975cbed57867cbd4d9c36b4e612e",
+   "master_sha256": "0c877c9baae4c4cb3ccb85099ca1300f558f4c0a6006dc060eebb79893147e77"
+  },
+  {
+   "id": "event-printing-v1",
+   "file": "event/event-printing-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 431046,
+   "sha256": "2e92dd9fc1a549bc079c9b8f8fcd693c72de5cf8802eff6b6185fa2c7f075b0a",
+   "master_sha256": "70fd41950d35c706e314bb161e1eff1c45cad3854dc5e51bd6b6540c755a62a8"
+  },
+  {
+   "id": "event-earthquake-v1",
+   "file": "event/event-earthquake-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 448284,
+   "sha256": "d663a72ab6c074f2ee1f173456916fc2941bec687beba22065e023501f28c17a",
+   "master_sha256": "ea817efd2addb3897d89c1ab03ee9b0bd0840236784e14f4caee8a055b8f9da7"
+  },
+  {
+   "id": "event-liquid-v1",
+   "file": "event/event-liquid-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 456250,
+   "sha256": "0150c8cf7abd4b7251d9ab81a442c8b2ece0f104fe70cbb0e7f16866ff679ddf",
+   "master_sha256": "00c2e1c62cfa11813e6c4b7129a868e12c98da3fabf52cef2b2c22c4296f5239"
+  },
+  {
+   "id": "event-dragon-v1",
+   "file": "event/event-dragon-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 473768,
+   "sha256": "86de5dae390893f94848aa87af65732e09a473a422442d59fab830d13bce4f83",
+   "master_sha256": "12c09297cac82cbab0bc4b8b9eed0bd3eb8333fc9aa98d4a5a0abeadc3bd6e40"
+  },
+  {
+   "id": "event-demon-invasion-v1",
+   "file": "event/event-demon-invasion-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 468902,
+   "sha256": "801bf8f20a0f5ab64420364036ab27db526fe39c05934464f1a34a25943e4856",
+   "master_sha256": "840119425c6f64cf7adda491d17aa089c171482a89ae6b1a83b58f02c8f74ee5"
+  },
+  {
+   "id": "event-revolt-v1",
+   "file": "event/event-revolt-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 455124,
+   "sha256": "2b050776a967b70dd945767f2b49f47feebb098f0f34c952508e68368b394652",
+   "master_sha256": "71f252b41f9445d7fec9f0051ed4bb1af6bda12f3219c57fe2af4c6811cca103"
+  },
+  {
+   "id": "event-cabbages-v1",
+   "file": "event/event-cabbages-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 471790,
+   "sha256": "d4a98b2bcf09d414ff5ae9eb74dbe3803fb85a3f5dd2976fdd00d5f9d3ff3e75",
+   "master_sha256": "1b844024f63e208eea34fdd71c71ab8390ff16b40d1938fc094f7ace5f238e90"
+  },
+  {
+   "id": "event-epidemic-v2",
+   "file": "event/event-epidemic-v2.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 471934,
+   "sha256": "5add61bfef119f36df61c7b14e354a44fb939b78e5dba4869b35ca0217715c8a",
+   "master_sha256": "6cdee7e38780a650cfc08fd3ca1e5fc7035e36f505ae6a0f60c9138a36ddc960"
+  },
+  {
+   "id": "event-strike-v1",
+   "file": "event/event-strike-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 435582,
+   "sha256": "52f010a23671c2ea84821e3a86ea8391b5735c3dd1b992bdbe34f16b31df0b4a",
+   "master_sha256": "ab5daa6d471e543a81dad681eea1dfc2fd22373799584a20e18ebd6aa24266e4"
+  },
+  {
+   "id": "event-festival-v1",
+   "file": "event/event-festival-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 550742,
+   "sha256": "6d5b84a0d1fb227280a6ad6954e20d2f9f3121fa24d6e4abbbce64c40eae3295",
+   "master_sha256": "b6e223d91287f5b206a1787feeb1222b3cac2ecbdd1ff6495adc1d5de2613aaa"
+  },
+  {
+   "id": "event-curse-v1",
+   "file": "event/event-curse-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 384142,
+   "sha256": "04f16b4a2b4e3f7838eab21333f3552ead950ed18ba1381fc1a210807649baad",
+   "master_sha256": "560bd0a153e1c3707c8a4264739dc0119b225ec77afc7109fc9145370df58c1b"
+  },
+  {
+   "id": "chance-emblem-v1",
+   "file": "symbols/chance-emblem-v1.webp",
+   "width": 1254,
+   "height": 1254,
+   "alpha": true,
+   "bytes": 324886,
+   "sha256": "4285ab37ac8e26c1cc4ef88be005bb467b06e017810d8a40bc9183ab13e62a25",
+   "master_sha256": "bb96238748467373ddb9a57b01adcdb8784398f04896e93737db3b0c4466bc7b"
+  },
+  {
+   "id": "world-event-emblem-v2",
+   "file": "symbols/world-event-emblem-v2.webp",
+   "width": 1254,
+   "height": 1254,
+   "alpha": true,
+   "bytes": 286332,
+   "sha256": "f1f6528cc9cf929cfe7bd571b453ac8942ae4d401d266c080ca85ca3239b85c6",
+   "master_sha256": "17bf36d0b61f722e9e2ad296c74fa1c77109cba061199bb21c4791ae4ec5cf97"
+  },
+  {
+   "id": "traveler-quartet-logo-v1",
+   "file": "branding/traveler-quartet-logo-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": true,
+   "bytes": 226714,
+   "sha256": "b5933d6f08f0b24eacd04f69405b7e7a71b99ae6a74a999657d3f565a62484e8",
+   "master_sha256": "131d11e49f346bf322b2dfad52ea18483c47d5959e451fdea429059f62f46f41"
+  },
+  {
+   "id": "merchant-purse-v1",
+   "file": "merchant_emblems/merchant-purse-v1.webp",
+   "width": 1254,
+   "height": 1254,
+   "alpha": true,
+   "bytes": 63096,
+   "sha256": "0c835d535c556431c2d1c7c8976d0062cf50a9fa7d753d632d06f08b67d85989",
+   "master_sha256": "ab726b3530b589c2a912dcfd11441a650b0483b96b38cc7444c39d63bd9d6cdc"
+  },
+  {
+   "id": "merchant-key-v1",
+   "file": "merchant_emblems/merchant-key-v1.webp",
+   "width": 1254,
+   "height": 1254,
+   "alpha": true,
+   "bytes": 77572,
+   "sha256": "89c5fda96b3a4036e231f54077b3d6e9ee121ffa6f65dada2f571c06ea2ae24c",
+   "master_sha256": "36dae2d1ce6093c4cc8a1a337f161efb8afbbf322c50a8adb6f13882c5a401e3"
+  },
+  {
+   "id": "merchant-compass-v1",
+   "file": "merchant_emblems/merchant-compass-v1.webp",
+   "width": 1254,
+   "height": 1254,
+   "alpha": true,
+   "bytes": 67178,
+   "sha256": "219ff8abf7f595ae991ab38a6cc1351d2577bf8781dc0cfd92995bcf160b9967",
+   "master_sha256": "b094684f45c476ddbf02784e4e74f79db685b19992001ff6f982b3f9ce40e81d"
+  },
+  {
+   "id": "merchant-quill-v1",
+   "file": "merchant_emblems/merchant-quill-v1.webp",
+   "width": 1254,
+   "height": 1254,
+   "alpha": true,
+   "bytes": 58034,
+   "sha256": "737dc7010b9ea748d6de215f296b57431c22fc5de81b6d1317a0d5b7a3a67ee0",
+   "master_sha256": "cbe632e5edaccc1331318461957ee09dfd3ac5ec98d0ca07f7b9b8641fda3e45"
+  },
+  {
+   "id": "merchant-scales-v1",
+   "file": "merchant_emblems/merchant-scales-v1.webp",
+   "width": 1254,
+   "height": 1254,
+   "alpha": true,
+   "bytes": 91836,
+   "sha256": "f00d76a5f27b6941182690f3b448217e9bc9c27f672a12d8cdd5bf87ebc1b588",
+   "master_sha256": "2cf49c3dc57788ecde4baaa29cba6d5c77ff270620af789a22d2097224b0f451"
+  },
+  {
+   "id": "00-start-v1",
+   "file": "locations/00-start-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 518084,
+   "sha256": "6e40a272eea753308176046ded8c4cb46ba1969d9b9e4b807364c3eabbbf52a5",
+   "master_sha256": "6c4248d1857ec8920bde21a2ccc252c2ef0e47dade61fbe62a9e48a28003a66e"
+  },
+  {
+   "id": "02-tax-office-v1",
+   "file": "locations/02-tax-office-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 423252,
+   "sha256": "6842610be61489c747c543094ebb9cd53da6eb97088ae6ec3eb30501206d990e",
+   "master_sha256": "165f263a50acb440d3ceced136d5e9b66bad7bb4593ba226e88ea709a6fb338d"
+  },
+  {
+   "id": "30-go-to-dungeon-v1",
+   "file": "locations/30-go-to-dungeon-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 540540,
+   "sha256": "d7e47dd57fd6fe4d9690ce0d6e9bdafd23e86fbc62f1ebc9b47a95469f0eb3fc",
+   "master_sha256": "a0b75ed1699917416a837503d4744293db9b627a991d10f4eecbaa19b723839a"
+  },
+  {
+   "id": "chance-back-v1",
+   "file": "card_backs/chance-back-v1.webp",
+   "width": 1024,
+   "height": 1536,
+   "alpha": false,
+   "bytes": 201834,
+   "sha256": "6fd2114eb5eaa796f9a852e20c31256e996f2fe1d6c620242e2bb8794159a28a",
+   "master_sha256": "d68aa2c6df7821f2899e32b051ca2a5f28f808e77368200b346c7c86dbbfa833"
+  },
+  {
+   "id": "world-event-back-v1",
+   "file": "card_backs/world-event-back-v1.webp",
+   "width": 1024,
+   "height": 1536,
+   "alpha": false,
+   "bytes": 188150,
+   "sha256": "9ef30e0347059a157fc5634a7c378d270d68c921eae85fb0402362f27664c14c",
+   "master_sha256": "c25e375d17a9c942643e0af66b9814b5a1022fa004ef0d73e9bd22b8d5f3d93a"
+  },
+  {
+   "id": "adventurer-back-v1",
+   "file": "card_backs/adventurer-back-v1.webp",
+   "width": 1024,
+   "height": 1536,
+   "alpha": false,
+   "bytes": 162218,
+   "sha256": "31df97a09b4bc634dd364eb6584c3be5bde7848ce70456d498078412c3f0a4ff",
+   "master_sha256": "c268a845f78ee21f7ae53434122fb84c52c182b218a983a4ca45ed04831c21cc"
+  },
+  {
+   "id": "kept-card-mask-v1",
+   "file": "card_backs/kept-card-mask-v1.webp",
+   "width": 1024,
+   "height": 1536,
+   "alpha": false,
+   "bytes": 87816,
+   "sha256": "1f66345dba5a24f28e55aa64433b15c3eb0b43b787dd669c0b7a33f557de4216",
+   "master_sha256": "48225b77fe1162815007cb5349ab4be536d44760263f60332b4d887e478c78e5"
+  },
+  {
+   "id": "ukon-mascot-welcome-v1",
+   "file": "mascot/ukon-mascot-welcome-v1.webp",
+   "width": 1086,
+   "height": 1448,
+   "alpha": true,
+   "bytes": 133720,
+   "sha256": "ac8047d24593afd499b609a06b60f50bcbec9f230752d7f4fe84c89088b3cc8d",
+   "master_sha256": "912d00711f6d3854a409b0e2e9a7ef619e41096cedb70dc2e374d4e665dc0ab0"
+  }
+ ]
+}
