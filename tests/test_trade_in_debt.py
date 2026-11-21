@@ -175,11 +175,12 @@ def _first_choice(tmp_path):
 
 
 def test_an_ai_table_records_the_option_in_its_report_and_the_replay_uses_it(tmp_path):
-    report = play_ai_game(("claude", "normal"), rounds=1, log_path=tmp_path / "debt.json", trade_in_debt=1,
+    """With the NON-default value: a table that forgets the option would play the default and pass unseen."""
+    report = play_ai_game(("claude", "normal"), rounds=1, log_path=tmp_path / "debt.json", trade_in_debt=0,
                           commands=_first_choice(tmp_path))
-    assert report["trade_in_debt"] == 1
+    assert report["trade_in_debt"] == 0
     _, _, final = replay(report)
-    assert final.economy.trade_in_debt == 1
+    assert final.economy.trade_in_debt == 0
 
 
 @pytest.mark.parametrize("value", [-1, 2])
