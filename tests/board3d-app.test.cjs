@@ -6,7 +6,7 @@ const fixture = require('../examples/board3d/fixture.json');
 const tick=()=>new Promise(setImmediate);
 
 function page(search='',reduced=false,table='computers',mine={your_turn:true,legal_actions:['roll']},options={}) {
-  const elements=new Map(),calls=[],places=[],poses=[],timers=[],follows=[];
+  const elements=new Map(),calls=[],artCalls=[],places=[],poses=[],timers=[],follows=[];
   let animation=null;
   function element(id) {
     if (!elements.has(id)) {
@@ -31,19 +31,20 @@ function page(search='',reduced=false,table='computers',mine={your_turn:true,leg
     animate(fn){animation=fn;}};
   if (table==='human') snapshot.seats=['human','computer','computer','computer'];
   const seatView={view:mine,over:false,revision:1};
-  const reply=url=>url.includes('fixture')?fixture:url==='/games'?{game:'real-id',tokens:table==='human'?{tok:0}:{}}:
-    url.endsWith('/view')||url.endsWith('/act')?seatView:url.includes('/events')?{events:[event]}:snapshot;
+  const reply=url=>url.startsWith('/art/illustrations/')?JSON.parse(fs.readFileSync('examples/board3d'+url,'utf8')):
+    url.includes('fixture')?fixture:url==='/games'?{game:'real-id',tokens:table==='human'?{tok:0}:{}}:
+    url.endsWith('/view')||url.endsWith('/act')?seatView:url.includes('/events')?{events:options.events||[event]}:snapshot;
   const context=vm.createContext({URLSearchParams,createScene:()=>stage,matchMedia:()=>motion,
     location:{search},history:{replaceState(){}},document:{getElementById:element,createElement:()=>element(Symbol())},
     sessionStorage:{store:{},getItem(k){return this.store[k]??null;},setItem(k,v){this.store[k]=v;}},
     clearTimeout(){},setTimeout:(fn,delay)=>{timers.push([fn,delay]);return timers.length;},
-    fetch:async(url,init)=>{calls.push([url,init]);
+    fetch:async(url,init)=>{(url.startsWith('/art/illustrations/')?artCalls:calls).push([url,init]);
       if (options.refuse && url.endsWith('/act')) return {ok:false,json:async()=>({error:options.refuse})};
       return {ok:true,json:async()=>structuredClone(reply(url))};}});
-  for (const name of ['layout','movement','camera','play','trade','client']) vm.runInContext(fs.readFileSync(`examples/board3d/${name}.js`,'utf8'),context);
+  for (const name of ['layout','movement','camera','play','trade','art','client']) vm.runInContext(fs.readFileSync(`examples/board3d/${name}.js`,'utf8'),context);
   vm.runInContext(fs.readFileSync('examples/board3d/app.js','utf8').replace(/^import .*;\r?\n/,''),context);
   element('seed').value='1';element('rounds').value='5';element('table').value=table;
-  return {element,calls,places,poses,motion,timers,snapshot,follows,
+  return {element,calls,artCalls,places,poses,motion,timers,snapshot,follows,
     frame(now){if(animation && !animation(now))animation=null;},
     submit:id=>element(id).handlers.submit({preventDefault(){}})};
 }
@@ -58,7 +59,7 @@ test('page creates four computers and plays the real public route before the fin
   assert.deepEqual(p.poses.map(([,f])=>f.to),[39,0,1,1]);
   assert.equal(p.element('start').disabled,false);
   assert.match(p.element('status').textContent,/Game complete/);
-  assert.equal(p.timers.length,0);
+  assert.equal(p.timers.filter(([,delay])=>delay!==4500).length,0,'no refresh is scheduled once the game is over');
   assert.ok(p.calls.every(([url,options])=>!url.includes('/view') && !url.includes('/act') && !options?.headers?.Authorization));
   assert.equal(p.element('towns').children.length,8);
   assert.equal(p.element('squares').children.length,40);
@@ -193,4 +194,31 @@ test('with a human in a REAL debt (the engine view): the debt is said, the mortg
   nodes.find(n=>n.name==='send').handlers.click();await tick();
   const act=p.calls.find(([url])=>url.endsWith('/act'));
   assert.equal(JSON.parse(act[1].body).action,'offer:1:0:11,13,14::440::');
+});
+
+const A=require('../examples/board3d/art.js');
+
+test('a confirmed arrival shows the square banner, on the side that keeps the pawn visible, and can be closed', async () => {
+  const p=page('',true);p.submit('start-form');await tick();await tick();await tick();
+  const box=p.element('arrival'),art=p.element('arrival-art');
+  assert.equal(box.hidden,false);
+  assert.equal(p.element('arrival-name').textContent,p.snapshot.view.board[1].name);
+  assert.match(art.style.backgroundImage,/\/art\/illustrations\/locations\/01-cabbage-row-v1\.webp/);
+  assert.equal(art.style.backgroundPosition,'0% 12%');
+  assert.equal(box.dataset.side,A.bannerSide(1));
+  p.element('arrival-close').click();
+  assert.equal(box.hidden,true);
+});
+
+test('a drawn card shows its face with the public sentence; a kept card only ever the common mask', async () => {
+  const drawn={index:0,revision:1,round:1,kind:'card',player:2,sentence:'player 2 drew Slime',data:{card:'slime'}};
+  const kept={index:0,revision:1,round:1,kind:'card',player:3,sentence:'player 3 drew a kept card',data:{card:'a kept card'}};
+  for (const [row,file,masked] of [[drawn,/chance-slime-v1\.webp/,'false'],[kept,/kept-card-mask-v1\.webp/,'true']]) {
+    const p=page('',true,'computers',undefined,{events:[row]});p.submit('start-form');await tick();await tick();await tick();
+    const box=p.element('card-shown');
+    assert.equal(box.hidden,false);
+    assert.match(p.element('card-art').style.backgroundImage,file);
+    assert.equal(box.dataset.masked,masked);
+    assert.equal(p.element('card-text').textContent,row.sentence);
+  }
 });

@@ -87,3 +87,20 @@ are outside this art lot; no board or game files were changed by this lot.
 The Python suite was not run: no Python executable was available in the environment.
 In-game integration and the launcher routes remain for the integrating maintainer.
 `.preview-run/` is ignored local rendering scratch space and is not an art resource.
+
+## Illustrations and logos (2026-11-20)
+
+The [illustration catalogue](illustrations/MANIFEST.md) contains 110 generated
+PNG masters: 22 district scenes, two utilities, the dungeon and park,
+16 cosmetic portal variants with wooden carts, eight Adventurer cards,
+16 house/stall construction scenes, 14 Chance cards, 14 World Event cards,
+three transparent game/deck logo proposals, five selectable merchant emblems,
+three additional board scenes, three deck backs, a neutral secret-card mask
+and an attributed transparent Ukon mascot.
+Per-file metadata and hashes
+are in [catalog.json](illustrations/catalog.json). The repository ships WebP exports of the same size
+([web.json](illustrations/web.json)); the PNG masters are not committed. Mana Stone Mining Inc.
+retains its existing illustration. Final crops, animation and game integration
+remain to be validated; the existing merchant models are unchanged.
+
+Ukon character design: kitsune_tsuki; [mascot attribution and terms](illustrations/mascot/ATTRIBUTION.md). This character adaptation is an exception to the default content license.

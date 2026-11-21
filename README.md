@@ -213,8 +213,11 @@ promised move was legal at one of the speaker's later decisions and never played
 
 The towns wink at isekai and fantasy works we love, including *Konosuba*, *Spice & Wolf*, *Amagi Brilliant Park*,
 *Combatants Will Be Dispatched!*, *Lazy Dungeon Master*, *Kamikatsu*, *Fate/Grand Order*, *Gintama*, *Surviving the
-Game as a Barbarian* and *Isekai Quartet*. All names, texts and art in this game are our own. We use no characters,
-quotes or official art from these works, and this project is not affiliated with their authors or publishers.
+Game as a Barbarian* and *Isekai Quartet*. Town scenes use original compositions and indirect references rather than official art.
+The separate Ukon mascot adaptation credits its character creator; see the
+[artwork report and remaining work](examples/board3d/art/illustrations/PRODUCTION.md) and
+[Ukon attribution](examples/board3d/art/illustrations/mascot/ATTRIBUTION.md).
+This project is not affiliated with the referenced works or their authors or publishers.
 
 Ideas for the AI metrics were inspired by public experiments with language models playing board games.
 
@@ -223,7 +226,9 @@ Ideas for the AI metrics were inspired by public experiments with language model
 © 2026 chevreOtaku.
 
 - **Code**: [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/).
-- **Art and texts** (cards, names, rules): [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+- **Art and texts** (cards, names, rules): [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/),
+  except third-party character adaptations with separate terms, including the
+  [Ukon mascot](examples/board3d/art/illustrations/mascot/ATTRIBUTION.md).
 - **Content creators welcome.** You may stream the game and make videos of it, **monetized or not**. That is
   explicitly allowed, despite the non-commercial terms above (see [CONTENT_CREATORS.md](CONTENT_CREATORS.md)).
 
