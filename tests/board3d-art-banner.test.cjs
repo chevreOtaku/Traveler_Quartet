@@ -19,10 +19,13 @@ test("every square of the board has an arrival banner, and every file it names e
   assert.equal(A.squareBanner(index, 40), null);
 });
 
-test("a square has ITS place: a location before a deck emblem, and the start square its own scene", () => {
+test("a square has ITS place: its OWN scene before a shared one or a deck emblem, and the start square its own scene", () => {
   assert.match(A.squareBanner(index, 0).url, /locations\/00-start-v1\.webp$/);
   assert.match(A.squareBanner(index, 1).url, /locations\/01-cabbage-row-v1\.webp$/);
-  assert.match(A.squareBanner(index, 7).url, /symbols\/chance-emblem-v1\.webp$/);
+  for (const [square, file] of [[2, "02-tax-office"], [4, "04-event-newcomers-gate"], [7, "07-chance-crystal-mines"],
+    [17, "17-tax-wildmark"], [22, "22-chance-glimmerland"], [33, "33-tax-wolfcoin"], [36, "36-chance-royal-ziggurat"],
+    [38, "38-event-royal-ziggurat"]])
+    assert.match(A.squareBanner(index, square).url, new RegExp(`locations/${file}-v1\.webp$`), `square ${square}`);
 });
 
 test("the 4:1 banner uses the approved crop when there is one, a centred band otherwise", () => {

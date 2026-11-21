@@ -17,10 +17,12 @@ globalThis.Board3DArt = (() => {
   function buildIndex(catalog, web, crops) {
     const files = new Map((web?.assets || []).map(a => [a.id, BASE + a.file]));
     const index = {squares: new Map(), cards: new Map(), mask: files.get(MASK) || null, crops: crops?.banner || {}};
-    for (const category of SQUARE_ORDER)
-      for (const asset of catalog?.assets || [])
-        if (asset.category === category && files.has(asset.id))
-          for (const square of squaresOf(asset))
+    // A square's OWN picture (its `square`) wins over a picture shared by several squares (`squares`), then by category.
+    const shown = (catalog?.assets || []).filter(asset => SQUARE_ORDER.includes(asset.category) && files.has(asset.id));
+    for (const own of [true, false])
+      for (const category of SQUARE_ORDER)
+        for (const asset of shown.filter(a => a.category === category))
+          for (const square of own ? (Number.isInteger(asset.square) ? [asset.square] : []) : squaresOf(asset))
             if (!index.squares.has(square)) index.squares.set(square, asset.id);
     for (const asset of catalog?.assets || [])
       if (asset.card_id && files.has(asset.id)) index.cards.set(asset.card_id, {id: asset.id, url: files.get(asset.id)});

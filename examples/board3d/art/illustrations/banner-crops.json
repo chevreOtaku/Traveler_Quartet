@@ -50,6 +50,48 @@
    "y": 0.08,
    "width": 1,
    "height": 0.1875
+  },
+  "04-event-newcomers-gate-v1": {
+   "x": 0,
+   "y": 0.21,
+   "width": 1,
+   "height": 0.5
+  },
+  "07-chance-crystal-mines-v1": {
+   "x": 0,
+   "y": 0.23,
+   "width": 1,
+   "height": 0.5
+  },
+  "17-tax-wildmark-v1": {
+   "x": 0,
+   "y": 0.25,
+   "width": 1,
+   "height": 0.5
+  },
+  "22-chance-glimmerland-v1": {
+   "x": 0,
+   "y": 0.25,
+   "width": 1,
+   "height": 0.5
+  },
+  "33-tax-wolfcoin-v1": {
+   "x": 0,
+   "y": 0.245,
+   "width": 1,
+   "height": 0.5
+  },
+  "36-chance-royal-ziggurat-v1": {
+   "x": 0,
+   "y": 0.25,
+   "width": 1,
+   "height": 0.5
+  },
+  "38-event-royal-ziggurat-v1": {
+   "x": 0,
+   "y": 0.24,
+   "width": 1,
+   "height": 0.5
   }
  }
 }

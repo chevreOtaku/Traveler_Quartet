@@ -38,6 +38,13 @@ Production history, counts and remaining generation/export/integration work:
 | West to north, purple to yellow | [portals/15-portal-purple-yellow-cart-v1.webp](portals/15-portal-purple-yellow-cart-v1.webp) |
 | West to north, orange to red | [portals/15-portal-orange-red-cart-v1.webp](portals/15-portal-orange-red-cart-v1.webp) |
 | West to north, orange to yellow | [portals/15-portal-orange-yellow-cart-v1.webp](portals/15-portal-orange-yellow-cart-v1.webp) |
+| Event — Newcomer's Gate, square 4 | [locations/04-event-newcomers-gate-v1.webp](locations/04-event-newcomers-gate-v1.webp) |
+| Chance — Crystal mining town, square 7 | [locations/07-chance-crystal-mines-v1.webp](locations/07-chance-crystal-mines-v1.webp) |
+| Tax — Wildmark, square 17 | [locations/17-tax-wildmark-v1.webp](locations/17-tax-wildmark-v1.webp) |
+| Chance — Glimmerland, square 22 | [locations/22-chance-glimmerland-v1.webp](locations/22-chance-glimmerland-v1.webp) |
+| Tax — Wolfcoin, square 33 | [locations/33-tax-wolfcoin-v1.webp](locations/33-tax-wolfcoin-v1.webp) |
+| Chance — Royal Ziggurat, square 36 | [locations/36-chance-royal-ziggurat-v1.webp](locations/36-chance-royal-ziggurat-v1.webp) |
+| Event — Royal Ziggurat, square 38 | [locations/38-event-royal-ziggurat-v1.webp](locations/38-event-royal-ziggurat-v1.webp) |
 | Park, square 20 | [locations/20-park-jackpot-v1.webp](locations/20-park-jackpot-v1.webp) |
 | Dragon-Go-Round, square 21 | [locations/21-dragon-go-round-v1.webp](locations/21-dragon-go-round-v1.webp) |
 | Mascot Avenue, square 23 | [locations/23-mascot-avenue-v1.webp](locations/23-mascot-avenue-v1.webp) |

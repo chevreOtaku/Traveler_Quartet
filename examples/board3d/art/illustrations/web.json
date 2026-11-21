@@ -1103,6 +1103,76 @@
    "bytes": 133720,
    "sha256": "ac8047d24593afd499b609a06b60f50bcbec9f230752d7f4fe84c89088b3cc8d",
    "master_sha256": "912d00711f6d3854a409b0e2e9a7ef619e41096cedb70dc2e374d4e665dc0ab0"
+  },
+  {
+   "id": "04-event-newcomers-gate-v1",
+   "file": "locations/04-event-newcomers-gate-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 380956,
+   "sha256": "ac0a979ffe1f133b963f014ea8a9a027c82b99d20d12d9ed498059c954c0ab83",
+   "master_sha256": "440c8622c94f8a5ce57b2cd65d08511582414e436c5cbc320b247463b5ad6ace"
+  },
+  {
+   "id": "07-chance-crystal-mines-v1",
+   "file": "locations/07-chance-crystal-mines-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 391796,
+   "sha256": "c00f28b808a846fc9d381cc3ad0e803f91b3657b38e3445d836b42a99ae9fb0d",
+   "master_sha256": "b0b4e7dcbc1b04277cb08be78ba86ed189788b7a4e54e19f9315a5870ce28899"
+  },
+  {
+   "id": "17-tax-wildmark-v1",
+   "file": "locations/17-tax-wildmark-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 422270,
+   "sha256": "c0f04b65c7442a314b334ff9b64ce37a08a1b275dc35a4cc8c0938407d888fc6",
+   "master_sha256": "c5ac0739c72a663dcaf2c9e41aa52f2c5e7c5939a8691038b554509079da3a2a"
+  },
+  {
+   "id": "22-chance-glimmerland-v1",
+   "file": "locations/22-chance-glimmerland-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 440194,
+   "sha256": "b4c8d56a95b3ec2221898e5f3d53d6286625bab54646a1ac62b5ac6210d4e49a",
+   "master_sha256": "64171fd6ff03111ba8ffdad97f2d6bb4182ddc919ffcfd62efa44887d622bf16"
+  },
+  {
+   "id": "33-tax-wolfcoin-v1",
+   "file": "locations/33-tax-wolfcoin-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 369418,
+   "sha256": "060b9e65a987ef3c598a84a55267f7026051362f9700d47d4e1b47d2d5f08001",
+   "master_sha256": "f4989b1515cae482b04228c47eb639bdbd30e50a06440da468703b8d641c2e3e"
+  },
+  {
+   "id": "36-chance-royal-ziggurat-v1",
+   "file": "locations/36-chance-royal-ziggurat-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 498764,
+   "sha256": "5cba8d2ea70dcb3e26b3dc2cbf277203a97dfb4d646a77dca58fbc6a9717b3b0",
+   "master_sha256": "cf8ddec68f9c132fef881e257d94e7f1814bfb8de26e0ed23ce26a38a6d7d97f"
+  },
+  {
+   "id": "38-event-royal-ziggurat-v1",
+   "file": "locations/38-event-royal-ziggurat-v1.webp",
+   "width": 1774,
+   "height": 887,
+   "alpha": false,
+   "bytes": 365552,
+   "sha256": "5bd2f6ca7aaf65bcbf4ef90b602cdcbaa5cc5c74b26bf0aa57c8479ff6740328",
+   "master_sha256": "e53a96dee79f64dd9d998020e4c5fbf8a0b1ab9019be82124481808092aa2bde"
   }
  ]
 }
