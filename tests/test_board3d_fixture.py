@@ -85,3 +85,28 @@ def test_preview_delegates_four_computers_and_bounded_public_events_to_real_serv
     finally:
         server.shutdown()
         server.server_close()
+
+
+def test_server_ships_the_webp_illustrations_and_their_lists_but_never_a_png_master():
+    """The illustrations reach the page as the WebP exports listed in web.json (D57); the full-size PNG masters stay on
+    the author's machine and are not served even when present."""
+    art = DEMO / "art" / "illustrations"
+    web = json.loads((art / "web.json").read_text(encoding="utf-8"))
+    server = runpy.run_path(str(DEMO / "serve.py"))["preview_server"](0)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    root = f"http://127.0.0.1:{server.server_address[1]}"
+    try:
+        for name in ("art.js", "art/illustrations/catalog.json", "art/illustrations/web.json",
+                     "art/illustrations/banner-crops.json", "art/illustrations/" + web["assets"][0]["file"]):
+            with urllib.request.urlopen(root + "/" + name) as reply:
+                assert reply.status == 200 and reply.read()
+        with urllib.request.urlopen(root + "/art/illustrations/" + web["assets"][0]["file"]) as reply:
+            assert reply.headers["Content-Type"] == "image/webp"
+        master = "art/illustrations/" + web["assets"][0]["file"][:-len(".webp")] + ".png"
+        for name in (master, "art/illustrations/MANIFEST.md", "art/illustrations/../../serve.py"):
+            with pytest.raises(urllib.error.HTTPError) as error:
+                urllib.request.urlopen(root + "/" + name)
+            assert error.value.code == 404
+    finally:
+        server.shutdown()
+        server.server_close()
