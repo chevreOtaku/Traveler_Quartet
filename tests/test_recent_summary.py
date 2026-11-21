@@ -82,3 +82,41 @@ def test_without_a_history_there_is_no_summary_section():
     player = CommandPlayer(lambda p: prompts.append(p) or '{"action": "roll"}', seat=0)
     player(game(), ("roll", "build:1"))
     assert "Since your last decision" not in prompts[0] and player.log[-1]["summary_chars"] == 0
+
+
+def test_every_event_the_engine_can_write_reads_as_a_sentence_not_as_raw_fields():
+    """A guard (21/11, chevre: QoL for the AIs): any `Event("<kind>"` written in the rules has its sentence -- a new
+    kind without one fails here instead of reaching the players as `debt_opened (to=1, amount=680)`."""
+    import re
+    from pathlib import Path
+    from traveler_quartet.players.recent import _sentences
+    rules = Path(__file__).resolve().parents[1] / "src" / "traveler_quartet" / "rules"
+    kinds = {k for f in rules.glob("*.py") for k in re.findall(r'Event\("([a-z_]+)"', f.read_text(encoding="utf-8"))}
+    assert len(kinds) > 30 and not kinds - set(_sentences(NAMES, str)), sorted(kinds - set(_sentences(NAMES, str)))
+
+
+def test_the_new_sentences_name_squares_players_and_amounts():
+    text = "\n".join(_lines([
+        _ev("debt_opened", 1, to=2, amount=680), _ev("debt_opened", 1, to="bank", amount=50),
+        _ev("debt_paid", 1, to=2, amount=680), _ev("sold", 1, square=3, level=1, bank=15),
+        _ev("unmortgaged", 1, square=11, bank=-77), _ev("cursed", 1, target=0), _ev("mirrored", 0, back_to=1),
+        _ev("left_dungeon", 1, paid=50, bank=-50), _ev("left_dungeon", 1, by="double"),
+        _ev("stall_requested", 1, square=6, owner=0), _ev("stall_shared", 0, square=6, partner=1, bank=-20),
+        _ev("stayed_in_dungeon", 1, left=2), _ev("disaster", 1, town="brown", destroyed=2)]))
+    assert "player 1 owes 680 to player 2 and is in debt" in text and "owes 50 to the bank" in text
+    assert "player 1 paid the debt of 680 to player 2" in text
+    assert f"player 1 sold a building on [3] {NAMES[3]} (now level 1)" in text
+    assert f"player 1 lifted the mortgage on [11] {NAMES[11]}" in text
+    assert "player 1 cursed you" in text and "you sent the curse back to player 1 with the mirror" in text
+    assert "player 1 paid 50 to leave the dungeon" in text and "player 1 left the dungeon with a double" in text
+    assert f"player 1 asked you to share a stall on [6] {NAMES[6]}" in text
+    assert f"you shared a stall on [6] {NAMES[6]} with player 1" in text
+    assert "player 1 stayed in the dungeon (2 turns left)" in text and "2 buildings destroyed in brown" in text
+    assert "=" not in text
+
+
+def test_a_card_drawn_in_public_is_read_with_what_it_does_a_rivals_kept_card_still_without():
+    catalog = game().catalog
+    lines = _lines([_ev("card", 1, card="birthday"), _ev("card", 1, card="mirror")])
+    assert lines[0].endswith(f"player 1 drew the card birthday: {catalog['birthday']['text']}")
+    assert lines[1].endswith("player 1 drew a kept card") and "mirror" not in lines[1]

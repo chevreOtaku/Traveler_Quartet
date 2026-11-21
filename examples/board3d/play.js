@@ -30,6 +30,14 @@ globalThis.Board3DPlay = (() => {
 
   const storageKey = game => `traveler-quartet:seat:${game}`;
 
-  return {actionLabel, humanSeat, storageKey};
+  // The debt is PUBLIC (the payment happens on the table): the page says it to the debtor, never someone else's as theirs.
+  function debtWords(view) {
+    const d = view?.debt_context;
+    if (!d || d.debtor !== view.me?.seat) return "";
+    const to = d.to === "bank" || d.to === "jackpot" ? `the ${d.to}` : `player ${d.to}`;
+    return `You owe ${d.amount} gold to ${to}.`;
+  }
+
+  return {actionLabel, debtWords, humanSeat, storageKey};
 })();
 if (typeof module !== "undefined") module.exports = globalThis.Board3DPlay;

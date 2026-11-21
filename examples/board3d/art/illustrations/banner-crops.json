@@ -1,0 +1,97 @@
+{
+ "schema_version": 1,
+ "date": "2026-11-21",
+ "note": "Approved 4:1 arrival-banner crops (normalized x, y, width, height of the master, origin top left). A square without an entry shows the centred band {x: 0, y: 0.25, width: 1, height: 0.5}.",
+ "banner": {
+  "01-cabbage-row-v1": {
+   "x": 0,
+   "y": 0.06,
+   "width": 1,
+   "height": 0.5
+  },
+  "03-newcomers-gate-v1": {
+   "x": 0,
+   "y": 0.3,
+   "width": 1,
+   "height": 0.5
+  },
+  "05-portal-brown-purple-cart-v1": {
+   "x": 0,
+   "y": 0.33,
+   "width": 1,
+   "height": 0.5
+  },
+  "build-house-brown-v1": {
+   "x": 0,
+   "y": 0.15,
+   "width": 1,
+   "height": 0.5
+  },
+  "build-stall-brown-v1": {
+   "x": 0,
+   "y": 0.29,
+   "width": 1,
+   "height": 0.5
+  },
+  "chance-slime-v1": {
+   "x": 0,
+   "y": 0.38,
+   "width": 1,
+   "height": 0.5
+  },
+  "kept-card-mask-v1": {
+   "x": 0,
+   "y": 0.36,
+   "width": 1,
+   "height": 0.16666666666666666
+  },
+  "ukon-mascot-welcome-v1": {
+   "x": 0,
+   "y": 0.08,
+   "width": 1,
+   "height": 0.1875
+  },
+  "04-event-newcomers-gate-v1": {
+   "x": 0,
+   "y": 0.21,
+   "width": 1,
+   "height": 0.5
+  },
+  "07-chance-crystal-mines-v1": {
+   "x": 0,
+   "y": 0.23,
+   "width": 1,
+   "height": 0.5
+  },
+  "17-tax-wildmark-v1": {
+   "x": 0,
+   "y": 0.25,
+   "width": 1,
+   "height": 0.5
+  },
+  "22-chance-glimmerland-v1": {
+   "x": 0,
+   "y": 0.25,
+   "width": 1,
+   "height": 0.5
+  },
+  "33-tax-wolfcoin-v1": {
+   "x": 0,
+   "y": 0.245,
+   "width": 1,
+   "height": 0.5
+  },
+  "36-chance-royal-ziggurat-v1": {
+   "x": 0,
+   "y": 0.25,
+   "width": 1,
+   "height": 0.5
+  },
+  "38-event-royal-ziggurat-v1": {
+   "x": 0,
+   "y": 0.24,
+   "width": 1,
+   "height": 0.5
+  }
+ }
+}

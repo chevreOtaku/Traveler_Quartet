@@ -1,21 +1,30 @@
 """Serve the local 3D board; delegate game transport to the existing arbiter server."""
 import argparse
+import json
 import mimetypes
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent
+mimetypes.add_type("image/webp", ".webp")  # unknown to some Windows registries
 sys.path.insert(0, str(ROOT.parents[1] / "src"))
 from traveler_quartet.match.server import make_server
 
 ASSETS = {"/": ROOT / "index.html"}
 for name in ("index.html", "style.css", "app.js", "scene.js", "pawn.js", "movement.js", "layout.js", "client.js",
-             "camera.js", "play.js", "trade.js", "fixture.json"):
+             "camera.js", "play.js", "trade.js", "art.js", "fixture.json"):
     ASSETS["/" + name] = ROOT / name
 for name in ("gallery.html", "gallery.css", "gallery.js", "merchants.js", "MANIFEST.md"):
     ASSETS["/art/" + name] = ROOT / "art" / name
 ASSETS["/vendor/three/three.module.js"] = ROOT.parent / "vendor" / "three" / "three.module.js"
+# The illustrations (D57): the WebP exports LISTED in web.json and the three lists -- never a PNG master.
+ILLUSTRATIONS = ROOT / "art" / "illustrations"
+for name in ("catalog.json", "web.json", "banner-crops.json"):
+    ASSETS["/art/illustrations/" + name] = ILLUSTRATIONS / name
+if (ILLUSTRATIONS / "web.json").is_file():
+    for exported in json.loads((ILLUSTRATIONS / "web.json").read_text(encoding="utf-8"))["assets"]:
+        ASSETS["/art/illustrations/" + exported["file"]] = ILLUSTRATIONS / exported["file"]
 
 
 def preview_server(port=8879):

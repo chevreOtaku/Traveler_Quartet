@@ -608,7 +608,9 @@
         },
         "stall_income_shared": 10,
         "seat_bonus_cash": 0,
-        "rotate_first_player": 1
+        "rotate_first_player": 1,
+        "talks_per_turn": 0,
+        "trade_in_debt": 1
       },
       "cards": [
         {
@@ -1545,7 +1547,9 @@
         },
         "stall_income_shared": 10,
         "seat_bonus_cash": 0,
-        "rotate_first_player": 1
+        "rotate_first_player": 1,
+        "talks_per_turn": 0,
+        "trade_in_debt": 1
       },
       "cards": [
         {

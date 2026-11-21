@@ -2,12 +2,13 @@ import {createScene} from "./scene.js";
 
 const element=id=>document.getElementById(id);
 const C=globalThis.Board3DClient,L=globalThis.Board3DLayout,M=globalThis.Board3DMovement;
-const Cam=globalThis.Board3DCamera,P=globalThis.Board3DPlay,T=globalThis.Board3DTrade;
+const Cam=globalThis.Board3DCamera,P=globalThis.Board3DPlay,T=globalThis.Board3DTrade,A=globalThis.Board3DArt;
 const motion=matchMedia("(prefers-reduced-motion: reduce)");
 const params=new URLSearchParams(location.search),fixtureMode=params.get("mode")==="fixture";
 let stage,client,game=params.get("game"),fixture=null,timer=null,detailView=false,busy=false;
 let activeMove=null,skip=false,board=null,seatKinds=[],player=null,playerRevision=null,panelKey=null;
-const HOP_MS={board:260,follow:380},FOLLOW_HOLD_MS=650;
+const HOP_MS={board:260,follow:380},FOLLOW_HOLD_MS=650,ART_MS=4500;
+let art=A.buildIndex(null,null,null),arrivalTimer=null,cardTimer=null;
 const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 function error(message="") {element("error").textContent=message;element("error").hidden=!message;}
@@ -37,12 +38,39 @@ function showSnapshot(snapshot) {
   const summary=snapshot.view.players.map(p=>`Player ${p.seat}: ${p.out?"out":`${p.cash} G, square ${p.position}`}`).join(" | ");
   element("summary").textContent=summary;
 }
+async function loadArt() {
+  const lists=await Promise.all(["catalog","web","banner-crops"].map(async name=>{
+    const response=await fetch(`/art/illustrations/${name}.json`);
+    if (!response.ok) throw new Error(`illustration list ${name}.json is missing`);
+    return response.json();
+  }));
+  art=A.buildIndex(...lists);
+}
+function arrive(square) {
+  const banner=A.squareBanner(art,square),box=element("arrival");
+  if (!banner) {box.hidden=true;return;}
+  const picture=element("arrival-art"),place=A.background(banner.rect);
+  picture.style.backgroundImage=`url("${banner.url}")`;
+  picture.style.backgroundSize=place.size;picture.style.backgroundPosition=place.position;
+  element("arrival-name").textContent=board?.[square]?.name ?? `Square ${square}`;
+  box.dataset.side=A.bannerSide(square);box.hidden=false;
+  clearTimeout(arrivalTimer);arrivalTimer=setTimeout(()=>{box.hidden=true;},ART_MS);
+}
+function showCard(row) {
+  const face=A.cardFace(art,row),box=element("card-shown");
+  if (!face) return;
+  element("card-art").style.backgroundImage=`url("${face.url}")`;
+  element("card-text").textContent=row.sentence;  // the filtered sentence: never more than the public event
+  box.dataset.masked=String(face.masked);box.hidden=false;
+  clearTimeout(cardTimer);cardTimer=setTimeout(()=>{box.hidden=true;},ART_MS);
+}
 async function showEvent(row) {
   element("move-title").textContent=`Round ${row.round} / player ${row.player} / revision ${row.revision}`;
   element("status").textContent=row.sentence;element("event").textContent=JSON.stringify(row,null,2);
   element("summary").textContent="Public journal playback; balances appear at the confirmed snapshot.";
   if (row.kind==="rolled") element("dice").textContent=row.data.dice.join(" / ");
   if (row.kind==="bankrupt") stage.setOut(row.player);
+  if (row.kind==="card") showCard(row);
   if (row.kind!=="moved") {
     if (!skip && !motion.matches) await new Promise(resolve=>setTimeout(resolve,65));
     return;
@@ -52,10 +80,11 @@ async function showEvent(row) {
   element("seat").value=String(row.player);
   element("route").textContent=[row.data.from,...route,...(route.length?[]:[row.data.to])].map(i=>String(i).padStart(2,"0")).join(" > ");
   stage.place(row.player,row.data.from);
-  if (skip || motion.matches || row.data.travel==="teleport") {stage.place(row.player,row.data.to);return;}
+  if (skip || motion.matches || row.data.travel==="teleport") {stage.place(row.player,row.data.to);arrive(row.data.to);return;}
   const followed=Cam.followSeat(seatKinds,row,motion.matches||skip);
   if (followed!==null) following(followed);
   await walk(row,followed===null ? HOP_MS.board : HOP_MS.follow);
+  arrive(row.data.to);
   if (followed!==null) {
     if (!skip) await pause(FOLLOW_HOLD_MS);
     following(null);
@@ -96,6 +125,8 @@ async function updatePanel() {
   const legal=data.view.your_turn && !data.over ? data.view.legal_actions : [];
   element("play-title").textContent=data.over ? "Game over" :
     legal.length ? `Your turn, player ${player.seat}` : "The computers are playing";
+  const owed=legal.length ? P.debtWords(data.view) : "";
+  if (owed) {const debt=document.createElement("p");debt.className="debt";debt.textContent=owed;actions.append(debt);}
   if (legal.length && data.view.trade) {
     const offer=document.createElement("p");offer.className="trade-offer";offer.textContent=T.offerWords(data.view);
     actions.append(offer);
@@ -197,6 +228,9 @@ function init() {
       element("detail").textContent=detailView ? "Return to board" : "Inspect figurine";
     });
     element("return").addEventListener("click",()=>element("detail").click());
+    element("arrival-close").addEventListener("click",()=>{element("arrival").hidden=true;});
+    element("card-close").addEventListener("click",()=>{element("card-shown").hidden=true;});
+    loadArt().catch(e=>error(`Illustrations unavailable: ${e.message}`));
     if (fixtureMode) run(replayFixture);
     else if (game) run(()=>connect(game,params.get("replay")==="1"));
     else {setBusy(false);element("status").textContent="Start four computers, or enter an existing game ID.";}

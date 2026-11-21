@@ -36,6 +36,16 @@
       <section class="stage" id="board" aria-label="Three dimensional merchant and board">
         <div id="viewport" role="img" aria-label="Four miniature chibi merchants on a forty square board"></div>
         <div id="labels" aria-hidden="true"></div>
+        <figure id="arrival" class="arrival" data-side="top" hidden aria-live="polite">
+          <div id="arrival-art" class="arrival-art" role="img" aria-label="Illustration of the square reached"></div>
+          <figcaption><span id="arrival-name"></span>
+            <button id="arrival-close" type="button" aria-label="Close the banner">&times;</button></figcaption>
+        </figure>
+        <figure id="card-shown" class="card-shown" data-masked="false" hidden aria-live="polite">
+          <div id="card-art" class="card-art" role="img" aria-label="The card drawn"></div>
+          <figcaption id="card-text"></figcaption>
+          <button id="card-close" type="button" aria-label="Close the card">&times;</button>
+        </figure>
         <div class="centre">
           <p class="eyebrow" id="source">SERVER / PUBLIC JOURNAL</p>
           <p class="dice-label">Last public dice</p><p id="dice">-- / --</p>
@@ -84,6 +94,7 @@
   <script src="./camera.js"></script>
   <script src="./play.js"></script>
   <script src="./trade.js"></script>
+  <script src="./art.js"></script>
   <script src="./client.js"></script>
   <script type="module" src="./app.js"></script>
 </body>

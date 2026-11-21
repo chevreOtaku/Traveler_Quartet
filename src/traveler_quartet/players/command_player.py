@@ -26,6 +26,7 @@ ANSWER_FORMAT = ('Answer with ONE JSON object and nothing else: {"action": "<one
 INTRO = ("You are playing Traveler Quartet, a board game for 2-4 merchants. The richest player after the last round "
          "wins: cash plus the value of districts and buildings.")
 SAFE = ("pass", "drop", "refuse", "stay", "roll", "bid:0", "bankrupt")
+WORDED = ("talk", "reply")
 # Claude as a LEAN player (measured 06/11): the full Claude Code agent resent its whole instructions and tool list at each
 # move -- ~25 000 input tokens for a ~160-token game question. A short system prompt and NO tools: ~900 tokens, the same
 # decision, a quarter of the cost, half the time; and with no tools it can read or write nothing at all.
@@ -90,6 +91,15 @@ def _legal(state: GameState, action: str) -> bool:
     return True
 
 
+def _refusal(state: GameState, action: Optional[str], message: str) -> Optional[str]:
+    """Why an answer cannot be played, or None. Speaking (`talk`) and answering (`reply`) need words."""
+    if not action or not _legal(state, action):
+        return f"Your answer `{action or 'no JSON answer'}` is not legal now. Choose again."
+    if action.partition(":")[0] in WORDED and not message.strip():
+        return f"Your answer `{action}` needs words: write what you say in \"message\"."
+    return None
+
+
 def _safe(legal: Sequence[str]) -> str:
     return next((a for a in SAFE if a in legal), legal[0])
 
@@ -137,11 +147,13 @@ class CommandPlayer:
         for attempt in range(1, self.retries + 2):
             reply = parse_reply(self.ask(prompt))
             action = self._action(reply)
-            if action and _legal(state, action):
+            message = str(reply.get("message") or "") if reply else ""
+            refusal = _refusal(state, action, message)
+            if refusal is None:
                 self._keep_notes(state, reply.get("notes"), sizes)
                 self._note(state, attempt, action, False, started, sizes)
-                return action, str(reply.get("message") or "") or None
-            prompt += f"\n\nYour answer `{action or 'no JSON answer'}` is not legal now. Choose again. {answer_format}"
+                return action, message or None
+            prompt += f"\n\n{refusal} {answer_format}"
         action = _safe(legal)
         self._keep_notes(state, None, sizes)
         self._note(state, attempt, action, True, started, sizes)

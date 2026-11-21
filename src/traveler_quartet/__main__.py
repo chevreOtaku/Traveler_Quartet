@@ -31,6 +31,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--offer-style", choices=("fields", "named", "listed"), default="fields",
                         help="ai-game: how the AI seats see and write a trade offer -- fields (the contract under the "
                              "choices), named (written with named fields), listed (each open offer in the choices)")
+    parser.add_argument("--talks-per-turn", type=int, default=None,
+                        help="ai-game: table talk -- how many times per turn a player may speak to a rival, who must "
+                             "answer, at any decision (default: the rules, 0)")
+    parser.add_argument("--trade-in-debt", type=int, choices=(0, 1), default=None,
+                        help="ai-game: 1 = a debtor may offer a trade before mortgaging or going bankrupt "
+                             "(default: the rules, 1)")
     parser.add_argument("--opponents", default="normal,normal,normal",
                         help="cli: the computers you play against, comma-separated (easy, normal, hard, adaptive)")
     return parser
@@ -101,7 +107,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         try:
             report = play_ai_game(tuple(seat.strip() for seat in args.seats.split(",")),
                                   seed=args.seed, rounds=args.rounds, log_path=args.log,
-                                  notebook_cap=args.notebook_cap, offer_style=args.offer_style)
+                                  notebook_cap=args.notebook_cap, offer_style=args.offer_style,
+                                  talks_per_turn=args.talks_per_turn, trade_in_debt=args.trade_in_debt)
         except (ValueError, OSError, RuntimeError, subprocess.SubprocessError) as error:
             print(f"traveler-quartet: {error}", file=sys.stderr)
             return 2

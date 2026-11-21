@@ -16,6 +16,8 @@ QUESTIONS = {
     "target": "Choose the player your curse is played on.",
     "debt": "You owe more than you have: sell houses or mortgage a district, or go bankrupt.",
 }
+# The debt question when the table allows an offer during a debt (`trade_in_debt`, D54); without it, the text above.
+DEBT_WITH_TRADE = "You owe more than you have: sell houses, mortgage a district or offer a trade, or go bankrupt."
 CONTRACT = ("To offer a trade, write `offer:<player>:<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:"
             "<ask_cards>` (squares by number, comma-separated; an empty field = nothing). A counter-offer: "
             "`counter:<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:<ask_cards>`. What each side "
@@ -26,6 +28,9 @@ CONTRACT_NAMED = ('To offer a trade, answer {"action": "offer", "to": <player>, 
                   '"to", with "action": "counter". What each side receives must be worth between half and double what '
                   "it gives.")
 FIELDS = "<give_gold>:<give_squares>:<give_cards>:<ask_gold>:<ask_squares>:<ask_cards>"
+# Table talk (an option of the table): the sentence that PROPOSES it, shown with the talk lines at any decision.
+TALK_INVITATION = ('At any decision you may first speak to another player (`talk:<player>`, your words in "message"): '
+                   "they answer you, then you decide. Talking can open a negotiation that leads to a trade.")
 # How an AI seat sees an open negotiation: `fields` = the contract explained under the choices (the default) ;
 # `named` = the same place, written with named fields ; `listed` = the same syntax, each open offer IN the choices.
 OFFER_STYLES = ("fields", "named", "listed")
@@ -120,12 +125,24 @@ def _negotiation(names: Sequence[str], style: str) -> List[str]:
     return ["", CONTRACT, "Open now: " + ", ".join(f"`{n}`" for n in names)]
 
 
+def _question(seen: Seen) -> str:
+    if seen["pending"] == "talk":
+        return f"Player {seen['talk']['speaker']} speaks to you: answer them in your message"
+    if seen["pending"] == "debt" and any(n.startswith("offer:") for n in seen["negotiations"]):
+        return DEBT_WITH_TRADE
+    return QUESTIONS.get(seen["pending"], seen["pending"])
+
+
 def _choices(seen: Seen, style: str) -> List[str]:
     if not seen["your_turn"]:
         return []
-    lines = ["", "## Your choices", f"{QUESTIONS.get(seen['pending'], seen['pending'])} (question: `{seen['pending']}`)", ""]
+    names = seen["negotiations"]
+    lines = ["", "## Your choices", f"{_question(seen)} (question: `{seen['pending']}`)", ""]
     lines += [f"- `{a}`" for a in seen["legal_actions"]]
-    return lines + _negotiation(seen["negotiations"], style)
+    talks = [n for n in names if n.startswith("talk:")]
+    lines += [f"- `{n}` -- speak to player {n.split(':')[1]}; they answer before you go on" for n in talks]
+    lines += ["", TALK_INVITATION] if talks else []
+    return lines + _negotiation([n for n in names if not n.startswith("talk:") and n != "reply"], style)
 
 
 def _header(seen: Seen) -> List[str]:

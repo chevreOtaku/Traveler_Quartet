@@ -63,7 +63,10 @@ class _Logged:
 def replay(report: Mapping) -> Tuple[Tuple[Decision, ...], Tuple[TimedEvent, ...], GameState]:
     seats = report["seats"]
     initial = new_game(seed=report["seed"], player_count=len(seats))
-    initial = replace(initial, economy=replace(initial.economy, rounds=report["rounds_limit"]))
+    talks = report.get("talks_per_turn", initial.economy.talks_per_turn)
+    in_debt = report.get("trade_in_debt", initial.economy.trade_in_debt)
+    initial = replace(initial, economy=replace(initial.economy, rounds=report["rounds_limit"], talks_per_turn=talks,
+                                               trade_in_debt=in_debt))
     decisions: List[Decision] = []
     position = {"next": 0}
 

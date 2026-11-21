@@ -1,7 +1,7 @@
 from dataclasses import replace
 from typing import Callable, Dict, Optional, Tuple
 
-from traveler_quartet.rules import auctions, buildings, dungeon, finance, partners, portals, trades
+from traveler_quartet.rules import auctions, buildings, dungeon, finance, partners, portals, table_talk, trades
 from traveler_quartet.rules.card_effects import crisis_on, resolve
 from traveler_quartet.rules.cards import load_cards, return_card, shuffled_decks
 from traveler_quartet.rules.board import Board, load_board
@@ -54,18 +54,24 @@ def actor(state: GameState) -> int:
         return state.owners[state.stall_request[1]]
     if state.pending == "sealed":
         return auctions.sealed_bidder(state)
+    if state.pending == "talk":
+        return state.listener
     return state.current
 
 
 def negotiations(state: GameState) -> Tuple[str, ...]:
     """The PARAMETERIZED actions open right now -- templates, not actions to play as they are: `offer:<player>` (then
     the six fields of the contract) and `counter` (the six fields). Kept apart from `legal_actions` on purpose: a
-    template played bare is refused (E13)."""
-    if state.pending == "roll":
-        return _offer_actions(state)
+    template played bare is refused (E13). With table talk on, `talk:<player>` and the answer `reply` are here too:
+    their content is the WORDS of the table message, which a computer player does not write."""
+    if state.pending == "talk":
+        return ("reply",)
+    talks = table_talk.talk_actions(state, actor(state))
+    if state.pending == "roll" or (state.pending == "debt" and state.economy.trade_in_debt):
+        return _offer_actions(state) + talks
     if state.pending == "trade" and state.trade.counters < trades.MAX_COUNTERS:
-        return ("counter",)
-    return ()
+        return ("counter",) + talks
+    return talks
 
 
 def _offer_actions(state: GameState) -> Tuple[str, ...]:
@@ -123,6 +129,8 @@ def legal_actions(state: GameState) -> Tuple[str, ...]:
         return ("jump", "stay")
     if state.pending == "debt":
         return _raising_actions(state) or ("bankrupt",)
+    if state.pending == "talk":
+        return ("reply",)
     return ()
 
 
@@ -134,15 +142,21 @@ def apply(state: GameState, action: str) -> Step:
             raise IllegalAction(f"{action!r} is not a legal contract now")
         receiver, terms = contract
         return trades.offer(state, receiver, terms) if name == "offer" else trades.counter(state, terms)
+    if name == "talk":
+        if action not in table_talk.talk_actions(state, actor(state)):
+            raise IllegalAction(f"{action!r} is not open now")
+        return table_talk.talk(state, actor(state), int(argument))
     if action not in legal_actions(state):
         raise IllegalAction(f"{action!r} is not legal now; legal: {legal_actions(state)}")
     if argument:
         state, events = SQUARE_ACTIONS[name](state, int(argument))
-        return _after_raising(state, events)
+        return _settle_if_covered(state, events)
     return SIMPLE_ACTIONS[name](state)
 
 
-def _after_raising(state: GameState, events: Tuple[Event, ...]) -> Step:
+def _settle_if_covered(state: GameState, events: Tuple[Event, ...]) -> Step:
+    """After cash came in -- a sale, a mortgage, a trade offered during a debt: a debt the cash now covers is paid and
+    the turn ends."""
     if state.pending != "debt" or not finance.can_settle(state):
         return state, events
     state, paid = finance.settle(state)
@@ -238,8 +252,9 @@ def _curse(state: GameState, target: int) -> Step:
 SIMPLE_ACTIONS: Dict[str, Callable[[GameState], Step]] = {
     "roll": _roll, "buy": _buy, "pass": _pass, "bankrupt": _bankrupt,
     "jump": portals.jump, "stay": portals.stay, "pay_exit": dungeon.pay_exit, "use_rope": dungeon.use_rope, "drop": _drop,
-    "accept": lambda s: (partners.accept if s.pending == "stall_request" else trades.accept)(s),
+    "accept": lambda s: partners.accept(s) if s.pending == "stall_request" else _settle_if_covered(*trades.accept(s)),
     "refuse": lambda s: (partners.refuse if s.pending == "stall_request" else trades.refuse)(s),
+    "reply": table_talk.reply,
 }
 SQUARE_ACTIONS: Dict[str, Callable[[GameState, int], Step]] = {
     "build": buildings.build, "sell": buildings.sell,

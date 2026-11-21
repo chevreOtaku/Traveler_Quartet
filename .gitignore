@@ -15,3 +15,6 @@ dist/
 # Game journals and experiment results stay on your machine
 journal/
 runs/
+
+# Full-size illustration masters stay on the author machine; the game ships the WebP exports (web.json)
+examples/board3d/art/illustrations/**/*.png
